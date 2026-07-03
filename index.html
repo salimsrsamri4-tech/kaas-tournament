@@ -131,14 +131,94 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <div class="nav-logo">K</div>
     <div>
       <div class="nav-title">كأس العرب للأكاديميات</div>
-      <div class="nav-sub">KAAS TOURNAMENT</div>
+      <div class="nav-sub">ARAB ACADEMIES CUP (KAAS)</div>
     </div>
   </div>
-  <div class="nav-btns">
-    <button class="nav-btn" onclick="go('admin_login')"><i class="fas fa-lock"></i> إدارة</button>
-    <button class="nav-btn gold" onclick="go('acad_login')"><i class="fas fa-sign-in-alt"></i> دخول الأكاديميات</button>
-  </div>
+  <button onclick="openSidebar()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+    <i class="fas fa-bars"></i>
+  </button>
 </nav>
+
+<!-- الشريط الجانبي -->
+<div id="sideOverlay" onclick="closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:998;"></div>
+<div id="sidebar" style="position:fixed;top:0;left:-280px;width:280px;height:100vh;background:linear-gradient(180deg,#0d3318 0%,#1b5e2e 50%,#0d3318 100%);z-index:999;transition:left .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;border-right:3px solid #d4af37;">
+
+  <!-- رأس الشريط -->
+  <div style="background:rgba(0,0,0,.2);padding:20px 16px 16px;border-bottom:2px solid rgba(212,175,55,.3);display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:38px;height:38px;background:var(--red);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;">K</div>
+      <div>
+        <div style="font-size:12px;font-weight:900;color:#fff;">كأس العرب للأكاديميات</div>
+        <div style="font-size:9px;color:rgba(255,255,255,.6);font-weight:700;">KAAS TOURNAMENT</div>
+      </div>
+    </div>
+    <button onclick="closeSidebar()" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.7);width:28px;height:28px;border-radius:50%;font-size:13px;cursor:pointer;">✕</button>
+  </div>
+
+  <!-- معلومات البطولة -->
+  <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-map-marker-alt"></i> صلالة 2026</span>
+      <span style="background:rgba(212,175,55,.2);color:#ffdd57;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-calendar"></i> 6-7-8 أغسطس</span>
+    </div>
+  </div>
+
+  <!-- قسم الأكاديميات -->
+  <div style="padding:14px 16px 6px;">
+    <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:900;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+      <span>الأكاديميات</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
+    </div>
+    <button onclick="closeSidebar();go('acad_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);border-radius:12px;color:#ffdd57;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-sign-in-alt" style="width:18px;text-align:center;"></i> دخول الأكاديمية
+    </button>
+    <button onclick="closeSidebar();go('acad_register')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-plus-circle" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> تسجيل أكاديمية جديدة
+    </button>
+    <button onclick="closeSidebar();go('academies')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">
+      <i class="fas fa-shield-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> الأكاديميات المشاركة
+    </button>
+  </div>
+
+  <!-- قسم الإدارة -->
+  <div style="padding:14px 16px 6px;">
+    <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:900;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+      <span>الإدارة</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
+    </div>
+    <button onclick="closeSidebar();go('admin_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.25);border:1px solid rgba(184,29,34,.4);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-lock" style="width:18px;text-align:center;"></i> لوحة تحكم الإدارة
+    </button>
+    <button onclick="closeSidebar();go('admin_players')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">
+      <i class="fas fa-users" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> قائمة اللاعبين
+    </button>
+  </div>
+
+  <!-- قسم التنقل -->
+  <div style="padding:14px 16px 6px;">
+    <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:900;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+      <span>التنقل</span>
+      <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
+    </div>
+    <button onclick="closeSidebar();go('home')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.75);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
+      <i class="fas fa-home" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> الرئيسية
+    </button>
+    <button onclick="closeSidebar();go('categories')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.75);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;text-align:right;">
+      <i class="fas fa-layer-group" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> الفئات العمرية
+    </button>
+  </div>
+
+  <!-- التواصل -->
+  <div style="padding:14px 16px 24px;margin-top:8px;border-top:1px solid rgba(255,255,255,.1);">
+    <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:900;letter-spacing:1.5px;margin-bottom:10px;">تواصل معنا</div>
+    <a href="tel:+96897837551" style="display:flex;align-items:center;gap:10px;padding:8px 0;color:rgba(255,255,255,.7);text-decoration:none;font-size:12px;font-weight:700;">
+      <i class="fas fa-phone" style="color:rgba(212,175,55,.6);width:18px;text-align:center;"></i> 9783 7551
+    </a>
+    <a href="mailto:official.ofal@gmail.com" style="display:flex;align-items:center;gap:10px;padding:8px 0;color:rgba(255,255,255,.7);text-decoration:none;font-size:11px;font-weight:700;">
+      <i class="fas fa-envelope" style="color:rgba(212,175,55,.6);width:18px;text-align:center;"></i> official.ofal@gmail.com
+    </a>
+  </div>
+</div>
 
 <!-- الشريط السفلي -->
 <div class="bottom-nav">
@@ -286,6 +366,17 @@ function go(page) {
 }
 
 function showL(){document.getElementById('app').innerHTML='<div class="ldg"><span class="sp"></span></div>';}
+
+function openSidebar(){
+  document.getElementById('sidebar').style.left='0';
+  document.getElementById('sideOverlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').style.left='-280px';
+  document.getElementById('sideOverlay').style.display='none';
+  document.body.style.overflow='';
+}
 
 // ════════════════════════════════════════
 // الرئيسية
