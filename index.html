@@ -189,8 +189,17 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('admin_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.25);border:1px solid rgba(184,29,34,.4);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-lock" style="width:18px;text-align:center;"></i> لوحة تحكم الإدارة
     </button>
-    <button onclick="closeSidebar();go('admin_players')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">
-      <i class="fas fa-users" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> قائمة اللاعبين
+    <button onclick="closeSidebar();go('admin_players')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
+      <i class="fas fa-users" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> قائمة اللاعبين
+    </button>
+    <button onclick="closeSidebar();go('admin_match')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
+      <i class="fas fa-calendar-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> جدول المباريات
+    </button>
+    <button onclick="closeSidebar();go('admin_messages')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
+      <i class="fas fa-envelope" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> رسائل الأكاديميات
+    </button>
+    <button onclick="closeSidebar();go('admin_notifications')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;text-align:right;">
+      <i class="fas fa-bell" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> الإشعارات
     </button>
   </div>
 
@@ -361,6 +370,10 @@ function go(page) {
     admin_login: renderAdminLogin,
     admin_panel: renderAdminPanel,
     admin_players: renderAdminPlayers,
+    admin_notifications: renderAdminNotifications,
+    admin_messages: renderAdminMessages,
+    admin_match: renderMatchSchedule,
+    acad_message: renderAcadMessage,
   };
   if(pages[page]) pages[page]();
 }
@@ -774,6 +787,7 @@ function renderAcadDashboard() {
       '</div>'+
       '<div class="section">'+
         '<button class="btn btn-gold" onclick="go(\'add_player\')"><i class="fas fa-user-plus"></i> إضافة لاعب جديد</button>'+
+        '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة للإدارة</button>'+
       '</div>'+
       '<div class="section">'+
         '<div class="sec-title"><i class="fas fa-users" style="color:var(--red)"></i> اللاعبون المسجلون</div>';
@@ -1095,8 +1109,14 @@ function renderAdminPanel() {
             '</div>';
           }).join('')+
         '</div>'+
-        '<button class="btn btn-red" onclick="go(\'admin_players\')"><i class="fas fa-users"></i> إدارة اللاعبين</button>'+
-        '<button class="btn btn-dark" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;">'+
+          '<button onclick="go(\'admin_players\')" style="background:linear-gradient(135deg,var(--red),#7a0f12);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-users"></i><br>اللاعبون</button>'+
+          '<button onclick="go(\'admin_match\')" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-calendar-alt"></i><br>جدول المباريات</button>'+
+          '<button onclick="go(\'admin_messages\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-envelope"></i><br>رسائل الأكاديميات</button>'+
+          '<button onclick="go(\'admin_notifications\')" style="background:linear-gradient(135deg,#b8960c,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-bell"></i><br>الإشعارات</button>'+
+        '</div>'+
+        '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
+        '<button onclick="testGasConnection()" style="width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-top:8px;"><i class="fas fa-wifi"></i> اختبار الاتصال بجوجل شيت</button>'+
       '</div>';
   });
 }
@@ -1144,6 +1164,307 @@ function exportWA() {
   var url = window.location.href;
   var msg = encodeURIComponent('🏆 *'+CONFIG.TOURNAMENT_NAME+'*\n\nللتسجيل في البطولة وإدخال بيانات اللاعبين:\n\n'+url+'\n\n⚽ KAAS '+CONFIG.SEASON);
   window.open('https://api.whatsapp.com/send?text='+msg,'_blank');
+}
+
+// ════════════════════════════════════════
+// اختبار الاتصال
+// ════════════════════════════════════════
+function testGasConnection(){
+  var out = document.createElement('div');
+  out.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  out.innerHTML='<div style="background:#fff;border-radius:16px;width:100%;max-width:420px;overflow:hidden;">'+
+    '<div style="background:linear-gradient(135deg,#1b5e2e,#0d3318);padding:14px 18px;color:#fff;font-size:14px;font-weight:900;">🔌 اختبار الاتصال</div>'+
+    '<div style="padding:16px;" id="gasTestBody"><div style="text-align:center;padding:20px;color:#64748b;">جاري الاختبار...</div></div>'+
+    '<div style="padding:12px 16px;border-top:1px solid #e2e8f0;text-align:center;">'+
+      '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">إغلاق</button>'+
+    '</div></div>';
+  document.body.appendChild(out);
+  var results=[];
+  function show(){
+    var body=document.getElementById('gasTestBody');
+    if(!body) return;
+    body.innerHTML=results.map(function(r){
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9;">'+
+        '<div style="font-size:18px;flex-shrink:0;">'+(r.ok?'✅':'❌')+'</div>'+
+        '<div><div style="font-size:13px;font-weight:700;color:'+(r.ok?'#16a34a':'#b81d22')+';">'+r.title+'</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+r.detail+'</div></div></div>';
+    }).join('')+(results.length<2?'<div style="text-align:center;padding:8px;color:#64748b;font-size:12px;">جاري المزيد...</div>':'');
+  }
+  fetch(CONFIG.GAS_URL+'?sheet=الأكاديميات&nocache='+Date.now())
+    .then(function(r){return r.json();})
+    .then(function(d){results.push({ok:true,title:'قراءة البيانات ✓',detail:'اتصال Google Sheets يعمل — '+(Array.isArray(d)?d.length:0)+' أكاديمية'});show();})
+    .catch(function(e){results.push({ok:false,title:'فشل الاتصال',detail:e.message});show();});
+  setTimeout(function(){
+    fetch(CONFIG.GAS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'append',sheet:'_test',data:[{test:'ping'}]})})
+      .then(function(){results.push({ok:true,title:'إرسال البيانات ✓',detail:'الإرسال إلى GAS يعمل'});show();})
+      .catch(function(e){results.push({ok:false,title:'فشل الإرسال',detail:e.message});show();});
+  },1000);
+}
+
+// ════════════════════════════════════════
+// إشعارات الإدارة
+// ════════════════════════════════════════
+function renderAdminNotifications(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  Promise.all([apiGet('الأكاديميات'),apiGet('اللاعبون'),apiGet('رسائل البطولة')]).then(function(res){
+    var acadList=Array.isArray(res[0])?res[0]:[];
+    var players=Array.isArray(res[1])?res[1]:[];
+    var msgs=Array.isArray(res[2])?res[2]:[];
+    var recentAcads=acadList.slice(-10).reverse();
+    var recentPlayers=players.slice(-10).reverse();
+    var recentMsgs=msgs.slice(-5).reverse();
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:16px;font-weight:900;">🔔 الإشعارات</div><div style="font-size:10px;opacity:.6;">آخر الأنشطة</div></div>'+
+      '</div>'+
+      '<div style="padding:14px;">'+
+
+      '<div style="font-size:13px;font-weight:900;color:#0f172a;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'+
+        '<span style="background:#1b5e2e;color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;">'+recentAcads.length+'</span> آخر الأكاديميات المسجلة</div>'+
+      (recentAcads.length?recentAcads.map(function(a){
+        return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 6px rgba(0,0,0,.06);border-right:4px solid #1b5e2e;display:flex;align-items:center;gap:10px;">'+
+          '<div style="width:38px;height:38px;background:#dcfce7;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🏫</div>'+
+          '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:900;color:#0f172a;">'+(a.name||a['اسم الأكاديمية']||'أكاديمية')+'</div>'+
+          '<div style="font-size:10px;color:#64748b;">'+(a.city||a['المدينة']||'')+(a.players?' · '+a.players+' لاعب':'')+'</div></div></div>';
+      }).join(''):'<div style="background:#f8fafc;border-radius:12px;padding:20px;text-align:center;color:#94a3b8;font-size:12px;margin-bottom:14px;">لا توجد تسجيلات بعد</div>')+
+
+      '<div style="font-size:13px;font-weight:900;color:#0f172a;margin:14px 0 8px;display:flex;align-items:center;gap:6px;">'+
+        '<span style="background:var(--gold);color:#0f172a;border-radius:20px;padding:2px 10px;font-size:10px;">'+recentPlayers.length+'</span> آخر اللاعبين المسجلين</div>'+
+      (recentPlayers.length?recentPlayers.map(function(p){
+        return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 6px rgba(0,0,0,.06);border-right:4px solid var(--gold);display:flex;align-items:center;gap:10px;">'+
+          '<div style="width:38px;height:38px;background:#fefce8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚽</div>'+
+          '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:900;color:#0f172a;">'+(p.name||p['اسم اللاعب']||'')+'</div>'+
+          '<div style="font-size:10px;color:#64748b;">'+(p.academy_name||p['الأكاديمية']||'')+'</div></div></div>';
+      }).join(''):'<div style="background:#f8fafc;border-radius:12px;padding:20px;text-align:center;color:#94a3b8;font-size:12px;margin-bottom:14px;">لا يوجد لاعبون بعد</div>')+
+
+      (recentMsgs.length?
+        '<div style="font-size:13px;font-weight:900;color:#0f172a;margin:14px 0 8px;display:flex;align-items:center;gap:6px;">'+
+          '<span style="background:var(--red);color:#fff;border-radius:20px;padding:2px 10px;font-size:10px;">'+recentMsgs.length+'</span> رسائل من الأكاديميات</div>'+
+        recentMsgs.map(function(r){
+          var icons={'اقتراح':'💡','شكوى':'⚠️','ملاحظة':'📝','شكر وتقدير':'🏅'};
+          return '<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 6px rgba(0,0,0,.06);border-right:4px solid var(--red);">'+
+            '<div style="font-size:12px;font-weight:900;color:#0f172a;">'+(icons[r['النوع']]||'💬')+' '+(r['اسم الأكاديمية']||'')+'</div>'+
+            '<div style="font-size:11px;color:#64748b;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(r['الرسالة']||'')+'</div></div>';
+        }).join('')
+      :'')+
+      '</div>';
+  });
+}
+
+// ════════════════════════════════════════
+// رسائل الأكاديميات (للإدارة)
+// ════════════════════════════════════════
+function renderAdminMessages(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('رسائل البطولة').then(function(rows){
+    var list=Array.isArray(rows)?rows.slice().reverse():[];
+    var typeColor={'اقتراح':'#1d4ed8','ملاحظة':'#0e7490','شكوى':'#b81d22','شكر وتقدير':'#d4af37'};
+    var typeIcon={'اقتراح':'💡','ملاحظة':'📝','شكوى':'⚠️','شكر وتقدير':'🏅'};
+    var counts={};
+    list.forEach(function(r){var t=r['النوع']||'اقتراح';counts[t]=(counts[t]||0)+1;});
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#0f172a,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:16px;font-weight:900;">📬 رسائل الأكاديميات</div><div style="font-size:10px;opacity:.6;">'+list.length+' رسالة</div></div>'+
+      '</div>'+
+      '<div style="padding:14px;">'+
+      (list.length?'<div style="display:flex;gap:6px;margin-bottom:14px;">'+
+        ['اقتراح','شكوى','ملاحظة','شكر وتقدير'].filter(function(t){return counts[t];}).map(function(t){
+          return '<div style="flex:1;background:#fff;border-radius:10px;padding:8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.06);border-top:3px solid '+(typeColor[t]||'#64748b')+';min-width:0;">'+
+            '<div>'+(typeIcon[t]||'💬')+'</div><div style="font-size:16px;font-weight:900;color:'+(typeColor[t]||'#64748b')+';">'+counts[t]+'</div>'+
+            '<div style="font-size:9px;color:#94a3b8;">'+t+'</div></div>';
+        }).join('')+'</div>':'')+
+      (list.length?list.map(function(r){
+        var type=r['النوع']||'اقتراح';
+        var col=typeColor[type]||'#64748b';
+        return '<div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);border-right:4px solid '+col+';">'+
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
+            '<div><div style="font-size:13px;font-weight:900;color:#0f172a;">🏫 '+(r['اسم الأكاديمية']||'')+'</div>'+
+            '<div style="font-size:11px;color:#64748b;">'+(r['اسم المسؤول']||'')+'</div></div>'+
+            '<span style="background:'+col+'22;color:'+col+';border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;">'+(typeIcon[type]||'')+' '+type+'</span>'+
+          '</div>'+
+          '<div style="font-size:12px;color:#334155;line-height:1.7;background:#f8fafc;border-radius:8px;padding:10px;margin-bottom:6px;">'+(r['الرسالة']||'')+'</div>'+
+          '<div style="font-size:10px;color:#94a3b8;">🕐 '+(r['التاريخ']||'')+'</div></div>';
+      }).join(''):
+      '<div style="background:#fff;border-radius:14px;padding:36px;text-align:center;color:#94a3b8;">'+
+        '<div style="font-size:40px;margin-bottom:10px;">📭</div>'+
+        '<div style="font-size:14px;font-weight:700;">لا توجد رسائل من الأكاديميات بعد</div></div>')+
+      '</div>';
+  });
+}
+
+// ════════════════════════════════════════
+// رسالة الأكاديمية للإدارة
+// ════════════════════════════════════════
+function renderAcadMessage(){
+  if(!sessionStorage.getItem('kaasAcadId')){go('acad_login');return;}
+  var acid=sessionStorage.getItem('kaasAcadId')||'';
+  var aname=sessionStorage.getItem('kaasAcadName')||'';
+  window._afbType='اقتراح';
+  var typeColors={'اقتراح':'#1b5e2e','شكوى':'#b81d22','ملاحظة':'#0e7490','شكر وتقدير':'#b8960c'};
+  function typeBtn(label,icon,type){
+    var active=type==='اقتراح';
+    var col=typeColors[type]||'#1b5e2e';
+    return '<button onclick="window._afbType=\''+type+'\';document.querySelectorAll(\'.afb-tb\').forEach(function(b){b.style.background=\'transparent\';b.style.color=\'#94a3b8\';b.style.border=\'2px solid transparent\';});this.style.background=\'#fff\';this.style.color=\''+col+'\';this.style.border=\'2px solid '+col+'\';" '+
+      'class="afb-tb" style="flex:1;padding:9px 4px;border:2px solid '+(active?col:'transparent')+';border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;transition:all .15s;text-align:center;'+(active?'background:#fff;color:'+col+';':'background:transparent;color:#94a3b8;')+'">'+
+      '<div style="font-size:16px;margin-bottom:3px;">'+icon+'</div>'+label+'</button>';
+  }
+  document.getElementById('app').innerHTML=
+    '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+      '<button onclick="go(\'acad_dashboard\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+      '<div><div style="font-size:16px;font-weight:900;">📣 رسالة للإدارة</div>'+
+        (aname?'<div style="margin-top:3px;background:rgba(255,255,255,.12);border-radius:20px;padding:3px 12px;display:inline-block;font-size:10px;font-weight:700;">🏫 '+aname+'</div>':'')+
+      '</div>'+
+    '</div>'+
+    '<div style="padding:16px;">'+
+    '<div class="card">'+
+      '<div style="font-size:13px;font-weight:800;color:#0f172a;margin-bottom:10px;">نوع الرسالة</div>'+
+      '<div style="display:flex;gap:8px;margin-bottom:16px;background:#f1f5f9;border-radius:12px;padding:6px;">'+
+        typeBtn('اقتراح','💡','اقتراح')+typeBtn('شكوى','⚠️','شكوى')+typeBtn('ملاحظة','📝','ملاحظة')+typeBtn('شكر','🏅','شكر وتقدير')+
+      '</div>'+
+      '<div class="mb"><label class="lbl">اسم المسؤول</label>'+
+      '<input class="inp" id="afbMgr" placeholder="اسمك"></div>'+
+      '<div class="mb"><label class="lbl">نص الرسالة *</label>'+
+      '<textarea class="inp" id="afbText" rows="5" placeholder="اكتب رسالتك للإدارة..." style="resize:none;"></textarea></div>'+
+      '<button onclick="submitAcadMessage(\''+acid+'\',\''+aname+'\')" class="btn btn-green-main"><i class="fas fa-paper-plane"></i> إرسال الرسالة</button>'+
+      '<div id="afbRes" style="display:none;margin-top:12px;"></div>'+
+    '</div></div>';
+}
+
+function submitAcadMessage(acid,aname){
+  var text=((document.getElementById('afbText')||{}).value||'').trim();
+  var mgr=((document.getElementById('afbMgr')||{}).value||'').trim()||'غير محدد';
+  if(!text){alert('يرجى كتابة نص الرسالة');return;}
+  var type=window._afbType||'اقتراح';
+  var row={'التاريخ':new Date().toLocaleString('ar-SA'),'النوع':type,'اسم الأكاديمية':aname||acid,'اسم المسؤول':mgr,'الرسالة':text,'الحالة':'جديد'};
+  var btn=document.querySelector('#app button[onclick*="submitAcadMessage"]');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';}
+  apiCall('append',{sheet:'رسائل البطولة',data:[row]}).then(function(){
+    var res=document.getElementById('afbRes');
+    if(res){res.style.display='block';res.innerHTML=
+      '<div style="background:#ecfdf5;border:1.5px solid #16a34a;border-radius:12px;padding:16px;text-align:center;">'+
+        '<div style="font-size:28px;margin-bottom:6px;">✅</div>'+
+        '<div style="font-size:14px;font-weight:900;color:#15803d;">تم إرسال رسالتك بنجاح!</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-top:4px;">ستتم مراجعتها من قبل إدارة البطولة</div>'+
+      '</div>';}
+    if(btn)btn.style.display='none';
+  }).catch(function(){
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane"></i> إرسال الرسالة';}
+    alert('حدث خطأ في الإرسال. تحقق من الاتصال.');
+  });
+}
+
+// ════════════════════════════════════════
+// جدول المباريات
+// ════════════════════════════════════════
+function renderMatchSchedule(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('اللاعبون').then(function(players){
+    window._matchPlayers=players;
+    var acadNames=[];
+    players.forEach(function(p){var n=p.academy_name||p['الأكاديمية']||'';if(n&&acadNames.indexOf(n)<0)acadNames.push(n);});
+    acadNames.sort();
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:16px;font-weight:900;">📅 جدول المباريات</div><div style="font-size:10px;opacity:.6;">إنشاء وإرسال قائمة المباراة</div></div>'+
+      '</div>'+
+      '<div style="padding:16px;">'+
+      '<div class="card">'+
+        '<div class="sec-title"><i class="fas fa-list-ol"></i> قائمة مباراة</div>'+
+        '<div class="mb"><label class="lbl">الأكاديمية</label>'+
+        '<select class="inp" id="mAcad" onchange="filterMatchByAcad()"><option value="">-- اختر أكاديمية --</option>'+
+          acadNames.map(function(n){return '<option>'+n+'</option>';}).join('')+
+        '</select></div>'+
+        '<div class="mb"><label class="lbl">الفريق المنافس</label><input class="inp" id="mOpponent" placeholder="اسم الفريق..."></div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">التاريخ</label><input type="date" class="inp" id="mDate"></div>'+
+          '<div><label class="lbl">الوقت</label><input type="time" class="inp" id="mTime"></div>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">الملعب</label><input class="inp" id="mVenue" placeholder="اسم الملعب..."></div>'+
+        '<div class="mb"><label class="lbl">الفئة العمرية</label>'+
+        '<select class="inp" id="mCat" onchange="filterMatchByAcad()">'+
+          '<option value="">الكل</option>'+
+          CATEGORIES.map(function(c){return '<option value="'+c.id+'">'+c.name+' ('+c.label+')</option>';}).join('')+
+        '</select></div>'+
+        '<div id="matchPlayersList" style="display:none;" class="mb">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+            '<label class="lbl" style="margin:0;">اختر اللاعبين</label>'+
+            '<div style="display:flex;gap:6px;">'+
+              '<button onclick="selectAllMatch(true)" style="background:#0f172a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">تحديد الكل</button>'+
+              '<button onclick="selectAllMatch(false)" style="background:#64748b;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">إلغاء الكل</button>'+
+            '</div></div>'+
+          '<div id="matchPlayerItems"></div>'+
+          '<div id="matchCount" style="font-size:12px;color:var(--red);font-weight:800;margin-top:6px;display:none;"></div>'+
+        '</div>'+
+        '<button onclick="sendMatchListWA()" class="btn btn-green"><i class="fab fa-whatsapp"></i> إرسال القائمة عبر واتساب</button>'+
+      '</div></div>';
+  });
+}
+
+function filterMatchByAcad(){
+  var acadName=(document.getElementById('mAcad').value||'').trim();
+  var catId=document.getElementById('mCat').value||'';
+  var players=(window._matchPlayers||[]).filter(function(p){
+    var pAcad=p.academy_name||p['الأكاديمية']||'';
+    var pCat=p.cat_id||p['الفئة']||'';
+    return (!acadName||pAcad===acadName)&&(!catId||pCat===catId);
+  });
+  var listDiv=document.getElementById('matchPlayersList');
+  var items=document.getElementById('matchPlayerItems');
+  if(!acadName&&!catId){listDiv.style.display='none';items.innerHTML='';updateMatchCount();return;}
+  listDiv.style.display='block';
+  items.innerHTML=players.map(function(p){
+    var name=p.name||p['اسم اللاعب']||'';
+    var cat=CATEGORIES.find(function(c){return c.id===(p.cat_id||p['الفئة']);});
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;margin-bottom:6px;cursor:pointer;background:#fff;">'+
+      '<input type="checkbox" class="match-chk" value="'+name+'" onchange="updateMatchCount()" style="width:18px;height:18px;cursor:pointer;">'+
+      '<div><div style="font-weight:700;font-size:13px;">'+name+'</div>'+
+      '<div style="font-size:10px;color:#64748b;">'+(p.birth||p['تاريخ الميلاد']||'')+(cat?' · '+cat.label:'')+'</div></div>'+
+      '</label>';
+  }).join('');
+  updateMatchCount();
+}
+
+function selectAllMatch(val){
+  document.querySelectorAll('.match-chk').forEach(function(c){c.checked=val;});
+  updateMatchCount();
+}
+
+function updateMatchCount(){
+  var n=document.querySelectorAll('.match-chk:checked').length;
+  var el=document.getElementById('matchCount');
+  if(!el) return;
+  el.style.display=n?'block':'none';
+  el.textContent='✅ تم اختيار '+n+' لاعب';
+}
+
+function sendMatchListWA(){
+  var opponent=(document.getElementById('mOpponent').value||'').trim();
+  var date=document.getElementById('mDate').value;
+  var time=document.getElementById('mTime').value;
+  var venue=(document.getElementById('mVenue').value||'').trim();
+  var acad=(document.getElementById('mAcad').value||'').trim();
+  var selected=[];
+  document.querySelectorAll('.match-chk:checked').forEach(function(c){selected.push(c.value);});
+  if(!opponent){alert('أدخل اسم الفريق المنافس');return;}
+  if(!selected.length){alert('اختر لاعباً واحداً على الأقل');return;}
+  var dateStr=date?new Date(date).toLocaleDateString('ar-SA'):'';
+  var msg='🏆 *'+CONFIG.TOURNAMENT_NAME+'*\n';
+  if(acad) msg+='🏫 *'+acad+'*\n';
+  msg+='⚽ *قائمة المباراة*\n━━━━━━━━━━━━━━\n';
+  if(opponent) msg+='🆚 المنافس: *'+opponent+'*\n';
+  if(dateStr)  msg+='📅 التاريخ: '+dateStr+'\n';
+  if(time)     msg+='⏰ الوقت: '+time+'\n';
+  if(venue)    msg+='📍 الملعب: '+venue+'\n';
+  msg+='━━━━━━━━━━━━━━\n👕 *اللاعبون ('+selected.length+')*\n';
+  selected.forEach(function(name,i){msg+=(i+1)+'. '+name+'\n';});
+  msg+='━━━━━━━━━━━━━━\n🇴🇲 بالتوفيق للجميع!';
+  window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
 }
 
 // ════════════════════════════════════════
