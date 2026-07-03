@@ -141,7 +141,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
 
 <!-- الشريط الجانبي -->
 <div id="sideOverlay" onclick="closeSidebar()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:998;"></div>
-<div id="sidebar" style="position:fixed;top:0;left:-280px;width:280px;height:100vh;background:linear-gradient(180deg,#0d3318 0%,#1b5e2e 50%,#0d3318 100%);z-index:999;transition:left .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;border-right:3px solid #d4af37;">
+<div id="sidebar" style="position:fixed;top:0;right:-280px;width:280px;height:100vh;background:linear-gradient(180deg,#0d3318 0%,#1b5e2e 50%,#0d3318 100%);z-index:999;transition:right .28s cubic-bezier(.4,0,.2,1);overflow-y:auto;border-left:3px solid #d4af37;">
 
   <!-- رأس الشريط -->
   <div style="background:rgba(0,0,0,.2);padding:20px 16px 16px;border-bottom:2px solid rgba(212,175,55,.3);display:flex;align-items:center;justify-content:space-between;">
@@ -368,12 +368,12 @@ function go(page) {
 function showL(){document.getElementById('app').innerHTML='<div class="ldg"><span class="sp"></span></div>';}
 
 function openSidebar(){
-  document.getElementById('sidebar').style.left='0';
+  document.getElementById('sidebar').style.right='0';
   document.getElementById('sideOverlay').style.display='block';
   document.body.style.overflow='hidden';
 }
 function closeSidebar(){
-  document.getElementById('sidebar').style.left='-280px';
+  document.getElementById('sidebar').style.right='-280px';
   document.getElementById('sideOverlay').style.display='none';
   document.body.style.overflow='';
 }
