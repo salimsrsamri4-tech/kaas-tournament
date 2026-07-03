@@ -916,13 +916,16 @@ function renderAcadDashboard() {
                   '</div>'+
                   '<span style="background:#e8f5e9;color:var(--green);font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;flex-shrink:0;">'+ci.label+'</span>'+
                 '</div>'+
-                /* أزرار تعديل وحذف */
-                '<div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #f1f5f9;">'+
+                /* أزرار تعديل ومشاركة وحذف */
+                '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #f1f5f9;">'+
                   '<button onclick="editKaasPlayer(\''+p.id+'\')" '+
-                    'style="background:#f0f9ff;color:#0369a1;border:none;border-left:1px solid #f1f5f9;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+                    'style="background:#f0f9ff;color:#0369a1;border:none;border-left:1px solid #f1f5f9;padding:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
                     '<i class="fas fa-edit"></i> تعديل</button>'+
+                  '<button onclick="sharePlayerWhatsapp(\''+p.id+'\')" '+
+                    'style="background:#f0fff4;color:#16a34a;border:none;border-left:1px solid #f1f5f9;padding:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+                    '<i class="fab fa-whatsapp"></i> واتساب</button>'+
                   '<button onclick="deleteKaasPlayer(\''+p.id+'\',\''+p.name.replace(/'/g,'')+'\')" '+
-                    'style="background:#fff5f5;color:#b81d22;border:none;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+                    'style="background:#fff5f5;color:#b81d22;border:none;padding:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
                     '<i class="fas fa-trash"></i> حذف</button>'+
                 '</div>'+
               '</div>';
@@ -1013,7 +1016,8 @@ function openPhotoCropper(input){
   reader.readAsDataURL(file);
 }
 
-function showPhotoCropper(src){
+/* ─── محرر قص الصورة الموحّد ─── */
+function _showCropper(src, onConfirm){
   var SZ = 240;
   var ov = document.createElement('div');
   ov.id = 'cropModal';
@@ -1021,7 +1025,7 @@ function showPhotoCropper(src){
   ov.innerHTML =
     '<div style="color:#d4af37;font-size:15px;font-weight:900;margin-bottom:18px;">📷 اضبط الصورة</div>'+
     '<div id="czn" style="position:relative;width:'+SZ+'px;height:'+SZ+'px;border-radius:50%;overflow:hidden;border:4px solid #d4af37;background:#0f172a;touch-action:none;">'+
-      '<img id="cimg" src="'+src+'" style="position:absolute;transform-origin:0 0;" draggable="false">'+
+      '<img id="cimg" src="'+src+'" style="position:absolute;transform-origin:0 0;max-width:none;max-height:none;" draggable="false">'+
     '</div>'+
     '<div style="color:rgba(255,255,255,.45);font-size:11px;margin:14px 0;text-align:center;">اسحب بإصبع · اقرص بإصبعين للتكبير</div>'+
     '<div style="display:flex;gap:12px;">'+
@@ -1034,17 +1038,18 @@ function showPhotoCropper(src){
   var czn = document.getElementById('czn');
   var tx=0, ty=0, sc=1, minSc=1;
 
-  img.onload = function(){
+  function init(){
     minSc = Math.max(SZ/img.naturalWidth, SZ/img.naturalHeight);
     sc = minSc;
     tx = (SZ - img.naturalWidth*sc)/2;
     ty = (SZ - img.naturalHeight*sc)/2;
     applyT();
-  };
-  if(img.complete && img.naturalWidth) img.onload();
+  }
+  if(img.complete && img.naturalWidth){ init(); }
+  else { img.onload = init; }
+
   function applyT(){ img.style.transform='translate('+tx+'px,'+ty+'px) scale('+sc+')'; }
 
-  /* لمس (سحب + قرص) */
   var lx=0, ly=0, ltx=0, lty=0, ld=0, ls=1;
   czn.addEventListener('touchstart',function(e){
     e.preventDefault();
@@ -1069,30 +1074,31 @@ function showPhotoCropper(src){
     }
   },{passive:false});
 
-  /* ماوس (ديسكتوب) */
   var md=false, mx0, my0, mtx, mty;
   czn.addEventListener('mousedown',function(e){md=true;mx0=e.clientX;my0=e.clientY;mtx=tx;mty=ty;});
   document.addEventListener('mousemove',function(e){if(!md)return;tx=mtx+(e.clientX-mx0);ty=mty+(e.clientY-my0);applyT();});
   document.addEventListener('mouseup',function(){md=false;});
 
-  /* تأكيد */
   document.getElementById('cropOk').onclick=function(){
-    var c=document.createElement('canvas'); c.width=SZ; c.height=SZ;
+    var c=document.createElement('canvas'); c.width=200; c.height=200;
     var ctx=c.getContext('2d');
-    ctx.beginPath(); ctx.arc(SZ/2,SZ/2,SZ/2,0,Math.PI*2); ctx.clip();
-    ctx.drawImage(img,tx,ty,img.naturalWidth*sc,img.naturalHeight*sc);
-    var res=c.toDataURL('image/jpeg',0.85);
-    window._playerPhoto=res;
-    // تحديث معاينة الصورة في النموذج
-    var box=document.getElementById('photoPreview');
-    if(box){
-      box.style.border='3px solid #d4af37';
-      box.innerHTML='<img src="'+res+'" style="width:100%;height:100%;object-fit:cover;">';
-    }
-    var eb=document.getElementById('photoEditBtn');
-    if(eb) eb.style.display='block';
+    ctx.beginPath(); ctx.arc(100,100,100,0,Math.PI*2); ctx.clip();
+    var r=200/SZ;
+    ctx.drawImage(img, tx*r, ty*r, img.naturalWidth*sc*r, img.naturalHeight*sc*r);
+    var res=c.toDataURL('image/jpeg',0.82);
     ov.remove();
+    onConfirm(res);
   };
+}
+
+function showPhotoCropper(src){
+  _showCropper(src, function(res){
+    window._playerPhoto = res;
+    var box = document.getElementById('photoPreview');
+    if(box){ box.style.border='3px solid #d4af37'; box.innerHTML='<img src="'+res+'" style="width:100%;height:100%;object-fit:cover;">'; }
+    var eb = document.getElementById('photoEditBtn');
+    if(eb) eb.style.display='block';
+  });
 }
 
 function loadPlayerDoc(input){
@@ -1869,11 +1875,23 @@ function editKaasPlayer(pid){
   var ov = document.createElement('div');
   ov.id = 'editModal';
   ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  var currentPhoto = getPlayerPhoto(pid);
   ov.innerHTML =
     '<div style="background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;font-family:Cairo,sans-serif;">'+
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'+
         '<div style="font-size:15px;font-weight:900;color:#0f172a;"><i class="fas fa-edit" style="color:var(--green)"></i> تعديل بيانات اللاعب</div>'+
         '<button onclick="document.getElementById(\'editModal\').remove()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;">✕</button>'+
+      '</div>'+
+      /* صورة اللاعب */
+      '<div class="mb" style="text-align:center;">'+
+        '<div id="editPhotoRing" onclick="document.getElementById(\'ePhotoInput\').click()" '+
+          'style="width:90px;height:90px;border-radius:50%;border:3px solid #d4af37;overflow:hidden;margin:0 auto 8px;cursor:pointer;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">'+
+          (currentPhoto
+            ? '<img src="'+currentPhoto+'" style="width:100%;height:100%;object-fit:cover;">'
+            : '<div style="text-align:center;"><div style="font-size:24px;">📷</div></div>')+
+        '</div>'+
+        '<div style="font-size:11px;color:#64748b;">اضغط لتغيير الصورة</div>'+
+        '<input type="file" id="ePhotoInput" accept="image/*" style="display:none" onchange="editOpenCropper(this,\''+pid+'\')">'+
       '</div>'+
       '<div class="mb"><label class="lbl">اسم اللاعب الكامل</label>'+
         '<input class="inp" id="eName" value="'+player.name+'"></div>'+
@@ -1899,6 +1917,20 @@ function editKaasPlayer(pid){
   ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
 }
 
+function editOpenCropper(input, pid){
+  if(!input.files||!input.files[0]) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    _showCropper(e.target.result, function(dataUrl){
+      try{ localStorage.setItem('kaasPhoto_'+pid, dataUrl); }catch(x){}
+      var ring = document.getElementById('editPhotoRing');
+      if(ring) ring.innerHTML = '<img src="'+dataUrl+'" style="width:100%;height:100%;object-fit:cover;">';
+      window._editNewPhoto = dataUrl;
+    });
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
 function saveEditKaasPlayer(pid){
   var name   = (document.getElementById('eName').value||'').trim();
   var birth  = (document.getElementById('eBirth').value||'').trim();
@@ -1908,16 +1940,45 @@ function saveEditKaasPlayer(pid){
   var health = (document.getElementById('eHealth').value||'').trim();
   if(!name){ alert('اسم اللاعب مطلوب'); return; }
 
+  // حفظ الصورة الجديدة إن وُجدت
+  if(window._editNewPhoto){
+    try{ localStorage.setItem('kaasPhoto_'+pid, window._editNewPhoto); }catch(x){}
+    window._editNewPhoto = null;
+  }
+
   var edit = {name:name, birth:birth, nationality:nat, jersey:jersey, phone:phone, health:health};
-  // حفظ محلياً
   try{ localStorage.setItem('kaasEdit_'+pid, JSON.stringify(edit)); }catch(x){}
-  // إرسال تعديل للشيت (سجل جديد بنفس ID)
   var acadId = sessionStorage.getItem('kaasAcadId');
   apiAppend('تعديلات اللاعبين', Object.assign({player_id:pid, academy_id:acadId, date:new Date().toLocaleDateString('ar')}, edit));
 
   document.getElementById('editModal').remove();
   invalidateCache('اللاعبون');
   go('acad_dashboard');
+}
+
+function sharePlayerWhatsapp(pid){
+  var p = (window._kaasPlayers||[]).find(function(x){ return x.id===pid; });
+  if(!p) return;
+  var edit = {};
+  try{ edit = JSON.parse(localStorage.getItem('kaasEdit_'+pid)||'{}'); }catch(e){}
+  var name    = edit.name    || p.name    || '';
+  var birth   = (edit.birth  || p.birth   || '').toString().split('T')[0];
+  var nat     = edit.nationality || p.nationality || p.nat || '';
+  var jersey  = edit.jersey  || p.jersey  || '';
+  var cat     = p.cat_name   || p.catName || '';
+  var acadName = sessionStorage.getItem('kaasAcadName') || p.academy_name || '';
+  var msg =
+    '🏆 *'+CONFIG.TOURNAMENT_NAME+'*\n'+
+    '─────────────────\n'+
+    '👤 *اللاعب:* '+name+'\n'+
+    '🎂 *تاريخ الميلاد:* '+birth+'\n'+
+    (nat  ? '🌍 *الجنسية:* '+nat+'\n'  : '')+
+    (cat  ? '⚽ *الفئة:* '+cat+'\n'    : '')+
+    (jersey ? '👕 *رقم القميص:* #'+jersey+'\n' : '')+
+    '🏫 *الأكاديمية:* '+acadName+'\n'+
+    '─────────────────\n'+
+    '📋 *الموسم:* '+CONFIG.SEASON;
+  window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg), '_blank');
 }
 
 function deleteKaasPlayer(pid, pname){
