@@ -6,6 +6,8 @@
 <title>KAAS — كأس العرب للأكاديميات</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Cairo',sans-serif;background:#f1f5f9;color:#0f172a;direction:rtl;}
@@ -672,22 +674,116 @@ function submitPlayer() {
   var btn = document.querySelector('.btn-red');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإضافة...';
 
+  var playerId = 'PL'+Date.now().toString().slice(-8);
   apiCall('addPlayer',{
-    id:'PL'+Date.now().toString().slice(-8),
+    id:playerId,
     academy_id:acadId, academy_name:acadName,
     name:name, birth:birth, nationality:nat,
     phone:phone, health:health||'لا يوجد',
     cat_id:catId, cat_name:getCatInfo(catId).name,
     date:new Date().toLocaleDateString('ar')
   }).then(function(){
-    document.getElementById('app').innerHTML=
-      '<div style="text-align:center;padding:60px 20px;">'+
-        '<div style="font-size:64px;margin-bottom:12px;">✅</div>'+
-        '<div style="font-size:18px;font-weight:900;color:#16a34a;margin-bottom:6px;">تمت إضافة اللاعب</div>'+
-        '<div style="font-size:13px;color:#64748b;margin-bottom:24px;">'+name+' · '+getCatInfo(catId).name+'</div>'+
-        '<button class="btn btn-red" style="max-width:280px;margin:0 auto 8px;" onclick="go(\'add_player\')">إضافة لاعب آخر</button>'+
-        '<button class="btn btn-dark" style="max-width:280px;margin:0 auto;" onclick="go(\'acad_dashboard\')">العودة للوحة التحكم</button>'+
-      '</div>';
+    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, catId:catId, acadId:acadId, acadName:acadName});
+  });
+}
+
+function showKaasCard(p) {
+  var ci = getCatInfo(p.catId);
+  var catColor = ci ? ci.color : '#b81d22';
+  var birthFormatted = p.birth ? new Date(p.birth).toLocaleDateString('ar-SA') : '';
+  var initials = p.name.trim().split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('');
+
+  var cardHtml =
+    '<div id="kaasPlayerCard" style="width:300px;margin:0 auto;border-radius:16px;overflow:hidden;border:3px solid var(--gold);font-family:Cairo,sans-serif;direction:rtl;box-shadow:0 8px 32px rgba(0,0,0,.3);">'+
+      '<div style="background:linear-gradient(145deg,#0a0f1e,#1e293b);padding:14px 16px 10px;text-align:center;position:relative;">'+
+        '<div style="font-size:8px;color:var(--gold);font-weight:900;letter-spacing:3px;margin-bottom:4px;">KAAS TOURNAMENT 2025/2026</div>'+
+        '<div style="font-size:15px;font-weight:900;color:#fff;">🏆 كأس العرب للأكاديميات</div>'+
+        '<div style="height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-top:10px;"></div>'+
+      '</div>'+
+      '<div style="background:linear-gradient(160deg,#1e293b,#0f172a);padding:16px;display:flex;align-items:center;gap:14px;">'+
+        '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,'+catColor+',#0f172a);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;font-weight:900;color:#fff;">'+initials+'</div>'+
+        '<div style="flex:1;min-width:0;">'+
+          '<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+p.name+'</div>'+
+          '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">'+p.acadName+'</div>'+
+          '<div style="display:inline-block;background:'+catColor+';color:#fff;font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;margin-top:5px;">'+(ci?ci.name+' · '+ci.label:'')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="background:#0f172a;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;">'+
+        '<div>'+
+          '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;">رقم اللاعب</div>'+
+          '<div style="font-size:12px;font-weight:900;color:var(--gold);letter-spacing:1px;">'+p.id+'</div>'+
+        '</div>'+
+        '<div style="text-align:center;">'+
+          '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;">تاريخ الميلاد</div>'+
+          '<div style="font-size:11px;font-weight:700;color:#fff;">'+birthFormatted+'</div>'+
+        '</div>'+
+        '<div id="kaasCardQR" style="background:#fff;padding:3px;border-radius:6px;border:2px solid var(--gold);"></div>'+
+      '</div>'+
+      '<div style="background:linear-gradient(90deg,var(--red),#7a0f12);padding:6px 16px;text-align:center;">'+
+        '<div style="font-size:8px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:2px;">KAAS · كأس العرب للأكاديميات · 2025</div>'+
+      '</div>'+
+    '</div>';
+
+  var modal = document.createElement('div');
+  modal.id = 'kaasCardModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  modal.innerHTML =
+    '<div style="text-align:center;width:100%;max-width:360px;">'+
+    '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:14px;">✅ تمت إضافة اللاعب بنجاح!</div>'+
+    cardHtml+
+    '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;">'+
+      '<button onclick="shareKaasCard()" style="padding:11px 18px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:6px;"><i class="fab fa-whatsapp"></i> مشاركة واتساب</button>'+
+      '<button onclick="downloadKaasCard()" style="padding:11px 18px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-download"></i> تنزيل</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">'+
+      '<button onclick="document.getElementById(\'kaasCardModal\').remove();go(\'add_player\')" style="padding:9px 16px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">إضافة لاعب آخر</button>'+
+      '<button onclick="document.getElementById(\'kaasCardModal\').remove();go(\'acad_dashboard\')" style="padding:9px 16px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">لوحة التحكم</button>'+
+    '</div>'+
+    '</div>';
+  document.body.appendChild(modal);
+
+  setTimeout(function(){
+    var qrEl = document.getElementById('kaasCardQR');
+    if(qrEl && typeof QRCode !== 'undefined'){
+      new QRCode(qrEl, {text: 'KAAS-'+p.id, width:52, height:52, correctLevel:QRCode.CorrectLevel.M});
+    }
+  }, 300);
+}
+
+function downloadKaasCard(){
+  var card = document.getElementById('kaasPlayerCard');
+  if(!card) return;
+  var btn = event && event.target ? event.target.closest('button') : null;
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ التحضير...';}
+  html2canvas(card,{scale:3,useCORS:true,backgroundColor:'#0f172a'}).then(function(canvas){
+    var a = document.createElement('a');
+    a.download = 'بطاقة-لاعب-KAAS.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="fas fa-download"></i> تنزيل';}
+  });
+}
+
+function shareKaasCard(){
+  var card = document.getElementById('kaasPlayerCard');
+  if(!card) return;
+  var btn = event && event.target ? event.target.closest('button') : null;
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ التحضير...';}
+  html2canvas(card,{scale:2,useCORS:true,backgroundColor:'#0f172a'}).then(function(canvas){
+    canvas.toBlob(function(blob){
+      var file = new File([blob],'بطاقة-لاعب-KAAS.png',{type:'image/png'});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({title:'بطاقة لاعب - KAAS',files:[file]})
+        .then(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="fab fa-whatsapp"></i> مشاركة واتساب';}})
+        .catch(function(){downloadKaasCard();});
+      } else {
+        var a = document.createElement('a');
+        a.download = 'بطاقة-لاعب-KAAS.png';
+        a.href = URL.createObjectURL(blob);
+        a.click();
+        if(btn){btn.disabled=false;btn.innerHTML='<i class="fab fa-whatsapp"></i> مشاركة واتساب';}
+      }
+    },'image/png');
   });
 }
 
