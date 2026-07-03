@@ -361,10 +361,35 @@ function apiAppend(sheet, rowObj) {
     .catch(function(){ return {status:'error'}; });
 }
 
-function apiGet(sheet) {
+var _cache = {};
+var _CACHE_TTL = 3 * 60 * 1000; // 3 دقائق
+
+function apiGet(sheet, forceRefresh) {
   if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') return getDemoData(sheet);
-  return fetch(CONFIG.GAS_URL+'?sheet='+encodeURIComponent(sheet)+'&nocache='+Date.now())
-    .then(function(r){return r.json();}).catch(function(){return [];});
+  var now = Date.now();
+  if(!forceRefresh && _cache[sheet] && (now - _cache[sheet].t) < _CACHE_TTL) {
+    return Promise.resolve(_cache[sheet].d);
+  }
+  return fetch(CONFIG.GAS_URL+'?sheet='+encodeURIComponent(sheet)+'&t='+now)
+    .then(function(r){return r.json();})
+    .then(function(d){ _cache[sheet]={d:d,t:Date.now()}; return d; })
+    .catch(function(){ return _cache[sheet]?_cache[sheet].d:[]; });
+}
+
+function invalidateCache(sheet){ delete _cache[sheet]; }
+
+// بعد كل كتابة، امسح cache الشيت المعني
+var _origApiAppend = null;
+function apiAppend(sheet, rowObj) {
+  if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') return Promise.resolve({status:'demo'});
+  invalidateCache(sheet);
+  return fetch(CONFIG.GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({action:'append', sheet:sheet, data:[rowObj]})
+  }).then(function(){ return {status:'ok'}; })
+    .catch(function(){ return {status:'error'}; });
 }
 
 // بيانات تجريبية
@@ -947,9 +972,21 @@ function previewPlayerPhoto(input){
   if(!file) return;
   var reader = new FileReader();
   reader.onload = function(e){
-    window._playerPhoto = e.target.result;
-    var box = document.getElementById('photoPreview');
-    if(box) box.innerHTML = '<img src="'+e.target.result+'" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid #d4af37;">';
+    // ضغط الصورة إلى 200x200 بجودة 80%
+    var img = new Image();
+    img.onload = function(){
+      var MAX = 200;
+      var canvas = document.createElement('canvas');
+      var ratio = Math.min(MAX/img.width, MAX/img.height);
+      canvas.width  = Math.round(img.width  * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      var compressed = canvas.toDataURL('image/jpeg', 0.8);
+      window._playerPhoto = compressed;
+      var box = document.getElementById('photoPreview');
+      if(box) box.innerHTML = '<img src="'+compressed+'" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid #d4af37;">';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -959,9 +996,20 @@ function previewPlayerDoc(input){
   if(!file) return;
   var reader = new FileReader();
   reader.onload = function(e){
-    window._playerDoc = e.target.result;
-    var box = document.getElementById('docPreview');
-    if(box) box.innerHTML = '<img src="'+e.target.result+'" style="max-width:100%;max-height:100px;border-radius:8px;border:2px solid #fecaca;">';
+    var img = new Image();
+    img.onload = function(){
+      var MAX = 600;
+      var canvas = document.createElement('canvas');
+      var ratio = Math.min(MAX/img.width, MAX/img.height, 1);
+      canvas.width  = Math.round(img.width  * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      var compressed = canvas.toDataURL('image/jpeg', 0.75);
+      window._playerDoc = compressed;
+      var box = document.getElementById('docPreview');
+      if(box) box.innerHTML = '<img src="'+compressed+'" style="max-width:100%;max-height:100px;border-radius:8px;border:2px solid #fecaca;">';
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
