@@ -877,6 +877,13 @@ function renderAcadDashboard() {
       '<div class="section">'+
         '<div class="sec-title"><i class="fas fa-users" style="color:var(--red)"></i> اللاعبون المسجلون</div>';
 
+    // تطبيق التعديلات المحلية المحفوظة
+    players = players.map(function(p){
+      try{ var e=JSON.parse(localStorage.getItem('kaasEdit_'+p.id)||'null'); if(e) return Object.assign({},p,e); }catch(x){}
+      return p;
+    });
+    window._kaasPlayers = players;
+
     if(!players.length){
       html += '<div style="text-align:center;padding:32px;color:#94a3b8;"><div style="font-size:32px;margin-bottom:8px;">👥</div>لم يُضف لاعبون بعد</div>';
     } else {
@@ -893,14 +900,32 @@ function renderAcadDashboard() {
           html += '<div style="font-size:11px;color:#94a3b8;text-align:center;padding:8px;">لا يوجد لاعبون في هذه الفئة</div>';
         } else {
           cPlayers.forEach(function(p,i){
-            html += '<div class="player-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:10px;margin-bottom:8px;border:1px solid #e2e8f0;">'+
-              '<div style="width:28px;height:28px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">'+(i+1)+'</div>'+
-              '<div style="flex:1;min-width:0;">'+
-                '<div style="font-size:13px;font-weight:900;color:var(--dark);">'+p.name+'</div>'+
-                '<div style="font-size:10px;color:#64748b;">'+p.birth+' · '+p.nationality+'</div>'+
-              '</div>'+
-              '<span style="background:#e8f5e9;color:var(--green);font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;flex-shrink:0;">'+ci.label+'</span>'+
-            '</div>';
+            var birthDisp = (p.birth||'').toString().split('T')[0]; // إزالة الوقت من التاريخ
+            var photo = getPlayerPhoto(p.id||'');
+            html +=
+              '<div style="background:#fff;border-radius:12px;margin-bottom:10px;border:1px solid #e2e8f0;overflow:hidden;">'+
+                '<div style="display:flex;align-items:center;gap:10px;padding:11px 12px;">'+
+                  /* رقم أو صورة */
+                  (photo
+                    ? '<img src="'+photo+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #d4af37;flex-shrink:0;">'
+                    : '<div style="width:36px;height:36px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0;">'+(i+1)+'</div>'
+                  )+
+                  '<div style="flex:1;min-width:0;">'+
+                    '<div style="font-size:13px;font-weight:900;color:var(--dark);">'+p.name+'</div>'+
+                    '<div style="font-size:10px;color:#64748b;margin-top:1px;">'+birthDisp+(p.jersey?' · #'+p.jersey:'')+'</div>'+
+                  '</div>'+
+                  '<span style="background:#e8f5e9;color:var(--green);font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;flex-shrink:0;">'+ci.label+'</span>'+
+                '</div>'+
+                /* أزرار تعديل وحذف */
+                '<div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #f1f5f9;">'+
+                  '<button onclick="editKaasPlayer(\''+p.id+'\')" '+
+                    'style="background:#f0f9ff;color:#0369a1;border:none;border-left:1px solid #f1f5f9;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+                    '<i class="fas fa-edit"></i> تعديل</button>'+
+                  '<button onclick="deleteKaasPlayer(\''+p.id+'\',\''+p.name.replace(/'/g,'')+'\')" '+
+                    'style="background:#fff5f5;color:#b81d22;border:none;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+                    '<i class="fas fa-trash"></i> حذف</button>'+
+                '</div>'+
+              '</div>';
           });
         }
         html += '</div>';
@@ -1833,6 +1858,82 @@ function sendMatchListWA(){
 // ════════════════════════════════════════
 // رابط تسجيل الأولياء
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// تعديل وحذف اللاعب
+// ════════════════════════════════════════
+function editKaasPlayer(pid){
+  var player = (window._kaasPlayers||[]).find(function(p){ return p.id===pid; });
+  if(!player) return;
+  var birthVal = (player.birth||'').toString().split('T')[0];
+
+  var ov = document.createElement('div');
+  ov.id = 'editModal';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;justify-content:center;';
+  ov.innerHTML =
+    '<div style="background:#fff;border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;font-family:Cairo,sans-serif;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'+
+        '<div style="font-size:15px;font-weight:900;color:#0f172a;"><i class="fas fa-edit" style="color:var(--green)"></i> تعديل بيانات اللاعب</div>'+
+        '<button onclick="document.getElementById(\'editModal\').remove()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;">✕</button>'+
+      '</div>'+
+      '<div class="mb"><label class="lbl">اسم اللاعب الكامل</label>'+
+        '<input class="inp" id="eName" value="'+player.name+'"></div>'+
+      '<div class="r2 mb">'+
+        '<div><label class="lbl">تاريخ الميلاد</label>'+
+          '<input class="inp" id="eBirth" type="date" value="'+birthVal+'"></div>'+
+        '<div><label class="lbl">الجنسية</label>'+
+          '<input class="inp" id="eNat" value="'+(player.nationality||'')+'"></div>'+
+      '</div>'+
+      '<div class="r2 mb">'+
+        '<div><label class="lbl">رقم القميص</label>'+
+          '<input class="inp" id="eJersey" type="number" min="1" max="99" value="'+(player.jersey||'')+'"></div>'+
+        '<div><label class="lbl">رقم الهاتف</label>'+
+          '<input class="inp" id="ePhone" type="tel" value="'+(player.phone||'')+'"></div>'+
+      '</div>'+
+      '<div class="mb"><label class="lbl">ملاحظات صحية</label>'+
+        '<input class="inp" id="eHealth" value="'+(player.health||'')+'"></div>'+
+      '<button onclick="saveEditKaasPlayer(\''+pid+'\')" class="btn btn-red" style="margin-top:4px;">'+
+        '<i class="fas fa-save"></i> حفظ التعديلات</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+  // إغلاق عند الضغط على الخلفية
+  ov.addEventListener('click', function(e){ if(e.target===ov) ov.remove(); });
+}
+
+function saveEditKaasPlayer(pid){
+  var name   = (document.getElementById('eName').value||'').trim();
+  var birth  = (document.getElementById('eBirth').value||'').trim();
+  var nat    = (document.getElementById('eNat').value||'').trim();
+  var jersey = (document.getElementById('eJersey').value||'').trim();
+  var phone  = (document.getElementById('ePhone').value||'').trim();
+  var health = (document.getElementById('eHealth').value||'').trim();
+  if(!name){ alert('اسم اللاعب مطلوب'); return; }
+
+  var edit = {name:name, birth:birth, nationality:nat, jersey:jersey, phone:phone, health:health};
+  // حفظ محلياً
+  try{ localStorage.setItem('kaasEdit_'+pid, JSON.stringify(edit)); }catch(x){}
+  // إرسال تعديل للشيت (سجل جديد بنفس ID)
+  var acadId = sessionStorage.getItem('kaasAcadId');
+  apiAppend('تعديلات اللاعبين', Object.assign({player_id:pid, academy_id:acadId, date:new Date().toLocaleDateString('ar')}, edit));
+
+  document.getElementById('editModal').remove();
+  invalidateCache('اللاعبون');
+  go('acad_dashboard');
+}
+
+function deleteKaasPlayer(pid, pname){
+  if(!confirm('حذف اللاعب "'+pname+'" ؟\nلا يمكن التراجع عن هذا الإجراء.')) return;
+  var acadId = sessionStorage.getItem('kaasAcadId');
+  apiAppend('حذف اللاعبين', {
+    player_id: pid, academy_id: acadId,
+    date: new Date().toLocaleDateString('ar')
+  });
+  // إزالة فورية من الواجهة
+  window._kaasPlayers = (window._kaasPlayers||[]).filter(function(p){ return p.id!==pid; });
+  try{ localStorage.removeItem('kaasEdit_'+pid); localStorage.removeItem('kaasPhoto_'+pid); }catch(x){}
+  invalidateCache('اللاعبون');
+  go('acad_dashboard');
+}
+
 function shareRegLink(){
   var id   = sessionStorage.getItem('kaasAcadId');
   var name = sessionStorage.getItem('kaasAcadName');
