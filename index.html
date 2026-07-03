@@ -812,6 +812,8 @@ function renderAcadDashboard() {
     cats.forEach(function(c){byCat[c]=[];});
     players.forEach(function(p){if(byCat[p.cat_id]!==undefined) byCat[p.cat_id].push(p);});
 
+    window._kaasPlayers = players;
+
     var html =
       '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:20px 16px 16px;">'+
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
@@ -837,8 +839,14 @@ function renderAcadDashboard() {
         '</div>'+
       '</div>'+
       '<div class="section">'+
-        '<button class="btn btn-gold" onclick="go(\'add_player\')"><i class="fas fa-user-plus"></i> إضافة لاعب جديد</button>'+
-        '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة للإدارة</button>'+
+        '<button class="btn btn-gold" onclick="go(\'add_player\')"><i class="fas fa-user-plus"></i> إضافة لاعب جديد / بديل</button>'+
+        (players.length>0?
+          '<button class="btn" onclick="downloadKaasCards()" style="background:linear-gradient(135deg,#d4af37,#b8960c);color:#fff;margin-top:8px;"><i class="fas fa-download"></i> تحميل البطاقات (PNG)</button>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
+            '<button class="btn" onclick="shareKaasCards()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;padding:11px;"><i class="fab fa-whatsapp"></i> مشاركة واتساب</button>'+
+            '<button class="btn" onclick="printKaasCards()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;padding:11px;"><i class="fas fa-file-pdf"></i> طباعة / PDF</button>'+
+          '</div>':'')+
+        '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة / ملاحظة للإدارة</button>'+
       '</div>'+
       '<div class="section">'+
         '<div class="sec-title"><i class="fas fa-users" style="color:var(--red)"></i> اللاعبون المسجلون</div>';
@@ -859,13 +867,13 @@ function renderAcadDashboard() {
           html += '<div style="font-size:11px;color:#94a3b8;text-align:center;padding:8px;">لا يوجد لاعبون في هذه الفئة</div>';
         } else {
           cPlayers.forEach(function(p,i){
-            html += '<div class="player-card">'+
-              '<div class="player-num">'+(i+1)+'</div>'+
-              '<div class="player-info">'+
-                '<div class="player-name">'+p.name+'</div>'+
-                '<div class="player-meta">'+p.birth+' · '+p.nationality+'</div>'+
+            html += '<div class="player-card" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:10px;margin-bottom:8px;border:1px solid #e2e8f0;">'+
+              '<div style="width:28px;height:28px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">'+(i+1)+'</div>'+
+              '<div style="flex:1;min-width:0;">'+
+                '<div style="font-size:13px;font-weight:900;color:var(--dark);">'+p.name+'</div>'+
+                '<div style="font-size:10px;color:#64748b;">'+p.birth+' · '+p.nationality+'</div>'+
               '</div>'+
-              '<span class="player-cat">'+ci.label+'</span>'+
+              '<span style="background:#e8f5e9;color:var(--green);font-size:9px;font-weight:900;padding:3px 8px;border-radius:20px;flex-shrink:0;">'+ci.label+'</span>'+
             '</div>';
           });
         }
@@ -1057,6 +1065,107 @@ function shareKaasCard(){
       }
     },'image/png');
   });
+}
+
+// ════════════════════════════════════════
+// بطاقات جميع اللاعبين (تحميل / مشاركة / طباعة)
+// ════════════════════════════════════════
+function buildKaasCardHTML(p, num){
+  var ci = getCatInfo(p.cat_id||p.catId||'');
+  var catColors = {cat1:'#1b5e2e',cat2:'#b81d22',cat3:'#d4af37',cat4:'#0e7490',cat5:'#7c3aed'};
+  var catColor = catColors[p.cat_id||p.catId||''] || '#1b5e2e';
+  var initials = (p.name||'').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('');
+  var birthFormatted = p.birth ? p.birth.replace(/-/g,'/') : '';
+  return '<div style="width:300px;margin:0 auto 14px;border-radius:16px;overflow:hidden;border:2px solid var(--gold,#d4af37);font-family:Cairo,sans-serif;direction:rtl;background:#0f172a;">'+
+    '<div style="background:linear-gradient(145deg,#0a0f1e,#1e293b);padding:10px 14px 8px;text-align:center;">'+
+      '<div style="font-size:7px;color:#d4af37;font-weight:900;letter-spacing:2px;margin-bottom:2px;">KAAS TOURNAMENT 2025/2026</div>'+
+      '<div style="font-size:13px;font-weight:900;color:#fff;">🏆 كأس العرب للأكاديميات</div>'+
+      '<div style="height:1px;background:linear-gradient(90deg,transparent,#d4af37,transparent);margin-top:8px;"></div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(160deg,#1e293b,#0f172a);padding:14px;display:flex;align-items:center;gap:12px;">'+
+      '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,'+catColor+',#0f172a);border:2px solid #d4af37;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;font-weight:900;color:#fff;">'+initials+'</div>'+
+      '<div style="flex:1;">'+
+        '<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+p.name+'</div>'+
+        '<div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:2px;">'+(p.academy_name||p.acadName||'')+'</div>'+
+        '<div style="display:inline-block;background:'+catColor+';color:#fff;font-size:8px;font-weight:900;padding:2px 8px;border-radius:20px;margin-top:4px;">'+(ci?ci.name+' · '+ci.label:'')+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="background:#0f172a;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<div>'+
+        '<div style="font-size:8px;color:rgba(255,255,255,.4);font-weight:700;">رقم اللاعب</div>'+
+        '<div style="font-size:11px;font-weight:900;color:#d4af37;letter-spacing:1px;">'+p.id+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:8px;color:rgba(255,255,255,.4);font-weight:700;">تاريخ الميلاد</div>'+
+        '<div style="font-size:10px;font-weight:700;color:#fff;">'+birthFormatted+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:8px;color:rgba(255,255,255,.4);font-weight:700;">#</div>'+
+        '<div style="font-size:16px;font-weight:900;color:#d4af37;">'+String(num).padStart(2,'0')+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(90deg,#b81d22,#7a0f12);padding:5px 14px;text-align:center;">'+
+      '<div style="font-size:7px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:2px;">KAAS · كأس العرب للأكاديميات · 2025</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function downloadKaasCards(){
+  var players = window._kaasPlayers||[];
+  if(!players.length){alert('لا يوجد لاعبون');return;}
+  var acadName = sessionStorage.getItem('kaasAcadName')||'الأكاديمية';
+  captureKaasCards(players,'تحميل','بطاقات-'+acadName);
+}
+function shareKaasCards(){
+  var players = window._kaasPlayers||[];
+  if(!players.length){alert('لا يوجد لاعبون');return;}
+  var acadName = sessionStorage.getItem('kaasAcadName')||'الأكاديمية';
+  captureKaasCards(players,'مشاركة','بطاقات-'+acadName);
+}
+function printKaasCards(){
+  var players = window._kaasPlayers||[];
+  if(!players.length){alert('لا يوجد لاعبون');return;}
+  var html='<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">'+
+    '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">'+
+    '<style>body{margin:0;padding:16px;background:#f1f5f9;font-family:Cairo,sans-serif;}'+
+    '.card{break-inside:avoid;margin-bottom:16px;}'+
+    '@media print{body{padding:0;}}</style></head><body>';
+  players.forEach(function(p,i){html+='<div class="card">'+buildKaasCardHTML(p,i+1)+'</div>';});
+  html+='<script>window.onload=function(){window.print();}<\/script></body></html>';
+  var w=window.open('','_blank');w.document.write(html);w.document.close();
+}
+function captureKaasCards(players,mode,filename){
+  var wrap=document.createElement('div');
+  wrap.style.cssText='position:fixed;left:-9999px;top:0;width:340px;background:#f1f5f9;padding:16px;display:flex;flex-direction:column;z-index:-1;';
+  players.forEach(function(p,i){
+    var div=document.createElement('div');
+    div.innerHTML=buildKaasCardHTML(p,i+1);
+    wrap.appendChild(div.firstChild);
+  });
+  document.body.appendChild(wrap);
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  ov.innerHTML='<div style="background:#fff;border-radius:12px;padding:24px 32px;text-align:center;font-family:Cairo,sans-serif;"><div style="width:32px;height:32px;border:3px solid #e2e8f0;border-top-color:#b81d22;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px;"></div><div style="font-size:13px;font-weight:700;color:#0f172a;">جارٍ التحضير...</div></div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){
+    html2canvas(wrap,{useCORS:true,scale:2,backgroundColor:'#f1f5f9',logging:false}).then(function(canvas){
+      ov.remove();
+      document.body.removeChild(wrap);
+      if(mode==='مشاركة'){
+        canvas.toBlob(function(blob){
+          var file=new File([blob],filename+'.png',{type:'image/png'});
+          if(navigator.canShare&&navigator.canShare({files:[file]})){
+            navigator.share({files:[file],title:CONFIG.TOURNAMENT_NAME,text:'بطاقات اللاعبين — '+CONFIG.TOURNAMENT_NAME});
+          } else {
+            var a=document.createElement('a');a.download=filename+'.png';a.href=URL.createObjectURL(blob);a.click();
+            setTimeout(function(){window.open('https://api.whatsapp.com/send?text='+encodeURIComponent('بطاقات اللاعبين: '+CONFIG.TOURNAMENT_NAME),'_blank');},800);
+          }
+        },'image/png');
+        return;
+      }
+      var a=document.createElement('a');a.download=filename+'.png';a.href=canvas.toDataURL('image/png');a.click();
+    }).catch(function(){ov.remove();document.body.removeChild(wrap);alert('حدث خطأ، جرب الطباعة');});
+  },600);
 }
 
 // ════════════════════════════════════════
