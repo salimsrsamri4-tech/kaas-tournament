@@ -928,17 +928,20 @@ function renderAddPlayer() {
       '<div style="font-size:28px;margin-bottom:6px;">⚽</div>'+
       '<div style="font-size:16px;font-weight:900;">إضافة لاعب</div>'+
     '</div>'+
-    '<div class="section">'+
+    '<div class="section" style="padding-bottom:90px;">'+
     '<div class="card">'+
 
-      /* صورة اللاعب */
-      '<div class="mb">'+
-        '<label class="lbl"><i class="fas fa-camera" style="color:var(--green)"></i> صورة اللاعب بالزي الرياضي</label>'+
-        '<div onclick="document.getElementById(\'pPhotoInput\').click()" id="photoPreviewBox" style="border:2px dashed #d4af37;border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:#f8fdf8;margin-bottom:4px;">'+
-          '<div id="photoPreview" style="font-size:28px;color:#94a3b8;">📷</div>'+
-          '<div style="font-size:11px;color:#64748b;margin-top:4px;">اضغط لاختيار صورة</div>'+
+      /* صورة اللاعب مع محرر */
+      '<div class="mb" style="text-align:center;">'+
+        '<label class="lbl" style="text-align:right;display:block;"><i class="fas fa-camera" style="color:var(--green)"></i> صورة اللاعب بالزي الرياضي</label>'+
+        '<div id="photoPreview" onclick="document.getElementById(\'pPhotoInput\').click()" '+
+          'style="width:120px;height:120px;border-radius:50%;border:3px dashed #d4af37;background:#f8fdf8;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:8px auto;position:relative;overflow:hidden;">'+
+          '<div style="text-align:center;pointer-events:none;"><div style="font-size:32px;">📷</div><div style="font-size:10px;color:#64748b;margin-top:4px;">اختر صورة</div></div>'+
         '</div>'+
-        '<input type="file" id="pPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="previewPlayerPhoto(this)">'+
+        '<div id="photoEditBtn" style="display:none;margin-top:4px;">'+
+          '<button onclick="document.getElementById(\'pPhotoInput\').click()" style="background:rgba(212,175,55,.15);border:1px solid #d4af37;color:#b8960c;border-radius:20px;padding:5px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-edit"></i> تغيير الصورة</button>'+
+        '</div>'+
+        '<input type="file" id="pPhotoInput" accept="image/*" style="display:none" onchange="openPhotoCropper(this)">'+
       '</div>'+
 
       /* البيانات الأساسية */
@@ -948,68 +951,144 @@ function renderAddPlayer() {
         '<div><label class="lbl">الجنسية *</label><input class="inp" id="pNat" type="text" placeholder="عُماني" value="عُماني"></div>'+
       '</div>'+
       '<div id="catResult" style="display:none;margin-bottom:12px;"></div>'+
-      '<div class="mb"><label class="lbl">رقم الهاتف (اختياري)</label><input class="inp" id="pPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
+      '<div class="r2 mb">'+
+        '<div><label class="lbl"><i class="fas fa-tshirt" style="color:var(--green)"></i> رقم القميص</label><input class="inp" id="pJersey" type="number" min="1" max="99" placeholder="٩"></div>'+
+        '<div><label class="lbl">رقم الهاتف (اختياري)</label><input class="inp" id="pPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
+      '</div>'+
       '<div class="mb"><label class="lbl">ملاحظات صحية</label><input class="inp" id="pHealth" type="text" placeholder="لا يوجد"></div>'+
 
       /* وثيقة اللاعب */
       '<div class="mb">'+
         '<label class="lbl"><i class="fas fa-id-card" style="color:var(--red)"></i> وثيقة اللاعب (بطاقة / شهادة ميلاد)</label>'+
-        '<div onclick="document.getElementById(\'pDocInput\').click()" id="docPreviewBox" style="border:2px dashed #b81d22;border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:#fff8f8;margin-bottom:4px;">'+
-          '<div id="docPreview" style="font-size:28px;color:#94a3b8;">📄</div>'+
-          '<div style="font-size:11px;color:#64748b;margin-top:4px;">اضغط لاختيار الوثيقة (صورة)</div>'+
+        '<div onclick="document.getElementById(\'pDocInput\').click()" style="border:2px dashed #b81d22;border-radius:12px;padding:14px;text-align:center;cursor:pointer;background:#fff8f8;">'+
+          '<div id="docPreview" style="font-size:26px;color:#94a3b8;">📄</div>'+
+          '<div id="docHint" style="font-size:11px;color:#64748b;margin-top:4px;">اضغط لاختيار صورة الوثيقة</div>'+
         '</div>'+
-        '<input type="file" id="pDocInput" accept="image/*" capture="environment" style="display:none" onchange="previewPlayerDoc(this)">'+
+        '<input type="file" id="pDocInput" accept="image/*" style="display:none" onchange="loadPlayerDoc(this)">'+
       '</div>'+
 
       '<div id="pErr" style="display:none;" class="err"></div>'+
-      '<button class="btn btn-red" onclick="submitPlayer()"><i class="fas fa-user-plus"></i> إضافة اللاعب</button>'+
     '</div>'+
+    '</div>'+
+
+    /* زر حفظ ثابت أسفل الشاشة */
+    '<div style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid #e2e8f0;padding:12px 16px;z-index:500;box-shadow:0 -4px 16px rgba(0,0,0,.08);">'+
+      '<button class="btn btn-red" id="saveBtn" onclick="submitPlayer()" style="margin:0;font-size:15px;padding:14px;">'+
+        '<i class="fas fa-save"></i> حفظ وإضافة اللاعب'+
+      '</button>'+
     '</div>';
 }
 
-function previewPlayerPhoto(input){
+/* ────── محرر الصورة (اسحب + اقرص) ────── */
+function openPhotoCropper(input){
   var file = input.files[0];
   if(!file) return;
   var reader = new FileReader();
-  reader.onload = function(e){
-    // ضغط الصورة إلى 200x200 بجودة 80%
-    var img = new Image();
-    img.onload = function(){
-      var MAX = 200;
-      var canvas = document.createElement('canvas');
-      var ratio = Math.min(MAX/img.width, MAX/img.height);
-      canvas.width  = Math.round(img.width  * ratio);
-      canvas.height = Math.round(img.height * ratio);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      var compressed = canvas.toDataURL('image/jpeg', 0.8);
-      window._playerPhoto = compressed;
-      var box = document.getElementById('photoPreview');
-      if(box) box.innerHTML = '<img src="'+compressed+'" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid #d4af37;">';
-    };
-    img.src = e.target.result;
-  };
+  reader.onload = function(e){ showPhotoCropper(e.target.result); };
   reader.readAsDataURL(file);
 }
 
-function previewPlayerDoc(input){
-  var file = input.files[0];
+function showPhotoCropper(src){
+  var SZ = 240;
+  var ov = document.createElement('div');
+  ov.id = 'cropModal';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-family:Cairo,sans-serif;direction:rtl;';
+  ov.innerHTML =
+    '<div style="color:#d4af37;font-size:15px;font-weight:900;margin-bottom:18px;">📷 اضبط الصورة</div>'+
+    '<div id="czn" style="position:relative;width:'+SZ+'px;height:'+SZ+'px;border-radius:50%;overflow:hidden;border:4px solid #d4af37;background:#0f172a;touch-action:none;">'+
+      '<img id="cimg" src="'+src+'" style="position:absolute;transform-origin:0 0;" draggable="false">'+
+    '</div>'+
+    '<div style="color:rgba(255,255,255,.45);font-size:11px;margin:14px 0;text-align:center;">اسحب بإصبع · اقرص بإصبعين للتكبير</div>'+
+    '<div style="display:flex;gap:12px;">'+
+      '<button id="cropOk" style="background:#d4af37;color:#0f172a;border:none;border-radius:12px;padding:13px 32px;font-size:14px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">✅ تأكيد</button>'+
+      '<button onclick="document.getElementById(\'cropModal\').remove()" style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:12px;padding:13px 24px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">إلغاء</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+
+  var img = document.getElementById('cimg');
+  var czn = document.getElementById('czn');
+  var tx=0, ty=0, sc=1, minSc=1;
+
+  img.onload = function(){
+    minSc = Math.max(SZ/img.naturalWidth, SZ/img.naturalHeight);
+    sc = minSc;
+    tx = (SZ - img.naturalWidth*sc)/2;
+    ty = (SZ - img.naturalHeight*sc)/2;
+    applyT();
+  };
+  if(img.complete && img.naturalWidth) img.onload();
+  function applyT(){ img.style.transform='translate('+tx+'px,'+ty+'px) scale('+sc+')'; }
+
+  /* لمس (سحب + قرص) */
+  var lx=0, ly=0, ltx=0, lty=0, ld=0, ls=1;
+  czn.addEventListener('touchstart',function(e){
+    e.preventDefault();
+    if(e.touches.length===1){ lx=e.touches[0].clientX; ly=e.touches[0].clientY; ltx=tx; lty=ty; }
+    else if(e.touches.length===2){
+      ld=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      ls=sc; ltx=tx; lty=ty;
+    }
+  },{passive:false});
+  czn.addEventListener('touchmove',function(e){
+    e.preventDefault();
+    if(e.touches.length===1){
+      tx=ltx+(e.touches[0].clientX-lx);
+      ty=lty+(e.touches[0].clientY-ly);
+      applyT();
+    } else if(e.touches.length===2 && ld){
+      var d=Math.hypot(e.touches[1].clientX-e.touches[0].clientX,e.touches[1].clientY-e.touches[0].clientY);
+      sc=Math.max(minSc,ls*(d/ld));
+      tx=SZ/2-(SZ/2-ltx)*(sc/ls);
+      ty=SZ/2-(SZ/2-lty)*(sc/ls);
+      applyT();
+    }
+  },{passive:false});
+
+  /* ماوس (ديسكتوب) */
+  var md=false, mx0, my0, mtx, mty;
+  czn.addEventListener('mousedown',function(e){md=true;mx0=e.clientX;my0=e.clientY;mtx=tx;mty=ty;});
+  document.addEventListener('mousemove',function(e){if(!md)return;tx=mtx+(e.clientX-mx0);ty=mty+(e.clientY-my0);applyT();});
+  document.addEventListener('mouseup',function(){md=false;});
+
+  /* تأكيد */
+  document.getElementById('cropOk').onclick=function(){
+    var c=document.createElement('canvas'); c.width=SZ; c.height=SZ;
+    var ctx=c.getContext('2d');
+    ctx.beginPath(); ctx.arc(SZ/2,SZ/2,SZ/2,0,Math.PI*2); ctx.clip();
+    ctx.drawImage(img,tx,ty,img.naturalWidth*sc,img.naturalHeight*sc);
+    var res=c.toDataURL('image/jpeg',0.85);
+    window._playerPhoto=res;
+    // تحديث معاينة الصورة في النموذج
+    var box=document.getElementById('photoPreview');
+    if(box){
+      box.style.border='3px solid #d4af37';
+      box.innerHTML='<img src="'+res+'" style="width:100%;height:100%;object-fit:cover;">';
+    }
+    var eb=document.getElementById('photoEditBtn');
+    if(eb) eb.style.display='block';
+    ov.remove();
+  };
+}
+
+function loadPlayerDoc(input){
+  var file=input.files[0];
   if(!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e){
-    var img = new Image();
-    img.onload = function(){
-      var MAX = 600;
-      var canvas = document.createElement('canvas');
-      var ratio = Math.min(MAX/img.width, MAX/img.height, 1);
-      canvas.width  = Math.round(img.width  * ratio);
-      canvas.height = Math.round(img.height * ratio);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      var compressed = canvas.toDataURL('image/jpeg', 0.75);
-      window._playerDoc = compressed;
-      var box = document.getElementById('docPreview');
-      if(box) box.innerHTML = '<img src="'+compressed+'" style="max-width:100%;max-height:100px;border-radius:8px;border:2px solid #fecaca;">';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var MAX=800, ratio=Math.min(MAX/img.width,MAX/img.height,1);
+      var c=document.createElement('canvas');
+      c.width=Math.round(img.width*ratio); c.height=Math.round(img.height*ratio);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      var comp=c.toDataURL('image/jpeg',0.75);
+      window._playerDoc=comp;
+      var box=document.getElementById('docPreview');
+      var hint=document.getElementById('docHint');
+      if(box) box.innerHTML='<img src="'+comp+'" style="max-width:100%;max-height:120px;border-radius:8px;">';
+      if(hint) hint.textContent='✅ تم رفع الوثيقة — اضغط لتغييرها';
     };
-    img.src = e.target.result;
+    img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
@@ -1039,6 +1118,7 @@ function submitPlayer() {
   var nat    = (document.getElementById('pNat').value||'').trim();
   var phone  = (document.getElementById('pPhone').value||'').trim();
   var health = (document.getElementById('pHealth').value||'').trim();
+  var jersey = (document.getElementById('pJersey').value||'').trim();
   var acadId = sessionStorage.getItem('kaasAcadId');
   var acadName = sessionStorage.getItem('kaasAcadName');
   var errEl  = document.getElementById('pErr');
@@ -1050,8 +1130,8 @@ function submitPlayer() {
   var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
   if(cats.indexOf(catId)===-1){errEl.textContent='أكاديميتك غير مسجلة في فئة هذا اللاعب';errEl.style.display='block';return;}
 
-  var btn = document.querySelector('.btn-red');
-  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإضافة...';
+  var btn = document.getElementById('saveBtn');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
 
   var playerId = 'PL'+Date.now().toString().slice(-8);
   var photo = window._playerPhoto || '';
@@ -1065,13 +1145,13 @@ function submitPlayer() {
     id:playerId,
     academy_id:acadId, academy_name:acadName,
     name:name, birth:birth, nationality:nat,
-    phone:phone, health:health||'لا يوجد',
+    jersey:jersey||'', phone:phone, health:health||'لا يوجد',
     cat_id:catId, cat_name:getCatInfo(catId).name,
     has_photo: photo?'نعم':'لا',
     has_doc:   doc?'نعم':'لا',
     date:new Date().toLocaleDateString('ar')
   }).then(function(){
-    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, catId:catId, acadId:acadId, acadName:acadName, photo:photo});
+    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, jersey:jersey, catId:catId, acadId:acadId, acadName:acadName, photo:photo});
   });
 }
 
@@ -1113,7 +1193,8 @@ function showKaasCard(p) {
           '<div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;">تاريخ الميلاد</div>'+
           '<div style="font-size:11px;font-weight:700;color:#fff;">'+birthFormatted+'</div>'+
         '</div>'+
-        '<div id="kaasCardQR" style="background:#fff;padding:3px;border-radius:6px;border:2px solid var(--gold);"></div>'+
+        (p.jersey?'<div style="text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,.4);font-weight:700;">القميص</div><div style="font-size:22px;font-weight:900;color:var(--gold);">#'+p.jersey+'</div></div>':
+         '<div id="kaasCardQR" style="background:#fff;padding:3px;border-radius:6px;border:2px solid var(--gold);"></div>')+
       '</div>'+
       '<div style="background:linear-gradient(90deg,var(--red),#7a0f12);padding:6px 16px;text-align:center;">'+
         '<div style="font-size:8px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:2px;">KAAS · كأس العرب للأكاديميات · 2025</div>'+
