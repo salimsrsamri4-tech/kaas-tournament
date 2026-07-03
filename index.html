@@ -840,6 +840,7 @@ function renderAcadDashboard() {
       '</div>'+
       '<div class="section">'+
         '<button class="btn btn-gold" onclick="go(\'add_player\')"><i class="fas fa-user-plus"></i> إضافة لاعب جديد / بديل</button>'+
+        '<button class="btn" onclick="shareRegLink()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;margin-top:8px;"><i class="fas fa-link"></i> مشاركة رابط التسجيل للأولياء</button>'+
         (players.length>0?
           '<button class="btn" onclick="downloadKaasCards()" style="background:linear-gradient(135deg,#d4af37,#b8960c);color:#fff;margin-top:8px;"><i class="fas fa-download"></i> تحميل البطاقات (PNG)</button>'+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
@@ -893,6 +894,9 @@ function renderAddPlayer() {
   var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
   if(!id){go('acad_login');return;}
 
+  window._playerPhoto = null;
+  window._playerDoc   = null;
+
   document.getElementById('app').innerHTML =
     '<div style="background:linear-gradient(135deg,#7a0f12,var(--red));padding:24px 16px 18px;text-align:center;color:#fff;">'+
       '<button onclick="go(\'acad_dashboard\')" style="position:absolute;right:16px;top:16px;background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;margin-top:56px;">← رجوع</button>'+
@@ -901,6 +905,18 @@ function renderAddPlayer() {
     '</div>'+
     '<div class="section">'+
     '<div class="card">'+
+
+      /* صورة اللاعب */
+      '<div class="mb">'+
+        '<label class="lbl"><i class="fas fa-camera" style="color:var(--green)"></i> صورة اللاعب بالزي الرياضي</label>'+
+        '<div onclick="document.getElementById(\'pPhotoInput\').click()" id="photoPreviewBox" style="border:2px dashed #d4af37;border-radius:12px;padding:20px;text-align:center;cursor:pointer;background:#f8fdf8;margin-bottom:4px;">'+
+          '<div id="photoPreview" style="font-size:28px;color:#94a3b8;">📷</div>'+
+          '<div style="font-size:11px;color:#64748b;margin-top:4px;">اضغط لاختيار صورة</div>'+
+        '</div>'+
+        '<input type="file" id="pPhotoInput" accept="image/*" capture="environment" style="display:none" onchange="previewPlayerPhoto(this)">'+
+      '</div>'+
+
+      /* البيانات الأساسية */
       '<div class="mb"><label class="lbl">اسم اللاعب الكامل *</label><input class="inp" id="pName" type="text" placeholder="الاسم الثلاثي أو الرباعي"></div>'+
       '<div class="r2 mb">'+
         '<div><label class="lbl">تاريخ الميلاد *</label><input class="inp" id="pBirth" type="date" onchange="checkPlayerCat()"></div>'+
@@ -909,10 +925,45 @@ function renderAddPlayer() {
       '<div id="catResult" style="display:none;margin-bottom:12px;"></div>'+
       '<div class="mb"><label class="lbl">رقم الهاتف (اختياري)</label><input class="inp" id="pPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
       '<div class="mb"><label class="lbl">ملاحظات صحية</label><input class="inp" id="pHealth" type="text" placeholder="لا يوجد"></div>'+
+
+      /* وثيقة اللاعب */
+      '<div class="mb">'+
+        '<label class="lbl"><i class="fas fa-id-card" style="color:var(--red)"></i> وثيقة اللاعب (بطاقة / شهادة ميلاد)</label>'+
+        '<div onclick="document.getElementById(\'pDocInput\').click()" id="docPreviewBox" style="border:2px dashed #b81d22;border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:#fff8f8;margin-bottom:4px;">'+
+          '<div id="docPreview" style="font-size:28px;color:#94a3b8;">📄</div>'+
+          '<div style="font-size:11px;color:#64748b;margin-top:4px;">اضغط لاختيار الوثيقة (صورة)</div>'+
+        '</div>'+
+        '<input type="file" id="pDocInput" accept="image/*" capture="environment" style="display:none" onchange="previewPlayerDoc(this)">'+
+      '</div>'+
+
       '<div id="pErr" style="display:none;" class="err"></div>'+
       '<button class="btn btn-red" onclick="submitPlayer()"><i class="fas fa-user-plus"></i> إضافة اللاعب</button>'+
     '</div>'+
     '</div>';
+}
+
+function previewPlayerPhoto(input){
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    window._playerPhoto = e.target.result;
+    var box = document.getElementById('photoPreview');
+    if(box) box.innerHTML = '<img src="'+e.target.result+'" style="width:90px;height:90px;object-fit:cover;border-radius:50%;border:3px solid #d4af37;">';
+  };
+  reader.readAsDataURL(file);
+}
+
+function previewPlayerDoc(input){
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    window._playerDoc = e.target.result;
+    var box = document.getElementById('docPreview');
+    if(box) box.innerHTML = '<img src="'+e.target.result+'" style="max-width:100%;max-height:100px;border-radius:8px;border:2px solid #fecaca;">';
+  };
+  reader.readAsDataURL(file);
 }
 
 function checkPlayerCat() {
@@ -955,16 +1006,29 @@ function submitPlayer() {
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإضافة...';
 
   var playerId = 'PL'+Date.now().toString().slice(-8);
+  var photo = window._playerPhoto || '';
+  var doc   = window._playerDoc   || '';
+
+  // حفظ الصورة والوثيقة محلياً (base64)
+  if(photo) { try{ localStorage.setItem('kaasPhoto_'+playerId, photo); }catch(e){} }
+  if(doc)   { try{ localStorage.setItem('kaasDoc_'+playerId,   doc);   }catch(e){} }
+
   apiAppend('اللاعبون',{
     id:playerId,
     academy_id:acadId, academy_name:acadName,
     name:name, birth:birth, nationality:nat,
     phone:phone, health:health||'لا يوجد',
     cat_id:catId, cat_name:getCatInfo(catId).name,
+    has_photo: photo?'نعم':'لا',
+    has_doc:   doc?'نعم':'لا',
     date:new Date().toLocaleDateString('ar')
   }).then(function(){
-    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, catId:catId, acadId:acadId, acadName:acadName});
+    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, catId:catId, acadId:acadId, acadName:acadName, photo:photo});
   });
+}
+
+function getPlayerPhoto(pid){
+  try{ return localStorage.getItem('kaasPhoto_'+pid)||''; }catch(e){ return ''; }
 }
 
 function showKaasCard(p) {
@@ -972,6 +1036,10 @@ function showKaasCard(p) {
   var catColor = ci ? ci.color : '#b81d22';
   var birthFormatted = p.birth ? new Date(p.birth).toLocaleDateString('ar-SA') : '';
   var initials = p.name.trim().split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('');
+  var photo = p.photo || getPlayerPhoto(p.id) || '';
+  var avatarHtml = photo
+    ? '<img src="'+photo+'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);flex-shrink:0;">'
+    : '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,'+catColor+',#0f172a);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;font-weight:900;color:#fff;">'+initials+'</div>';
 
   var cardHtml =
     '<div id="kaasPlayerCard" style="width:300px;margin:0 auto;border-radius:16px;overflow:hidden;border:3px solid var(--gold);font-family:Cairo,sans-serif;direction:rtl;box-shadow:0 8px 32px rgba(0,0,0,.3);">'+
@@ -981,7 +1049,7 @@ function showKaasCard(p) {
         '<div style="height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin-top:10px;"></div>'+
       '</div>'+
       '<div style="background:linear-gradient(160deg,#1e293b,#0f172a);padding:16px;display:flex;align-items:center;gap:14px;">'+
-        '<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,'+catColor+',#0f172a);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;font-weight:900;color:#fff;">'+initials+'</div>'+
+        avatarHtml+
         '<div style="flex:1;min-width:0;">'+
           '<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+p.name+'</div>'+
           '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:3px;">'+p.acadName+'</div>'+
@@ -1076,6 +1144,10 @@ function buildKaasCardHTML(p, num){
   var catColor = catColors[p.cat_id||p.catId||''] || '#1b5e2e';
   var initials = (p.name||'').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('');
   var birthFormatted = p.birth ? p.birth.replace(/-/g,'/') : '';
+  var photo = getPlayerPhoto(p.id||p.playerId||'');
+  var avatarHtml = photo
+    ? '<img src="'+photo+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid #d4af37;flex-shrink:0;">'
+    : '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,'+catColor+',#0f172a);border:2px solid #d4af37;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;font-weight:900;color:#fff;">'+initials+'</div>';
   return '<div style="width:300px;margin:0 auto 14px;border-radius:16px;overflow:hidden;border:2px solid var(--gold,#d4af37);font-family:Cairo,sans-serif;direction:rtl;background:#0f172a;">'+
     '<div style="background:linear-gradient(145deg,#0a0f1e,#1e293b);padding:10px 14px 8px;text-align:center;">'+
       '<div style="font-size:7px;color:#d4af37;font-weight:900;letter-spacing:2px;margin-bottom:2px;">KAAS TOURNAMENT 2025/2026</div>'+
@@ -1083,7 +1155,7 @@ function buildKaasCardHTML(p, num){
       '<div style="height:1px;background:linear-gradient(90deg,transparent,#d4af37,transparent);margin-top:8px;"></div>'+
     '</div>'+
     '<div style="background:linear-gradient(160deg,#1e293b,#0f172a);padding:14px;display:flex;align-items:center;gap:12px;">'+
-      '<div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,'+catColor+',#0f172a);border:2px solid #d4af37;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;font-weight:900;color:#fff;">'+initials+'</div>'+
+      avatarHtml+
       '<div style="flex:1;">'+
         '<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+p.name+'</div>'+
         '<div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:2px;">'+(p.academy_name||p.acadName||'')+'</div>'+
@@ -1628,9 +1700,66 @@ function sendMatchListWA(){
 }
 
 // ════════════════════════════════════════
+// رابط تسجيل الأولياء
+// ════════════════════════════════════════
+function shareRegLink(){
+  var id   = sessionStorage.getItem('kaasAcadId');
+  var name = sessionStorage.getItem('kaasAcadName');
+  if(!id){ alert('يجب تسجيل الدخول أولاً'); return; }
+  var base = location.href.split('?')[0];
+  var link = base + '?acad=' + id;
+  var msg  = '🏆 *' + CONFIG.TOURNAMENT_NAME + '*\n\n' +
+             'رابط تسجيل لاعبي أكاديمية *' + name + '*\n\n' +
+             '👇 اضغط الرابط لتسجيل ابنك مباشرة:\n' + link + '\n\n' +
+             '✅ بعد التسجيل ستظهر بطاقة اللاعب للتحميل والمشاركة';
+
+  // محاولة نسخ الرابط
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(link).then(function(){}).catch(function(){});
+  }
+
+  // فتح واتساب مع الرسالة
+  window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ════════════════════════════════════════
+// معالجة رابط ولي الأمر ?acad=ACID
+// ════════════════════════════════════════
+function handleAcadLink(){
+  var params = new URLSearchParams(location.search);
+  var acadId = params.get('acad');
+  if(!acadId) return false;
+
+  // تحميل بيانات الأكاديمية من الشيت
+  showL();
+  apiGet('الأكاديميات').then(function(list){
+    var acad = (Array.isArray(list)?list:[]).find(function(a){ return String(a.id)===String(acadId); });
+    if(!acad){
+      document.getElementById('app').innerHTML =
+        '<div style="padding:40px;text-align:center;">'+
+        '<div style="font-size:40px;margin-bottom:12px;">❌</div>'+
+        '<div style="font-size:15px;font-weight:900;color:#b81d22;">الرابط غير صحيح</div>'+
+        '<div style="font-size:12px;color:#64748b;margin-top:6px;">تعذّر العثور على الأكاديمية</div>'+
+        '<button onclick="go(\'home\')" class="btn btn-red" style="margin-top:16px;">الصفحة الرئيسية</button>'+
+        '</div>';
+      return;
+    }
+    // تعيين session مؤقت
+    sessionStorage.setItem('kaasAcadId',   acad.id   || acadId);
+    sessionStorage.setItem('kaasAcadName', acad.name || '');
+    sessionStorage.setItem('kaasAcadCats', acad.cats || '');
+    // عرض نموذج إضافة لاعب مباشرة
+    go('add_player');
+  }).catch(function(){
+    go('home');
+  });
+  return true;
+}
+
+// ════════════════════════════════════════
 // البدء
 // ════════════════════════════════════════
-go('home');
+if(!handleAcadLink()) go('home');
 </script>
 </body>
 </html>
