@@ -1632,12 +1632,27 @@ function renderAdminPlayers() {
           '<div style="font-size:15px;font-weight:900;">جميع اللاعبين</div>'+
           '<div style="font-size:10px;opacity:.6;">'+players.length+' لاعب · '+acadNames.length+' أكاديمية</div>'+
         '</div>'+
+      '</div>'+
+      /* شريط الفرز */
+      '<div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">'+
+        '<div style="flex:1;min-width:160px;position:relative;">'+
+          '<i class="fas fa-search" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:12px;"></i>'+
+          '<input id="apSearch" type="text" placeholder="بحث باسم اللاعب أو الأكاديمية..." oninput="applyAdminFilter()" '+
+            'style="width:100%;padding:9px 32px 9px 10px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;font-family:Cairo,sans-serif;outline:none;background:#fff;direction:rtl;box-sizing:border-box;">'+
+        '</div>'+
+        '<select id="apCat" onchange="applyAdminFilter()" '+
+          'style="padding:9px 10px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;font-family:Cairo,sans-serif;outline:none;background:#fff;color:#0f172a;direction:rtl;">'+
+          '<option value="">كل الفئات</option>'+
+          CATEGORIES.map(function(c){ return '<option value="'+c.id+'">'+c.name+'</option>'; }).join('')+
+        '</select>'+
       '</div>';
+
+    window._adminAllPlayers = players;
 
     if(!players.length){
       html += '<div style="text-align:center;padding:60px 20px;color:#94a3b8;font-size:14px;">لا يوجد لاعبون بعد</div>';
     } else {
-      html += '<div class="section" style="padding-bottom:30px;">';
+      html += '<div id="adminPlayersList" class="section" style="padding-bottom:30px;">';
 
       acadNames.forEach(function(acadName){
         var acadPlayers = acadMap[acadName];
@@ -1682,6 +1697,71 @@ function renderAdminPlayers() {
 
     document.getElementById('app').innerHTML = html;
   });
+}
+
+function applyAdminFilter(){
+  var search = (document.getElementById('apSearch').value||'').trim().toLowerCase();
+  var catFilter = document.getElementById('apCat').value;
+  var players = (window._adminAllPlayers||[]).filter(function(p){
+    var matchCat  = !catFilter || p.cat_id === catFilter;
+    var matchText = !search ||
+      (p.name||'').toLowerCase().includes(search) ||
+      (p.academy_name||'').toLowerCase().includes(search);
+    return matchCat && matchText;
+  });
+
+  var catColors = {cat1:'#1b5e2e',cat2:'#b81d22',cat3:'#d4af37',cat4:'#0e7490',cat5:'#7c3aed'};
+  var acadMap = {};
+  players.forEach(function(p){
+    var key = p.academy_name||'غير محدد';
+    if(!acadMap[key]) acadMap[key]=[];
+    acadMap[key].push(p);
+  });
+  var acadNames = Object.keys(acadMap).sort();
+  var html = '';
+
+  if(!players.length){
+    html = '<div style="text-align:center;padding:40px;color:#94a3b8;">لا توجد نتائج</div>';
+  } else {
+    acadNames.forEach(function(acadName){
+      var acadPlayers = acadMap[acadName];
+      html +=
+        '<div style="background:#fff;border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);">'+
+          '<div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">'+
+            '<div style="font-size:13px;font-weight:900;color:#fff;">🏫 '+acadName+'</div>'+
+            '<span style="background:#d4af37;color:#0f172a;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;">'+acadPlayers.length+' لاعب</span>'+
+          '</div>';
+      CATEGORIES.forEach(function(c){
+        var cp = acadPlayers.filter(function(p){ return p.cat_id===c.id; });
+        if(!cp.length) return;
+        var cc = catColors[c.id]||'#1b5e2e';
+        html +=
+          '<div style="border-top:1px solid #f1f5f9;padding:8px 12px 4px;">'+
+            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'+
+              '<div style="width:4px;height:16px;border-radius:2px;background:'+cc+'"></div>'+
+              '<div style="font-size:11px;font-weight:900;color:'+cc+';">'+c.name+'</div>'+
+              '<span style="background:'+cc+'22;color:'+cc+';font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;">'+cp.length+'</span>'+
+            '</div>';
+        cp.forEach(function(p,i){
+          var birth=(p.birth||'').toString().split('T')[0];
+          html +=
+            '<div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid #f8fafc;">'+
+              '<div style="width:24px;height:24px;border-radius:50%;background:'+cc+';color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(i+1)+'</div>'+
+              '<div style="flex:1;min-width:0;">'+
+                '<div style="font-size:12px;font-weight:800;color:#0f172a;">'+p.name+'</div>'+
+                '<div style="font-size:10px;color:#64748b;">'+birth+(p.jersey?' · #'+p.jersey:'')+'</div>'+
+              '</div>'+
+              '<span style="background:'+cc+'22;color:'+cc+';font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;flex-shrink:0;">'+c.label+'</span>'+
+            '</div>';
+        });
+        html += '</div>';
+      });
+      html += '</div>';
+    });
+  }
+
+  var list = document.getElementById('adminPlayersList');
+  if(list) list.innerHTML = html;
 }
 
 function exportWA() {
