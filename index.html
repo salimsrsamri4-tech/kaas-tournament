@@ -1961,24 +1961,56 @@ function sharePlayerWhatsapp(pid){
   if(!p) return;
   var edit = {};
   try{ edit = JSON.parse(localStorage.getItem('kaasEdit_'+pid)||'{}'); }catch(e){}
-  var name    = edit.name    || p.name    || '';
-  var birth   = (edit.birth  || p.birth   || '').toString().split('T')[0];
-  var nat     = edit.nationality || p.nationality || p.nat || '';
-  var jersey  = edit.jersey  || p.jersey  || '';
-  var cat     = p.cat_name   || p.catName || '';
+  var name     = edit.name    || p.name    || '';
+  var birth    = (edit.birth  || p.birth   || '').toString().split('T')[0];
+  var nat      = edit.nationality || p.nationality || p.nat || '';
+  var jersey   = edit.jersey  || p.jersey  || '';
+  var cat      = p.cat_name   || p.catName || '';
   var acadName = sessionStorage.getItem('kaasAcadName') || p.academy_name || '';
   var msg =
     '🏆 *'+CONFIG.TOURNAMENT_NAME+'*\n'+
     '─────────────────\n'+
     '👤 *اللاعب:* '+name+'\n'+
     '🎂 *تاريخ الميلاد:* '+birth+'\n'+
-    (nat  ? '🌍 *الجنسية:* '+nat+'\n'  : '')+
-    (cat  ? '⚽ *الفئة:* '+cat+'\n'    : '')+
-    (jersey ? '👕 *رقم القميص:* #'+jersey+'\n' : '')+
+    (nat    ? '🌍 *الجنسية:* '+nat+'\n'       : '')+
+    (cat    ? '⚽ *الفئة:* '+cat+'\n'         : '')+
+    (jersey ? '👕 *رقم القميص:* #'+jersey+'\n': '')+
     '🏫 *الأكاديمية:* '+acadName+'\n'+
     '─────────────────\n'+
     '📋 *الموسم:* '+CONFIG.SEASON;
-  window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg), '_blank');
+
+  /* بناء بطاقة اللاعب وتحويلها إلى صورة PNG ثم مشاركتها */
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:340px;z-index:-1;background:#f1f5f9;padding:16px;';
+  wrap.innerHTML = buildKaasCardHTML(p, 1);
+  document.body.appendChild(wrap);
+
+  var loadingBtn = document.querySelector('[onclick="sharePlayerWhatsapp(\''+pid+'\')"]');
+  if(loadingBtn){ loadingBtn.disabled=true; loadingBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i>'; }
+
+  setTimeout(function(){
+    html2canvas(wrap, {scale:2, useCORS:true, backgroundColor:'#f1f5f9', logging:false}).then(function(canvas){
+      document.body.removeChild(wrap);
+      if(loadingBtn){ loadingBtn.disabled=false; loadingBtn.innerHTML='<i class="fab fa-whatsapp"></i> واتساب'; }
+
+      canvas.toBlob(function(blob){
+        var file = new File([blob], 'بطاقة-'+name+'.png', {type:'image/png'});
+        if(navigator.canShare && navigator.canShare({files:[file]})){
+          navigator.share({files:[file], text:msg}).catch(function(){
+            /* fallback: واتساب نص فقط */
+            window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
+          });
+        } else {
+          /* fallback للمتصفحات التي لا تدعم share */
+          window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
+        }
+      }, 'image/png');
+    }).catch(function(){
+      document.body.removeChild(wrap);
+      if(loadingBtn){ loadingBtn.disabled=false; loadingBtn.innerHTML='<i class="fab fa-whatsapp"></i> واتساب'; }
+      window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(msg),'_blank');
+    });
+  }, 200);
 }
 
 function deleteKaasPlayer(pid, pname){
