@@ -340,19 +340,30 @@ function getCatInfo(catId){
 // التواصل مع Google Sheets
 // ════════════════════════════════════════
 function apiCall(action, data) {
-  if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') {
-    return Promise.resolve({status:'demo'});
+  // للتوافق مع الكود القديم
+  if(data && data.sheet && data.data) {
+    return apiAppend(data.sheet, Array.isArray(data.data)?data.data[0]:data.data);
   }
+  return apiAppend(
+    action==='registerAcademy'?'الأكاديميات':action==='addPlayer'?'اللاعبون':'رسائل البطولة',
+    data
+  );
+}
+
+function apiAppend(sheet, rowObj) {
+  if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') return Promise.resolve({status:'demo'});
   return fetch(CONFIG.GAS_URL, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(Object.assign({action:action}, data))
-  }).then(function(r){return r.json();}).catch(function(){return {status:'error'};});
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({action:'append', sheet:sheet, data:[rowObj]})
+  }).then(function(){ return {status:'ok'}; })
+    .catch(function(){ return {status:'error'}; });
 }
 
 function apiGet(sheet) {
   if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') return getDemoData(sheet);
-  return fetch(CONFIG.GAS_URL+'?sheet='+encodeURIComponent(sheet))
+  return fetch(CONFIG.GAS_URL+'?sheet='+encodeURIComponent(sheet)+'&nocache='+Date.now())
     .then(function(r){return r.json();}).catch(function(){return [];});
 }
 
@@ -713,10 +724,10 @@ function submitAcadReg() {
   var btn = document.querySelector('.btn-red');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
 
-  apiCall('registerAcademy',{
+  apiAppend('الأكاديميات',{
     id:id, name:name, city:city, country:country,
     coach:coach, phone:phone, email:email,
-    cats:cats.join(','), pin:pin,
+    cats:cats.join(','), pin:pin, players:'0',
     date: new Date().toLocaleDateString('ar')
   }).then(function(){
     document.getElementById('app').innerHTML =
@@ -936,7 +947,7 @@ function submitPlayer() {
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإضافة...';
 
   var playerId = 'PL'+Date.now().toString().slice(-8);
-  apiCall('addPlayer',{
+  apiAppend('اللاعبون',{
     id:playerId,
     academy_id:acadId, academy_name:acadName,
     name:name, birth:birth, nationality:nat,
@@ -1382,7 +1393,7 @@ function submitAcadMessage(acid,aname){
   var row={'التاريخ':new Date().toLocaleString('ar-SA'),'النوع':type,'اسم الأكاديمية':aname||acid,'اسم المسؤول':mgr,'الرسالة':text,'الحالة':'جديد'};
   var btn=document.querySelector('#app button[onclick*="submitAcadMessage"]');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';}
-  apiCall('append',{sheet:'رسائل البطولة',data:[row]}).then(function(){
+  apiAppend('رسائل البطولة', row).then(function(){
     var res=document.getElementById('afbRes');
     if(res){res.style.display='block';res.innerHTML=
       '<div style="background:#ecfdf5;border:1.5px solid #16a34a;border-radius:12px;padding:16px;text-align:center;">'+
