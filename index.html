@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>KAAS — كأس العرب للأكاديميات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Cairo',sans-serif;background:#f1f5f9;color:#0f172a;direction:rtl;}
+:root{--red:#b81d22;--gold:#d4af37;--dark:#0f172a;}
+
+/* شريط التنقل */
+.navbar{background:linear-gradient(135deg,#0a0f1e,#1e293b);padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:2px solid var(--gold);}
+.nav-brand{display:flex;align-items:center;gap:10px;}
+.nav-logo{width:36px;height:36px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;}
+.nav-title{font-size:13px;font-weight:900;color:#fff;line-height:1.2;}
+.nav-sub{font-size:9px;color:var(--gold);font-weight:700;letter-spacing:.5px;}
+.nav-btns{display:flex;gap:8px;}
+.nav-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;}
+.nav-btn.gold{background:var(--gold);border-color:var(--gold);color:var(--dark);}
+
+/* المحتوى */
+#app{margin-top:56px;min-height:calc(100vh - 56px);}
+
+/* البطل */
+.hero{background:linear-gradient(160deg,#0a0f1e 0%,#1a0a0a 40%,#7a0f12 100%);padding:48px 20px 40px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='28'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+.hero-badge{display:inline-block;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.4);color:var(--gold);font-size:11px;font-weight:800;padding:4px 14px;border-radius:20px;margin-bottom:16px;letter-spacing:.5px;}
+.hero h1{font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;position:relative;}
+.hero h1 span{color:var(--gold);}
+.hero p{font-size:12px;color:rgba(255,255,255,.65);font-weight:600;margin-bottom:24px;position:relative;}
+.hero-stats{display:flex;justify-content:center;gap:24px;position:relative;}
+.hstat{text-align:center;}
+.hstat-n{font-size:22px;font-weight:900;color:var(--gold);}
+.hstat-l{font-size:10px;color:rgba(255,255,255,.5);font-weight:600;}
+
+/* الأقسام */
+.section{padding:16px;}
+.sec-title{font-size:14px;font-weight:900;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:8px;border-bottom:2px solid #e2e8f0;padding-bottom:8px;}
+
+/* بطاقات الفئات */
+.cats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.cat-card{background:#fff;border-radius:14px;padding:14px;border-top:3px solid var(--red);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.cat-name{font-size:12px;font-weight:900;color:var(--dark);margin-bottom:4px;}
+.cat-years{font-size:10px;color:#64748b;font-weight:600;line-height:1.6;}
+.cat-extra{font-size:9px;color:var(--gold);font-weight:700;margin-top:4px;}
+
+/* بطاقات الأكاديميات */
+.acad-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:12px;}
+.acad-avatar{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--red),#7a0f12);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;flex-shrink:0;}
+.acad-info{flex:1;}
+.acad-name{font-size:13px;font-weight:900;color:var(--dark);}
+.acad-meta{font-size:10px;color:#64748b;font-weight:600;margin-top:2px;}
+.acad-cats{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.cat-pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f1f5f9;color:#475569;}
+
+/* الأزرار */
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;text-align:center;}
+.btn-red{background:linear-gradient(135deg,var(--red),#7a0f12);color:#fff;}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#b8960c);color:var(--dark);}
+.btn-dark{background:linear-gradient(135deg,var(--dark),#1e293b);color:#fff;}
+.btn-light{background:#f1f5f9;color:#475569;}
+.btn-green{background:linear-gradient(135deg,#128c7e,#25d366);color:#fff;}
+.btn+.btn{margin-top:8px;}
+
+/* النماذج */
+.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);margin-bottom:12px;}
+.lbl{display:block;font-size:11px;font-weight:800;color:#374151;margin-bottom:5px;}
+.inp{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 13px;font-size:13px;font-family:'Cairo',sans-serif;color:var(--dark);background:#fff;outline:none;transition:border .2s;}
+.inp:focus{border-color:var(--red);}
+.mb{margin-bottom:12px;}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.err{color:#b91c1c;font-size:11px;font-weight:700;margin-top:4px;}
+.ok{color:#16a34a;font-size:11px;font-weight:700;margin-top:4px;}
+
+/* التنبيهات */
+.al{border-radius:10px;padding:10px 14px;font-size:12px;font-weight:700;margin-bottom:10px;}
+.al-ok{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;}
+.al-err{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}
+.al-warn{background:#fffbeb;color:#d97706;border:1px solid #fde68a;}
+
+/* لودينج */
+.ldg{display:flex;justify-content:center;padding:40px;}
+.sp{width:32px;height:32px;border:3px solid #e2e8f0;border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* الموديل */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.modal{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:20px 16px 32px;max-height:85vh;overflow-y:auto;}
+.modal-handle{width:40px;height:4px;background:#e2e8f0;border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:16px;font-weight:900;color:var(--dark);margin-bottom:16px;text-align:center;}
+
+/* بطاقة اللاعب */
+.player-card{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.player-num{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--dark);flex-shrink:0;}
+.player-info{flex:1;}
+.player-name{font-size:12px;font-weight:900;color:#fff;}
+.player-meta{font-size:10px;color:rgba(255,255,255,.55);font-weight:600;}
+.player-cat{font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;background:rgba(212,175,55,.2);color:var(--gold);}
+
+/* الشريط السفلي */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;display:flex;z-index:100;}
+.bn-btn{flex:1;padding:10px 4px;text-align:center;cursor:pointer;border:none;background:none;font-family:'Cairo',sans-serif;}
+.bn-icon{font-size:18px;display:block;margin-bottom:2px;}
+.bn-label{font-size:9px;color:#94a3b8;font-weight:700;}
+.bn-btn.active .bn-label{color:var(--red);}
+.bn-btn.active .bn-icon{filter:drop-shadow(0 0 4px var(--red));}
+#app{padding-bottom:64px;}
+
+/* شارة الحالة */
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:800;}
+.status-open{background:#dcfce7;color:#16a34a;}
+.status-closed{background:#fee2e2;color:#b91c1c;}
+
+/* قسم الفئة في إدارة الأكاديمية */
+.cat-section{background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px;border:1.5px solid #e2e8f0;}
+.cat-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.cat-count{background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;}
+</style>
+</head>
+<body>
+
+<!-- شريط التنقل -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">K</div>
+    <div>
+      <div class="nav-title">كأس العرب للأكاديميات</div>
+      <div class="nav-sub">KAAS TOURNAMENT</div>
+    </div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" onclick="go('admin_login')"><i class="fas fa-lock"></i> إدارة</button>
+    <button class="nav-btn gold" onclick="go('acad_login')"><i class="fas fa-sign-in-alt"></i> دخول الأكاديميات</button>
+  </div>
+</nav>
+
+<!-- الشريط السفلي -->
+<div class="bottom-nav">
+  <button class="bn-btn active" id="bn-home" onclick="go('home')">
+    <span class="bn-icon">🏆</span><span class="bn-label">الرئيسية</span>
+  </button>
+  <button class="bn-btn" id="bn-cats" onclick="go('categories')">
+    <span class="bn-icon">📋</span><span class="bn-label">الفئات</span>
+  </button>
+  <button class="bn-btn" id="bn-reg" onclick="go('acad_register')">
+    <span class="bn-icon">➕</span><span class="bn-label">تسجيل</span>
+  </button>
+  <button class="bn-btn" id="bn-acadlist" onclick="go('academies')">
+    <span class="bn-icon">🏫</span><span class="bn-label">الأكاديميات</span>
+  </button>
+</div>
+
+<div id="app"></div>
+
+<script>
+// ════════════════════════════════════════
+// الإعداد
+// ════════════════════════════════════════
+var CONFIG = {
+  GAS_URL: 'YOUR_GAS_URL_HERE', // ← ضع رابط Google Apps Script هنا
+  ADMIN_PASS: 'kaas2025',
+  TOURNAMENT_NAME: 'كأس العرب للأكاديميات',
+  SEASON: '2025/2026'
+};
+
+// الفئات العمرية
+var CATEGORIES = [
+  {
+    id:'cat1', name:'الفئة الأولى',
+    label:'U8/U9',
+    years:'2017 · 2018',
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2015',
+    color:'#3b82f6'
+  },
+  {
+    id:'cat2', name:'الفئة الثانية',
+    label:'U11/U12',
+    years:'2014 · 2015 (يناير–سبتمبر)',
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2013',
+    color:'#8b5cf6'
+  },
+  {
+    id:'cat3', name:'الفئة الثالثة',
+    label:'U13/U14',
+    years:'2012 · 2013 (يناير–سبتمبر)',
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2011',
+    color:'#f59e0b'
+  },
+  {
+    id:'cat4', name:'الفئة الرابعة',
+    label:'U15/U16',
+    years:'2010 · 2011 (يناير–سبتمبر)',
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2009',
+    color:'#10b981'
+  }
+];
+
+// ════════════════════════════════════════
+// التحقق من الفئة العمرية
+// ════════════════════════════════════════
+function getCategory(birthDateStr) {
+  var d = new Date(birthDateStr);
+  if(isNaN(d)) return null;
+  var y = d.getFullYear();
+  var m = d.getMonth() + 1; // 1-12
+
+  if(y===2017||y===2018) return 'cat1';
+  if(y===2015 && m>=10)  return 'cat1';
+  if(y===2015 || y===2014) return 'cat2';
+  if(y===2013 && m>=10)  return 'cat2';
+  if(y===2013 || y===2012) return 'cat3';
+  if(y===2011 && m>=10)  return 'cat3';
+  if(y===2011 || y===2010) return 'cat4';
+  if(y===2009 && m>=10)  return 'cat4';
+  return null;
+}
+
+function getCatInfo(catId){
+  return CATEGORIES.find(function(c){return c.id===catId;});
+}
+
+// ════════════════════════════════════════
+// التواصل مع Google Sheets
+// ════════════════════════════════════════
+function apiCall(action, data) {
+  if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') {
+    return Promise.resolve({status:'demo'});
+  }
+  return fetch(CONFIG.GAS_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify(Object.assign({action:action}, data))
+  }).then(function(r){return r.json();}).catch(function(){return {status:'error'};});
+}
+
+function apiGet(sheet) {
+  if(CONFIG.GAS_URL === 'YOUR_GAS_URL_HERE') return getDemoData(sheet);
+  return fetch(CONFIG.GAS_URL+'?sheet='+encodeURIComponent(sheet))
+    .then(function(r){return r.json();}).catch(function(){return [];});
+}
+
+// بيانات تجريبية
+function getDemoData(sheet) {
+  if(sheet==='الأكاديميات') return Promise.resolve([
+    {id:'AC001',name:'أكاديمية النجوم',city:'مسقط',coach:'أحمد السعيدي',phone:'91234567',pin:'1234',cats:'cat1,cat2,cat3',players:'12'},
+    {id:'AC002',name:'أكاديمية الفتح',city:'صلالة',coach:'محمد البلوشي',phone:'92345678',pin:'2345',cats:'cat2,cat4',players:'8'},
+    {id:'AC003',name:'نادي الشباب',city:'نزوى',coach:'سالم الحارثي',phone:'93456789',pin:'3456',cats:'cat1,cat3',players:'15'},
+  ]);
+  if(sheet==='اللاعبون') return Promise.resolve([]);
+  return Promise.resolve([]);
+}
+
+// ════════════════════════════════════════
+// التنقل
+// ════════════════════════════════════════
+var _currentPage = '';
+function go(page) {
+  _currentPage = page;
+  // تحديث الشريط السفلي
+  ['home','cats','reg','acadlist'].forEach(function(k){
+    var el = document.getElementById('bn-'+k);
+    if(el) el.classList.remove('active');
+  });
+  var map = {home:'bn-home',categories:'bn-cats',acad_register:'bn-reg',academies:'bn-acadlist'};
+  if(map[page]) { var el=document.getElementById(map[page]); if(el) el.classList.add('active'); }
+
+  var pages = {
+    home: renderHome,
+    categories: renderCategories,
+    acad_register: renderAcadRegister,
+    academies: renderAcademies,
+    acad_login: renderAcadLogin,
+    acad_dashboard: renderAcadDashboard,
+    add_player: renderAddPlayer,
+    admin_login: renderAdminLogin,
+    admin_panel: renderAdminPanel,
+    admin_players: renderAdminPlayers,
+  };
+  if(pages[page]) pages[page]();
+}
+
+function showL(){document.getElementById('app').innerHTML='<div class="ldg"><span class="sp"></span></div>';}
+
+// ════════════════════════════════════════
+// الرئيسية
+// ════════════════════════════════════════
+function renderHome() {
+  apiGet('الأكاديميات').then(function(acadList){
+    var total = acadList.length;
+    var totalPlayers = acadList.reduce(function(s,a){return s+parseInt(a.players||0);},0);
+    document.getElementById('app').innerHTML =
+      '<div class="hero">'+
+        '<div class="hero-badge">🏆 '+CONFIG.TOURNAMENT_NAME+'</div>'+
+        '<h1><span>KAAS</span> 2025</h1>'+
+        '<p>كأس العرب للأكاديميات · '+CONFIG.SEASON+'</p>'+
+        '<div class="hero-stats">'+
+          '<div class="hstat"><div class="hstat-n">'+total+'</div><div class="hstat-l">أكاديمية</div></div>'+
+          '<div class="hstat"><div class="hstat-n">'+totalPlayers+'</div><div class="hstat-l">لاعب</div></div>'+
+          '<div class="hstat"><div class="hstat-n">4</div><div class="hstat-l">فئات</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="section">'+
+        '<button class="btn btn-gold" onclick="go(\'acad_register\')"><i class="fas fa-plus-circle"></i> تسجيل أكاديميتك الآن</button>'+
+        '<button class="btn btn-dark" style="margin-top:8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول الأكاديميات المسجلة</button>'+
+      '</div>'+
+      '<div class="section">'+
+        '<div class="sec-title"><i class="fas fa-th" style="color:var(--gold)"></i> الفئات العمرية</div>'+
+        '<div class="cats-grid">'+
+          CATEGORIES.map(function(c){
+            return '<div class="cat-card" style="border-top-color:'+c.color+'">'+
+              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
+                '<div class="cat-name">'+c.name+'</div>'+
+                '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;background:'+c.color+'22;color:'+c.color+'">'+c.label+'</span>'+
+              '</div>'+
+              '<div class="cat-years">'+c.years+'</div>'+
+              '<div class="cat-extra">+ '+c.extra+'</div>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+      '</div>'+
+      (total > 0 ?
+      '<div class="section">'+
+        '<div class="sec-title"><i class="fas fa-shield-alt" style="color:var(--red)"></i> الأكاديميات المسجلة</div>'+
+        acadList.slice(0,5).map(function(a,i){
+          var initials = a.name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2);
+          return '<div class="acad-card">'+
+            '<div class="acad-avatar">'+initials+'</div>'+
+            '<div class="acad-info">'+
+              '<div class="acad-name">'+a.name+'</div>'+
+              '<div class="acad-meta"><i class="fas fa-map-marker-alt"></i> '+a.city+' · <i class="fas fa-users"></i> '+(a.players||0)+' لاعب</div>'+
+              '<div class="acad-cats">'+
+                (a.cats||'').split(',').filter(Boolean).map(function(c){
+                  var ci = getCatInfo(c.trim());
+                  return ci ? '<span class="cat-pill">'+ci.name+'</span>' : '';
+                }).join('')+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        }).join('')+
+        (total>5?'<div style="text-align:center;padding:8px;"><button class="btn btn-light" onclick="go(\'academies\')">عرض الكل ('+total+')</button></div>':'')+
+      '</div>' : '')+
+    '';
+  });
+}
+
+// ════════════════════════════════════════
+// الفئات
+// ════════════════════════════════════════
+function renderCategories() {
+  document.getElementById('app').innerHTML =
+    '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:32px 16px 24px;text-align:center;color:#fff;">'+
+      '<div style="font-size:32px;margin-bottom:8px;">📋</div>'+
+      '<div style="font-size:20px;font-weight:900;">الفئات العمرية</div>'+
+      '<div style="font-size:11px;opacity:.6;margin-top:4px;">قواعد الأهلية للمشاركة</div>'+
+    '</div>'+
+    '<div class="section">'+
+    CATEGORIES.map(function(c){
+      return '<div class="card" style="border-top:4px solid '+c.color+';margin-bottom:12px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+          '<div style="font-size:15px;font-weight:900;color:var(--dark)">'+c.name+'</div>'+
+          '<span style="font-size:11px;font-weight:800;padding:4px 12px;border-radius:12px;background:'+c.color+'22;color:'+c.color+'">'+c.label+'</span>'+
+        '</div>'+
+        '<div style="background:#f8fafc;border-radius:10px;padding:10px 12px;margin-bottom:8px;">'+
+          '<div style="font-size:10px;font-weight:800;color:#64748b;margin-bottom:4px;">✅ المواليد الأساسيون</div>'+
+          '<div style="font-size:13px;font-weight:900;color:var(--dark)">'+c.years+'</div>'+
+        '</div>'+
+        '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;">'+
+          '<div style="font-size:10px;font-weight:800;color:#d97706;margin-bottom:4px;">⭐ مسموح بهم أيضاً</div>'+
+          '<div style="font-size:12px;font-weight:700;color:#92400e">'+c.extra+'</div>'+
+        '</div>'+
+      '</div>';
+    }).join('')+
+    '<div class="al al-warn">'+
+      '<i class="fas fa-info-circle"></i> يتحقق النظام تلقائياً من تاريخ الميلاد عند إضافة كل لاعب'+
+    '</div>'+
+    '</div>';
+}
+
+// ════════════════════════════════════════
+// تسجيل أكاديمية جديدة
+// ════════════════════════════════════════
+function renderAcadRegister() {
+  document.getElementById('app').innerHTML =
+    '<div style="background:linear-gradient(135deg,#7a0f12,var(--red));padding:28px 16px 20px;text-align:center;color:#fff;">'+
+      '<div style="font-size:28px;margin-bottom:6px;">🏫</div>'+
+      '<div style="font-size:18px;font-weight:900;">تسجيل أكاديمية جديدة</div>'+
+      '<div style="font-size:11px;opacity:.65;margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+    '</div>'+
+    '<div class="section">'+
+    '<div class="card">'+
+      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-building" style="color:var(--red)"></i> بيانات الأكاديمية</div>'+
+      '<div class="mb"><label class="lbl">اسم الأكاديمية *</label><input class="inp" id="rAcadName" type="text" placeholder="مثال: أكاديمية النجوم" required></div>'+
+      '<div class="r2 mb">'+
+        '<div><label class="lbl">المدينة / الولاية *</label><input class="inp" id="rCity" type="text" placeholder="مسقط"></div>'+
+        '<div><label class="lbl">الدولة *</label><input class="inp" id="rCountry" type="text" placeholder="عُمان"></div>'+
+      '</div>'+
+      '<div class="mb"><label class="lbl">اسم المدرب أو المسؤول *</label><input class="inp" id="rCoach" type="text" placeholder="الاسم الكامل"></div>'+
+      '<div class="r2 mb">'+
+        '<div><label class="lbl">رقم الهاتف (واتساب) *</label><input class="inp" id="rPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
+        '<div><label class="lbl">البريد الإلكتروني</label><input class="inp" id="rEmail" type="email" placeholder="اختياري"></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-list-check" style="color:var(--gold)"></i> الفئات التي ستشارك فيها</div>'+
+      CATEGORIES.map(function(c){
+        return '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1.5px solid #e2e8f0;">'+
+          '<input type="checkbox" id="rCat_'+c.id+'" value="'+c.id+'" style="width:16px;height:16px;accent-color:var(--red);">'+
+          '<div>'+
+            '<div style="font-size:12px;font-weight:800;color:var(--dark)">'+c.name+' <span style="color:#94a3b8;font-weight:600;font-size:10px;">'+c.label+'</span></div>'+
+            '<div style="font-size:10px;color:#64748b">'+c.years+'</div>'+
+          '</div>'+
+        '</label>';
+      }).join('')+
+    '</div>'+
+    '<div class="card">'+
+      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-key" style="color:var(--red)"></i> كلمة المرور (PIN)</div>'+
+      '<div class="al al-warn" style="margin-bottom:12px;">سيُستخدم هذا الرمز لاحقاً عند إضافة لاعبين — احتفظ به</div>'+
+      '<div class="r2">'+
+        '<div><label class="lbl">PIN (4 أرقام) *</label><input class="inp" id="rPin" type="number" maxlength="4" placeholder="0000" max="9999" min="1000"></div>'+
+        '<div><label class="lbl">تأكيد PIN *</label><input class="inp" id="rPin2" type="number" placeholder="0000"></div>'+
+      '</div>'+
+      '<div id="rErr" style="display:none;" class="err"></div>'+
+    '</div>'+
+    '<button class="btn btn-red" onclick="submitAcadReg()"><i class="fas fa-paper-plane"></i> إرسال طلب التسجيل</button>'+
+    '<div style="height:20px;"></div>'+
+    '</div>';
+}
+
+function submitAcadReg() {
+  var name    = (document.getElementById('rAcadName').value||'').trim();
+  var city    = (document.getElementById('rCity').value||'').trim();
+  var country = (document.getElementById('rCountry').value||'').trim();
+  var coach   = (document.getElementById('rCoach').value||'').trim();
+  var phone   = (document.getElementById('rPhone').value||'').trim();
+  var email   = (document.getElementById('rEmail').value||'').trim();
+  var pin     = (document.getElementById('rPin').value||'').trim();
+  var pin2    = (document.getElementById('rPin2').value||'').trim();
+  var cats    = CATEGORIES.filter(function(c){return document.getElementById('rCat_'+c.id).checked;}).map(function(c){return c.id;});
+  var errEl   = document.getElementById('rErr');
+
+  errEl.style.display='none';
+  if(!name||!city||!country||!coach||!phone){errEl.textContent='الرجاء ملء جميع الحقول الإلزامية';errEl.style.display='block';return;}
+  if(!cats.length){errEl.textContent='اختر فئة عمرية واحدة على الأقل';errEl.style.display='block';return;}
+  if(pin.length!==4||isNaN(pin)){errEl.textContent='الرمز السري يجب أن يكون 4 أرقام';errEl.style.display='block';return;}
+  if(pin!==pin2){errEl.textContent='كلمة المرور غير متطابقة';errEl.style.display='block';return;}
+
+  var id = 'AC'+Date.now().toString().slice(-6);
+  var btn = document.querySelector('.btn-red');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
+
+  apiCall('registerAcademy',{
+    id:id, name:name, city:city, country:country,
+    coach:coach, phone:phone, email:email,
+    cats:cats.join(','), pin:pin,
+    date: new Date().toLocaleDateString('ar')
+  }).then(function(){
+    document.getElementById('app').innerHTML =
+      '<div style="text-align:center;padding:60px 20px;">'+
+        '<div style="font-size:64px;margin-bottom:16px;">🎉</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#16a34a;margin-bottom:6px;">تم التسجيل بنجاح!</div>'+
+        '<div style="font-size:13px;color:#64748b;margin-bottom:6px;">'+name+'</div>'+
+        '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin:20px auto;max-width:300px;">'+
+          '<div style="font-size:11px;color:#16a34a;font-weight:700;margin-bottom:6px;">رقم الأكاديمية</div>'+
+          '<div style="font-size:24px;font-weight:900;color:#0f172a;letter-spacing:2px;">'+id+'</div>'+
+          '<div style="font-size:10px;color:#64748b;margin-top:4px;">احتفظ بهذا الرقم وبالـ PIN</div>'+
+        '</div>'+
+        '<button class="btn btn-dark" style="max-width:300px;margin:0 auto 8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول لوحة التحكم</button>'+
+        '<button class="btn btn-light" style="max-width:300px;margin:0 auto;" onclick="go(\'home\')">العودة للرئيسية</button>'+
+      '</div>';
+    // حفظ في الجلسة
+    sessionStorage.setItem('kaasAcadId', id);
+    sessionStorage.setItem('kaasAcadName', name);
+    sessionStorage.setItem('kaasAcadPin', pin);
+  });
+}
+
+// ════════════════════════════════════════
+// دخول الأكاديميات
+// ════════════════════════════════════════
+function renderAcadLogin() {
+  document.getElementById('app').innerHTML =
+    '<div style="padding:40px 16px;max-width:360px;margin:0 auto;">'+
+      '<div style="text-align:center;margin-bottom:28px;">'+
+        '<div style="font-size:48px;margin-bottom:8px;">🔐</div>'+
+        '<div style="font-size:18px;font-weight:900;color:var(--dark)">دخول الأكاديميات</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+      '</div>'+
+      '<div class="card">'+
+        '<div class="mb"><label class="lbl">رقم الأكاديمية *</label><input class="inp" id="loginId" type="text" placeholder="AC000000" style="text-align:center;font-weight:900;font-size:16px;letter-spacing:2px;"></div>'+
+        '<div class="mb"><label class="lbl">كلمة المرور (PIN) *</label><input class="inp" id="loginPin" type="password" placeholder="••••" maxlength="4" style="text-align:center;font-weight:900;font-size:20px;letter-spacing:4px;" onkeydown="if(event.key===\'Enter\')doAcadLogin()"></div>'+
+        '<div id="loginErr" style="display:none;" class="err"></div>'+
+        '<button class="btn btn-red" onclick="doAcadLogin()"><i class="fas fa-sign-in-alt"></i> دخول</button>'+
+      '</div>'+
+      '<div style="text-align:center;margin-top:16px;">'+
+        '<span style="font-size:11px;color:#94a3b8;">لم تسجل بعد؟ </span>'+
+        '<button onclick="go(\'acad_register\')" style="background:none;border:none;color:var(--red);font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">سجّل أكاديميتك الآن</button>'+
+      '</div>'+
+    '</div>';
+  setTimeout(function(){var i=document.getElementById('loginId');if(i)i.focus();},300);
+}
+
+function doAcadLogin() {
+  var id  = (document.getElementById('loginId').value||'').trim().toUpperCase();
+  var pin = (document.getElementById('loginPin').value||'').trim();
+  var err = document.getElementById('loginErr');
+  err.style.display='none';
+  if(!id||!pin){err.textContent='أدخل رقم الأكاديمية والـ PIN';err.style.display='block';return;}
+  var btn = document.querySelector('#app .btn-red');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ التحقق...';
+
+  apiGet('الأكاديميات').then(function(list){
+    var acad = list.find(function(a){return a.id===id && String(a.pin)===String(pin);});
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> دخول';
+    if(!acad){err.textContent='رقم الأكاديمية أو الـ PIN غير صحيح';err.style.display='block';return;}
+    sessionStorage.setItem('kaasAcadId',id);
+    sessionStorage.setItem('kaasAcadName',acad.name);
+    sessionStorage.setItem('kaasAcadCats',acad.cats||'');
+    window._kaasAcad = acad;
+    go('acad_dashboard');
+  });
+}
+
+// ════════════════════════════════════════
+// لوحة تحكم الأكاديمية
+// ════════════════════════════════════════
+function renderAcadDashboard() {
+  var id   = sessionStorage.getItem('kaasAcadId');
+  var name = sessionStorage.getItem('kaasAcadName');
+  var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
+  if(!id){go('acad_login');return;}
+
+  showL();
+  apiGet('اللاعبون').then(function(all){
+    var players = all.filter(function(p){return p.academy_id===id;});
+    var byCat = {};
+    cats.forEach(function(c){byCat[c]=[];});
+    players.forEach(function(p){if(byCat[p.cat_id]!==undefined) byCat[p.cat_id].push(p);});
+
+    var html =
+      '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:20px 16px 16px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'+
+          '<div>'+
+            '<div style="font-size:16px;font-weight:900;color:#fff;">'+name+'</div>'+
+            '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:2px;">'+id+' · '+CONFIG.TOURNAMENT_NAME+'</div>'+
+          '</div>'+
+          '<button onclick="sessionStorage.clear();go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">خروج</button>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">'+
+          '<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:var(--gold)">'+players.length+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.5)">إجمالي اللاعبين</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:var(--gold)">'+cats.length+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.5)">الفئات</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.07);border-radius:10px;padding:10px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:#10b981">✓</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.5)">مسجل</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="section">'+
+        '<button class="btn btn-gold" onclick="go(\'add_player\')"><i class="fas fa-user-plus"></i> إضافة لاعب جديد</button>'+
+      '</div>'+
+      '<div class="section">'+
+        '<div class="sec-title"><i class="fas fa-users" style="color:var(--red)"></i> اللاعبون المسجلون</div>';
+
+    if(!players.length){
+      html += '<div style="text-align:center;padding:32px;color:#94a3b8;"><div style="font-size:32px;margin-bottom:8px;">👥</div>لم يُضف لاعبون بعد</div>';
+    } else {
+      cats.forEach(function(cid){
+        var ci = getCatInfo(cid);
+        if(!ci) return;
+        var cPlayers = byCat[cid]||[];
+        html += '<div class="cat-section">'+
+          '<div class="cat-header">'+
+            '<div style="font-size:12px;font-weight:900;color:var(--dark)">'+ci.name+' <span style="color:#94a3b8;font-size:10px;">'+ci.label+'</span></div>'+
+            '<span class="cat-count">'+cPlayers.length+' لاعب</span>'+
+          '</div>';
+        if(!cPlayers.length){
+          html += '<div style="font-size:11px;color:#94a3b8;text-align:center;padding:8px;">لا يوجد لاعبون في هذه الفئة</div>';
+        } else {
+          cPlayers.forEach(function(p,i){
+            html += '<div class="player-card">'+
+              '<div class="player-num">'+(i+1)+'</div>'+
+              '<div class="player-info">'+
+                '<div class="player-name">'+p.name+'</div>'+
+                '<div class="player-meta">'+p.birth+' · '+p.nationality+'</div>'+
+              '</div>'+
+              '<span class="player-cat">'+ci.label+'</span>'+
+            '</div>';
+          });
+        }
+        html += '</div>';
+      });
+    }
+    html += '</div>';
+    document.getElementById('app').innerHTML = html;
+  });
+}
+
+// ════════════════════════════════════════
+// إضافة لاعب
+// ════════════════════════════════════════
+function renderAddPlayer() {
+  var id   = sessionStorage.getItem('kaasAcadId');
+  var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
+  if(!id){go('acad_login');return;}
+
+  document.getElementById('app').innerHTML =
+    '<div style="background:linear-gradient(135deg,#7a0f12,var(--red));padding:24px 16px 18px;text-align:center;color:#fff;">'+
+      '<button onclick="go(\'acad_dashboard\')" style="position:absolute;right:16px;top:16px;background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;margin-top:56px;">← رجوع</button>'+
+      '<div style="font-size:28px;margin-bottom:6px;">⚽</div>'+
+      '<div style="font-size:16px;font-weight:900;">إضافة لاعب</div>'+
+    '</div>'+
+    '<div class="section">'+
+    '<div class="card">'+
+      '<div class="mb"><label class="lbl">اسم اللاعب الكامل *</label><input class="inp" id="pName" type="text" placeholder="الاسم الثلاثي أو الرباعي"></div>'+
+      '<div class="r2 mb">'+
+        '<div><label class="lbl">تاريخ الميلاد *</label><input class="inp" id="pBirth" type="date" onchange="checkPlayerCat()"></div>'+
+        '<div><label class="lbl">الجنسية *</label><input class="inp" id="pNat" type="text" placeholder="عُماني" value="عُماني"></div>'+
+      '</div>'+
+      '<div id="catResult" style="display:none;margin-bottom:12px;"></div>'+
+      '<div class="mb"><label class="lbl">رقم الهاتف (اختياري)</label><input class="inp" id="pPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
+      '<div class="mb"><label class="lbl">ملاحظات صحية</label><input class="inp" id="pHealth" type="text" placeholder="لا يوجد"></div>'+
+      '<div id="pErr" style="display:none;" class="err"></div>'+
+      '<button class="btn btn-red" onclick="submitPlayer()"><i class="fas fa-user-plus"></i> إضافة اللاعب</button>'+
+    '</div>'+
+    '</div>';
+}
+
+function checkPlayerCat() {
+  var birth = document.getElementById('pBirth').value;
+  var el = document.getElementById('catResult');
+  if(!birth){el.style.display='none';return;}
+  var catId = getCategory(birth);
+  if(!catId){
+    el.innerHTML='<div class="al al-err">❌ تاريخ الميلاد هذا لا ينتمي لأي فئة عمرية في البطولة</div>';
+    el.style.display='block';return;
+  }
+  var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
+  var ci = getCatInfo(catId);
+  if(cats.indexOf(catId)===-1){
+    el.innerHTML='<div class="al al-warn">⚠️ اللاعب ينتمي لـ <b>'+ci.name+'</b> لكن أكاديميتك لم تسجل في هذه الفئة</div>';
+    el.style.display='block';return;
+  }
+  el.innerHTML='<div class="al al-ok">✅ الفئة: <b>'+ci.name+'</b> ('+ci.label+')</div>';
+  el.style.display='block';
+}
+
+function submitPlayer() {
+  var name   = (document.getElementById('pName').value||'').trim();
+  var birth  = (document.getElementById('pBirth').value||'').trim();
+  var nat    = (document.getElementById('pNat').value||'').trim();
+  var phone  = (document.getElementById('pPhone').value||'').trim();
+  var health = (document.getElementById('pHealth').value||'').trim();
+  var acadId = sessionStorage.getItem('kaasAcadId');
+  var acadName = sessionStorage.getItem('kaasAcadName');
+  var errEl  = document.getElementById('pErr');
+  errEl.style.display='none';
+
+  if(!name||!birth||!nat){errEl.textContent='الرجاء ملء الحقول الإلزامية';errEl.style.display='block';return;}
+  var catId = getCategory(birth);
+  if(!catId){errEl.textContent='تاريخ الميلاد لا ينتمي لأي فئة في البطولة';errEl.style.display='block';return;}
+  var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
+  if(cats.indexOf(catId)===-1){errEl.textContent='أكاديميتك غير مسجلة في فئة هذا اللاعب';errEl.style.display='block';return;}
+
+  var btn = document.querySelector('.btn-red');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإضافة...';
+
+  apiCall('addPlayer',{
+    id:'PL'+Date.now().toString().slice(-8),
+    academy_id:acadId, academy_name:acadName,
+    name:name, birth:birth, nationality:nat,
+    phone:phone, health:health||'لا يوجد',
+    cat_id:catId, cat_name:getCatInfo(catId).name,
+    date:new Date().toLocaleDateString('ar')
+  }).then(function(){
+    document.getElementById('app').innerHTML=
+      '<div style="text-align:center;padding:60px 20px;">'+
+        '<div style="font-size:64px;margin-bottom:12px;">✅</div>'+
+        '<div style="font-size:18px;font-weight:900;color:#16a34a;margin-bottom:6px;">تمت إضافة اللاعب</div>'+
+        '<div style="font-size:13px;color:#64748b;margin-bottom:24px;">'+name+' · '+getCatInfo(catId).name+'</div>'+
+        '<button class="btn btn-red" style="max-width:280px;margin:0 auto 8px;" onclick="go(\'add_player\')">إضافة لاعب آخر</button>'+
+        '<button class="btn btn-dark" style="max-width:280px;margin:0 auto;" onclick="go(\'acad_dashboard\')">العودة للوحة التحكم</button>'+
+      '</div>';
+  });
+}
+
+// ════════════════════════════════════════
+// قائمة الأكاديميات (عامة)
+// ════════════════════════════════════════
+function renderAcademies() {
+  showL();
+  apiGet('الأكاديميات').then(function(list){
+    var html =
+      '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:28px 16px 20px;text-align:center;color:#fff;">'+
+        '<div style="font-size:28px;margin-bottom:6px;">🏫</div>'+
+        '<div style="font-size:18px;font-weight:900;">الأكاديميات المشاركة</div>'+
+        '<div style="font-size:11px;opacity:.6;margin-top:4px;">'+list.length+' أكاديمية مسجلة</div>'+
+      '</div>'+
+      '<div class="section">';
+    if(!list.length){
+      html+='<div style="text-align:center;padding:40px;color:#94a3b8;">لا توجد أكاديميات مسجلة بعد</div>';
+    } else {
+      list.forEach(function(a,i){
+        var initials=a.name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2);
+        var catsList=(a.cats||'').split(',').filter(Boolean);
+        html+='<div class="acad-card">'+
+          '<div class="acad-avatar" style="font-size:14px;">'+initials+'</div>'+
+          '<div class="acad-info">'+
+            '<div class="acad-name">'+a.name+'</div>'+
+            '<div class="acad-meta"><i class="fas fa-map-marker-alt"></i> '+a.city+' · '+a.country+'</div>'+
+            '<div class="acad-meta"><i class="fas fa-user-tie"></i> '+a.coach+'</div>'+
+            '<div class="acad-cats">'+
+              catsList.map(function(c){
+                var ci=getCatInfo(c.trim());
+                return ci?'<span class="cat-pill" style="background:#f0fdf4;color:#16a34a;">'+ci.name+'</span>':'';
+              }).join('')+
+            '</div>'+
+          '</div>'+
+          '<div style="text-align:center;flex-shrink:0;">'+
+            '<div style="font-size:18px;font-weight:900;color:var(--red)">'+(a.players||0)+'</div>'+
+            '<div style="font-size:9px;color:#94a3b8;">لاعب</div>'+
+          '</div>'+
+        '</div>';
+      });
+    }
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  });
+}
+
+// ════════════════════════════════════════
+// لوحة الإدارة
+// ════════════════════════════════════════
+function renderAdminLogin() {
+  document.getElementById('app').innerHTML=
+    '<div style="padding:60px 20px;max-width:360px;margin:0 auto;">'+
+      '<div style="text-align:center;margin-bottom:28px;">'+
+        '<div style="font-size:48px;margin-bottom:8px;">🔒</div>'+
+        '<div style="font-size:18px;font-weight:900;color:var(--dark)">لوحة الإدارة</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+      '</div>'+
+      '<div class="card">'+
+        '<div class="mb"><label class="lbl">كلمة مرور الإدارة</label>'+
+        '<input type="password" class="inp" id="adminPass" placeholder="••••••••" onkeydown="if(event.key===\'Enter\')doAdminLogin()"></div>'+
+        '<div id="adminErr" style="display:none;" class="err"></div>'+
+        '<button class="btn btn-dark" onclick="doAdminLogin()"><i class="fas fa-unlock"></i> دخول</button>'+
+      '</div>'+
+    '</div>';
+  setTimeout(function(){var i=document.getElementById('adminPass');if(i)i.focus();},300);
+}
+
+function doAdminLogin() {
+  var pass=(document.getElementById('adminPass').value||'').trim();
+  var err=document.getElementById('adminErr');
+  if(pass!==CONFIG.ADMIN_PASS){err.textContent='كلمة المرور غير صحيحة';err.style.display='block';return;}
+  sessionStorage.setItem('kaasAdmin','1');
+  go('admin_panel');
+}
+
+function renderAdminPanel() {
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  Promise.all([apiGet('الأكاديميات'),apiGet('اللاعبون')]).then(function(res){
+    var acadList=res[0], players=res[1];
+    var byCat={};
+    CATEGORIES.forEach(function(c){byCat[c.id]=players.filter(function(p){return p.cat_id===c.id;}).length;});
+
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#1a0a0a,#7a0f12);padding:24px 16px 18px;text-align:center;color:#fff;">'+
+        '<div style="font-size:14px;font-weight:900;margin-bottom:4px;">لوحة إدارة البطولة 👑</div>'+
+        '<div style="font-size:11px;opacity:.6">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+        '<button onclick="sessionStorage.removeItem(\'kaasAdmin\');go(\'home\')" style="position:absolute;left:16px;top:68px;background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);padding:5px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">خروج</button>'+
+      '</div>'+
+      '<div class="section">'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">'+
+          '<div class="card" style="text-align:center;margin:0;"><div style="font-size:28px;font-weight:900;color:var(--red)">'+acadList.length+'</div><div style="font-size:10px;color:#64748b">أكاديمية</div></div>'+
+          '<div class="card" style="text-align:center;margin:0;"><div style="font-size:28px;font-weight:900;color:var(--gold)">'+players.length+'</div><div style="font-size:10px;color:#64748b">لاعب</div></div>'+
+        '</div>'+
+        '<div class="card">'+
+          '<div class="sec-title">إحصاء حسب الفئة</div>'+
+          CATEGORIES.map(function(c){
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">'+
+              '<div><div style="font-size:12px;font-weight:800;">'+c.name+'</div><div style="font-size:10px;color:#64748b;">'+c.label+'</div></div>'+
+              '<span style="background:var(--red);color:#fff;font-size:11px;font-weight:800;padding:3px 10px;border-radius:10px;">'+byCat[c.id]+' لاعب</span>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+        '<button class="btn btn-red" onclick="go(\'admin_players\')"><i class="fas fa-users"></i> إدارة اللاعبين</button>'+
+        '<button class="btn btn-dark" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
+      '</div>';
+  });
+}
+
+function renderAdminPlayers() {
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('اللاعبون').then(function(players){
+    var html=
+      '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:20px 16px;display:flex;align-items:center;gap:10px;color:#fff;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;">←</button>'+
+        '<div><div style="font-size:14px;font-weight:900;">جميع اللاعبين</div><div style="font-size:10px;opacity:.6">'+players.length+' لاعب</div></div>'+
+      '</div>'+
+      '<div class="section">';
+    if(!players.length){
+      html+='<div style="text-align:center;padding:40px;color:#94a3b8;">لا يوجد لاعبون بعد</div>';
+    } else {
+      CATEGORIES.forEach(function(c){
+        var cp=players.filter(function(p){return p.cat_id===c.id;});
+        if(!cp.length) return;
+        html+='<div class="cat-section">'+
+          '<div class="cat-header">'+
+            '<div style="font-size:12px;font-weight:900;">'+c.name+'</div>'+
+            '<span class="cat-count">'+cp.length+'</span>'+
+          '</div>';
+        cp.forEach(function(p,i){
+          html+='<div class="player-card">'+
+            '<div class="player-num">'+(i+1)+'</div>'+
+            '<div class="player-info">'+
+              '<div class="player-name">'+p.name+'</div>'+
+              '<div class="player-meta">'+p.academy_name+' · '+p.birth+'</div>'+
+            '</div>'+
+            '<span class="player-cat">'+c.label+'</span>'+
+          '</div>';
+        });
+        html+='</div>';
+      });
+    }
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  });
+}
+
+function exportWA() {
+  var url = window.location.href;
+  var msg = encodeURIComponent('🏆 *'+CONFIG.TOURNAMENT_NAME+'*\n\nللتسجيل في البطولة وإدخال بيانات اللاعبين:\n\n'+url+'\n\n⚽ KAAS '+CONFIG.SEASON);
+  window.open('https://api.whatsapp.com/send?text='+msg,'_blank');
+}
+
+// ════════════════════════════════════════
+// البدء
+// ════════════════════════════════════════
+go('home');
+</script>
+</body>
+</html>
