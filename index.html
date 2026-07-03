@@ -1150,7 +1150,7 @@ function submitPlayer() {
   var phone  = (document.getElementById('pPhone').value||'').trim();
   var health = (document.getElementById('pHealth').value||'').trim();
   var jersey = (document.getElementById('pJersey').value||'').trim();
-  var acadId = sessionStorage.getItem('kaasAcadId');
+  var acadId   = sessionStorage.getItem('kaasAcadId');
   var acadName = sessionStorage.getItem('kaasAcadName');
   var errEl  = document.getElementById('pErr');
   errEl.style.display='none';
@@ -1161,14 +1161,51 @@ function submitPlayer() {
   var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
   if(cats.indexOf(catId)===-1){errEl.textContent='أكاديميتك غير مسجلة في فئة هذا اللاعب';errEl.style.display='block';return;}
 
-  var btn = document.getElementById('saveBtn');
-  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
+  /* ── معاينة البطاقة قبل الحفظ ── */
+  var previewData = {
+    id:'PL-PREVIEW', name:name, birth:birth, nationality:nat,
+    jersey:jersey, phone:phone, health:health,
+    cat_id:catId, cat_name:(getCatInfo(catId)||{}).name||'',
+    academy_name:acadName, acadName:acadName, catId:catId,
+    photo: window._playerPhoto||''
+  };
+  _showRegPreview(previewData, function(){
+    _doSubmitPlayer(name, birth, nat, phone, health, jersey, catId, acadId, acadName);
+  });
+}
 
+function _showRegPreview(p, onConfirm){
+  var ov = document.createElement('div');
+  ov.id = 'regPreviewModal';
+  ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow-y:auto;font-family:Cairo,sans-serif;direction:rtl;';
+  ov.innerHTML =
+    '<div style="width:100%;max-width:360px;text-align:center;">'+
+      '<div style="font-size:15px;font-weight:900;color:#d4af37;margin-bottom:14px;">👀 معاينة البطاقة قبل الحفظ</div>'+
+      buildKaasCardHTML(p, 1)+
+      '<div style="display:flex;gap:10px;justify-content:center;margin-top:18px;">'+
+        '<button id="previewConfirmBtn" onclick="_confirmRegPreview()" '+
+          'style="background:#16a34a;color:#fff;border:none;border-radius:12px;padding:13px 28px;font-size:14px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '✅ تأكيد التسجيل</button>'+
+        '<button onclick="document.getElementById(\'regPreviewModal\').remove()" '+
+          'style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:12px;padding:13px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '✏️ تعديل</button>'+
+      '</div>'+
+    '</div>';
+  document.body.appendChild(ov);
+  window._regPreviewConfirm = onConfirm;
+}
+
+function _confirmRegPreview(){
+  var btn = document.getElementById('previewConfirmBtn');
+  if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...'; }
+  if(window._regPreviewConfirm) window._regPreviewConfirm();
+}
+
+function _doSubmitPlayer(name, birth, nat, phone, health, jersey, catId, acadId, acadName){
   var playerId = 'PL'+Date.now().toString().slice(-8);
   var photo = window._playerPhoto || '';
   var doc   = window._playerDoc   || '';
 
-  // حفظ الصورة والوثيقة محلياً (base64)
   if(photo) { try{ localStorage.setItem('kaasPhoto_'+playerId, photo); }catch(e){} }
   if(doc)   { try{ localStorage.setItem('kaasDoc_'+playerId,   doc);   }catch(e){} }
 
@@ -1177,12 +1214,14 @@ function submitPlayer() {
     academy_id:acadId, academy_name:acadName,
     name:name, birth:birth, nationality:nat,
     jersey:jersey||'', phone:phone, health:health||'لا يوجد',
-    cat_id:catId, cat_name:getCatInfo(catId).name,
+    cat_id:catId, cat_name:(getCatInfo(catId)||{}).name||'',
     has_photo: photo?'نعم':'لا',
     has_doc:   doc?'نعم':'لا',
     date:new Date().toLocaleDateString('ar')
   }).then(function(){
-    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, jersey:jersey, catId:catId, acadId:acadId, acadName:acadName, photo:photo});
+    var prev = document.getElementById('regPreviewModal');
+    if(prev) prev.remove();
+    showKaasCard({id:playerId, name:name, birth:birth, nationality:nat, jersey:jersey, phone:phone, catId:catId, acadId:acadId, acadName:acadName, photo:photo});
   });
 }
 
@@ -1241,14 +1280,21 @@ function showKaasCard(p) {
     '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:14px;">✅ تمت إضافة اللاعب بنجاح!</div>'+
     cardHtml+
     '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;">'+
-      '<button onclick="shareKaasCard()" style="padding:11px 18px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:6px;"><i class="fab fa-whatsapp"></i> مشاركة واتساب</button>'+
+      '<button onclick="shareKaasCard()" style="padding:11px 18px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fab fa-whatsapp"></i> مشاركة</button>'+
       '<button onclick="downloadKaasCard()" style="padding:11px 18px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-download"></i> تنزيل</button>'+
     '</div>'+
-    '<div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">'+
+    (p.phone ?
+    '<div style="margin-top:10px;">'+
+      '<button onclick="sendParentWhatsapp()" '+
+        'style="width:100%;padding:12px;background:linear-gradient(135deg,#075e54,#128c7e);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+        '<i class="fab fa-whatsapp"></i> إرسال البطاقة لولي الأمر</button>'+
+    '</div>' : '')+
+    '<div style="display:flex;gap:8px;justify-content:center;margin-top:10px;">'+
       '<button onclick="document.getElementById(\'kaasCardModal\').remove();go(\'add_player\')" style="padding:9px 16px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">إضافة لاعب آخر</button>'+
       '<button onclick="document.getElementById(\'kaasCardModal\').remove();go(\'acad_dashboard\')" style="padding:9px 16px;background:rgba(255,255,255,.1);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">لوحة التحكم</button>'+
     '</div>'+
     '</div>';
+  window._kaasCardPlayer = p;
   document.body.appendChild(modal);
 
   setTimeout(function(){
@@ -1257,6 +1303,54 @@ function showKaasCard(p) {
       new QRCode(qrEl, {text: 'KAAS-'+p.id, width:52, height:52, correctLevel:QRCode.CorrectLevel.M});
     }
   }, 300);
+}
+
+function sendParentWhatsapp(){
+  var p = window._kaasCardPlayer;
+  if(!p || !p.phone) return;
+  var ci = getCatInfo(p.catId||p.cat_id||'');
+  var birth = (p.birth||'').toString().split('T')[0];
+  var msg =
+    '🏆 *'+CONFIG.TOURNAMENT_NAME+'*\n'+
+    '─────────────────\n'+
+    'السلام عليكم ورحمة الله،\n'+
+    'تم تسجيل ابنك/ابنتك بنجاح في البطولة 🎉\n\n'+
+    '👤 *اللاعب:* '+p.name+'\n'+
+    '🎂 *تاريخ الميلاد:* '+birth+'\n'+
+    (p.nationality ? '🌍 *الجنسية:* '+p.nationality+'\n' : '')+
+    (ci ? '⚽ *الفئة:* '+ci.name+' ('+ci.label+')\n' : '')+
+    (p.jersey ? '👕 *رقم القميص:* #'+p.jersey+'\n' : '')+
+    '🏫 *الأكاديمية:* '+(p.acadName||p.academy_name||'')+'\n'+
+    '🆔 *رقم اللاعب:* '+p.id+'\n'+
+    '─────────────────\n'+
+    '📋 *الموسم:* '+CONFIG.SEASON+'\n\n'+
+    'نتمنى له التوفيق والنجاح 🌟';
+
+  var card = document.getElementById('kaasPlayerCard');
+  if(!card){
+    window.open('https://api.whatsapp.com/send?phone='+p.phone+'&text='+encodeURIComponent(msg),'_blank');
+    return;
+  }
+
+  var btn = event && event.target ? event.target.closest('button') : null;
+  if(btn){ btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...'; }
+
+  html2canvas(card,{scale:2,useCORS:true,backgroundColor:'#0f172a'}).then(function(canvas){
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="fab fa-whatsapp"></i> إرسال البطاقة لولي الأمر'; }
+    canvas.toBlob(function(blob){
+      var file = new File([blob],'بطاقة-'+p.name+'.png',{type:'image/png'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file], text:msg}).catch(function(){
+          window.open('https://api.whatsapp.com/send?phone='+p.phone+'&text='+encodeURIComponent(msg),'_blank');
+        });
+      } else {
+        window.open('https://api.whatsapp.com/send?phone='+p.phone+'&text='+encodeURIComponent(msg),'_blank');
+      }
+    },'image/png');
+  }).catch(function(){
+    if(btn){ btn.disabled=false; btn.innerHTML='<i class="fab fa-whatsapp"></i> إرسال البطاقة لولي الأمر'; }
+    window.open('https://api.whatsapp.com/send?phone='+p.phone+'&text='+encodeURIComponent(msg),'_blank');
+  });
 }
 
 function downloadKaasCard(){
