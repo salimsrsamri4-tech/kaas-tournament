@@ -698,8 +698,8 @@ function renderAcadLogin() {
         '<div style="font-size:11px;color:#64748b;margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
       '</div>'+
       '<div class="card">'+
-        '<div class="mb"><label class="lbl">رقم الأكاديمية *</label><input class="inp" id="loginId" type="text" placeholder="AC000000" style="text-align:center;font-weight:900;font-size:16px;letter-spacing:2px;"></div>'+
-        '<div class="mb"><label class="lbl">كلمة المرور (PIN) *</label><input class="inp" id="loginPin" type="password" placeholder="••••" maxlength="4" style="text-align:center;font-weight:900;font-size:20px;letter-spacing:4px;" onkeydown="if(event.key===\'Enter\')doAcadLogin()"></div>'+
+        '<div class="mb"><label class="lbl">رقم الهاتف (واتساب) *</label><input class="inp" id="loginPhone" type="tel" placeholder="9XXXXXXXX" style="text-align:center;font-weight:900;font-size:16px;letter-spacing:1px;"></div>'+
+        '<div class="mb"><label class="lbl">رمز الدخول (PIN) *</label><input class="inp" id="loginPin" type="password" placeholder="••••" maxlength="4" style="text-align:center;font-weight:900;font-size:20px;letter-spacing:4px;" onkeydown="if(event.key===\'Enter\')doAcadLogin()"></div>'+
         '<div id="loginErr" style="display:none;" class="err"></div>'+
         '<button class="btn btn-red" onclick="doAcadLogin()"><i class="fas fa-sign-in-alt"></i> دخول</button>'+
       '</div>'+
@@ -708,23 +708,23 @@ function renderAcadLogin() {
         '<button onclick="go(\'acad_register\')" style="background:none;border:none;color:var(--red);font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">سجّل أكاديميتك الآن</button>'+
       '</div>'+
     '</div>';
-  setTimeout(function(){var i=document.getElementById('loginId');if(i)i.focus();},300);
+  setTimeout(function(){var i=document.getElementById('loginPhone');if(i)i.focus();},300);
 }
 
 function doAcadLogin() {
-  var id  = (document.getElementById('loginId').value||'').trim().toUpperCase();
-  var pin = (document.getElementById('loginPin').value||'').trim();
-  var err = document.getElementById('loginErr');
+  var phone = (document.getElementById('loginPhone').value||'').trim();
+  var pin   = (document.getElementById('loginPin').value||'').trim();
+  var err   = document.getElementById('loginErr');
   err.style.display='none';
-  if(!id||!pin){err.textContent='أدخل رقم الأكاديمية والـ PIN';err.style.display='block';return;}
+  if(!phone||!pin){err.textContent='أدخل رقم الهاتف والـ PIN';err.style.display='block';return;}
   var btn = document.querySelector('#app .btn-red');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ التحقق...';
 
   apiGet('الأكاديميات').then(function(list){
-    var acad = list.find(function(a){return a.id===id && String(a.pin)===String(pin);});
+    var acad = list.find(function(a){return String(a.phone)===String(phone) && String(a.pin)===String(pin);});
     btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> دخول';
-    if(!acad){err.textContent='رقم الأكاديمية أو الـ PIN غير صحيح';err.style.display='block';return;}
-    sessionStorage.setItem('kaasAcadId',id);
+    if(!acad){err.textContent='رقم الهاتف أو الـ PIN غير صحيح';err.style.display='block';return;}
+    sessionStorage.setItem('kaasAcadId',acad.id);
     sessionStorage.setItem('kaasAcadName',acad.name);
     sessionStorage.setItem('kaasAcadCats',acad.cats||'');
     window._kaasAcad = acad;
