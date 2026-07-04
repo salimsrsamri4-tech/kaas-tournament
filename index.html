@@ -2331,7 +2331,8 @@ function approveAcad(id,nameEnc,phoneEnc){
   if(!confirm('اعتماد أكاديمية: '+name+'؟'))return;
   _saveLocalStatus(id,'معتمد');
   var phone=decodeURIComponent(phoneEnc);
-  var waMsg='السلام عليكم،\n\nيسعدنا إبلاغكم بأنه تم *اعتماد '+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+' ✅\n\nيمكنكم الآن الدخول للمنصة وتسجيل لاعبيكم:\n'+window.location.href+'\n\n🆔 رقم الأكاديمية: '+id;
+  var loginUrl = window.location.origin+window.location.pathname+'?page=login';
+  var waMsg='السلام عليكم،\n\nيسعدنا إبلاغكم بأنه تم *اعتماد '+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+' ✅\n\nيمكنكم الآن الدخول للمنصة وتسجيل لاعبيكم:\n'+loginUrl+'\n\n🆔 رقم الأكاديمية: '+id;
   var waUrl='https://api.whatsapp.com/send?phone=968'+phone+'&text='+encodeURIComponent(waMsg);
   var card=document.getElementById('acadCard_'+id);
   if(card){
@@ -2864,6 +2865,8 @@ function shareRegLink(){
 // ════════════════════════════════════════
 function handleAcadLink(){
   var params = new URLSearchParams(location.search);
+  // فتح صفحة الدخول مباشرة عند ?page=login
+  if(params.get('page')==='login'){go('acad_login');return true;}
   var acadId = params.get('acad');
   if(!acadId) return false;
 
