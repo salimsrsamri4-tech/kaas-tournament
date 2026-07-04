@@ -746,16 +746,8 @@ function submitAcadReg() {
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
 
   var catLabels = cats.map(function(cid){var c=CATEGORIES.find(function(x){return x.id===cid;});return c?c.name:cid;}).join('، ');
-  var adminMsg = '🔔 *طلب تسجيل أكاديمية جديد*\n\n'+
-    '🏫 *الاسم:* '+name+'\n'+
-    '📍 *المدينة:* '+city+' — '+country+'\n'+
-    '👤 *المدرب:* '+coach+'\n'+
-    '📱 *الهاتف:* '+phone+'\n'+
-    (email?'📧 *الإيميل:* '+email+'\n':'')+
-    '⚽ *الفئات:* '+catLabels+'\n'+
-    '🆔 *رقم الأكاديمية:* '+id+'\n\n'+
-    '➡️ يرجى مراجعة المنصة للاعتماد أو الرفض.';
-  var adminWaUrl = 'https://wa.me/96892126558?text='+encodeURIComponent(adminMsg);
+  var adminMsg = 'طلب تسجيل: '+name+' | '+city+' | '+coach+' | '+phone+' | ID: '+id;
+  var adminWaUrl = 'https://api.whatsapp.com/send?phone=96892126558&text='+encodeURIComponent(adminMsg);
 
   apiAppend('الأكاديميات',{
     id:id, name:name, city:city, country:country,
