@@ -134,9 +134,14 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
       <div class="nav-sub">ARAB ACADEMIES CUP (KAAS)</div>
     </div>
   </div>
-  <button onclick="openSidebar()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-    <i class="fas fa-bars"></i>
-  </button>
+  <div style="display:flex;gap:8px;">
+    <button onclick="shareApp()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="مشاركة المنصة">
+      <i class="fas fa-share-alt"></i>
+    </button>
+    <button onclick="openSidebar()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
 </nav>
 
 <!-- الشريط الجانبي -->
@@ -438,6 +443,17 @@ function go(page) {
 
 function showL(){document.getElementById('app').innerHTML='<div class="ldg"><span class="sp"></span></div>';}
 
+function shareApp(){
+  var url = window.location.origin + window.location.pathname;
+  var text = 'منصة كأس العرب للأكاديميات (KAAS) — سجّل أكاديميتك الآن!\n' + url;
+  if(navigator.share){
+    navigator.share({ title: 'كأس العرب للأكاديميات', text: 'سجّل أكاديميتك في KAAS 2026', url: url })
+      .catch(function(){});
+  } else {
+    var wa = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(text);
+    location.href = wa;
+  }
+}
 function openSidebar(){
   document.getElementById('sidebar').style.right='0';
   document.getElementById('sideOverlay').style.display='block';
