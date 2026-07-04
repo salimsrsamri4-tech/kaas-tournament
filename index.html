@@ -2311,12 +2311,21 @@ function approveAcad(id,nameEnc,phoneEnc){
   var name=decodeURIComponent(nameEnc);
   if(!confirm('اعتماد أكاديمية: '+name+'؟'))return;
   _saveLocalStatus(id,'معتمد');
+  var phone=decodeURIComponent(phoneEnc);
+  var waMsg='السلام عليكم،\n\nيسعدنا إبلاغكم بأنه تم *اعتماد '+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+' ✅\n\nيمكنكم الآن الدخول للمنصة وتسجيل لاعبيكم:\n'+window.location.href+'\n\n🆔 رقم الأكاديمية: '+id;
+  var waUrl='https://api.whatsapp.com/send?phone=968'+phone+'&text='+encodeURIComponent(waMsg);
   var card=document.getElementById('acadCard_'+id);
   if(card){
     card.style.transition='all .3s';
     card.style.background='#f0fdf4';
     card.style.border='2px solid #16a34a';
-    card.innerHTML='<div style="text-align:center;padding:20px;"><div style="font-size:36px;">✅</div><div style="font-size:13px;font-weight:900;color:#16a34a;margin-top:8px;">تم الاعتماد</div><div style="font-size:11px;color:#64748b;margin-top:4px;">'+name+'</div></div>';
+    card.innerHTML='<div style="text-align:center;padding:20px;">'+
+      '<div style="font-size:36px;">✅</div>'+
+      '<div style="font-size:13px;font-weight:900;color:#16a34a;margin-top:8px;">تم الاعتماد</div>'+
+      '<div style="font-size:11px;color:#64748b;margin-top:4px;">'+name+'</div>'+
+      '<button onclick="location.href=\''+waUrl+'\'" style="margin-top:12px;background:#25d366;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:6px;margin:12px auto 0;">'+
+        '<i class="fab fa-whatsapp"></i> إرسال إشعار للمشرف</button>'+
+    '</div>';
   }
   invalidateCache('الأكاديميات');
   apiAppend('تحديث الأكاديميات',{academy_id:id,status:'معتمد',updated_at:new Date().toLocaleDateString('ar')});
