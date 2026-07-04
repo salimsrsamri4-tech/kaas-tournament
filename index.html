@@ -177,6 +177,9 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('acad_register')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-plus-circle" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> تسجيل أكاديمية جديدة
     </button>
+    <button onclick="closeSidebar();go('about_tournament')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(212,175,55,.15);border:none;border-radius:10px;color:#ffdd57;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;text-align:right;margin-bottom:4px;">
+      <i class="fas fa-info-circle" style="width:18px;text-align:center;color:#ffdd57;"></i> عن البطولة
+    </button>
     <button onclick="closeSidebar();go('academies')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">
       <i class="fas fa-shield-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> الأكاديميات المشاركة
     </button>
@@ -427,6 +430,7 @@ function go(page) {
     admin_best_player: renderBestPlayer,
     admin_referee: renderRefereeReport,
     admin_academies_approval: renderAcademiesApproval,
+    about_tournament: renderAboutTournament,
     acad_message: renderAcadMessage,
   };
   if(pages[page]) pages[page]();
@@ -2240,6 +2244,220 @@ function saveRefereeReport(){
 // ════════════════════════════════════════
 // اعتماد الأكاديميات
 // ════════════════════════════════════════
+function renderAboutTournament(){
+  document.getElementById('app').innerHTML=`
+  <div style="padding:16px;max-width:500px;margin:0 auto;">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:16px;padding:24px;text-align:center;margin-bottom:16px;border:2px solid #d4af37;">
+      <div style="font-size:36px;margin-bottom:8px;">🏆</div>
+      <div style="font-size:20px;font-weight:900;color:#d4af37;margin-bottom:4px;">كأس العرب للأكاديميات</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:1px;">ARAB ACADEMIES CUP (KAAS)</div>
+      <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,.6);">تحت إشراف الاتحاد العماني لكرة القدم · بالتعاون مع OFAL</div>
+    </div>
+
+    <!-- رؤية البطولة -->
+    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">رؤية البطولة</span>
+      </div>
+      <p style="font-size:13px;color:#374151;line-height:1.8;margin:0;">
+        تتشرف اللجنة المنظمة بتقديم "كأس العرب للأكاديميات"، والتي تهدف إلى تعزيز روح المنافسة الشريفة وتطوير المواهب الكروية الشابة في بيئة مثالية. تقام البطولة على ملاعب قانونية مجهزة بالكامل، حيث تضفي أجواء صلالة الخريفية الضبابية والساحرة طابعاً فريداً ومميزاً على المنافسة.
+      </p>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;">📍 صلالة، محافظة ظفار</span>
+        <span style="background:#fffbeb;color:#92400e;border:1px solid #fde68a;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;">📅 6 - 7 - 8 أغسطس 2026</span>
+      </div>
+    </div>
+
+    <!-- أهداف البطولة -->
+    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">أهداف البطولة</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0;">
+          <div style="font-size:24px;margin-bottom:6px;">⭐</div>
+          <div style="font-size:12px;font-weight:900;color:#0d3318;margin-bottom:4px;">اكتشاف المواهب</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5;">البحث عن المواهب العربية الصاعدة عبر كشافين دوليين</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0;">
+          <div style="font-size:24px;margin-bottom:6px;">🤝</div>
+          <div style="font-size:12px;font-weight:900;color:#0d3318;margin-bottom:4px;">الروح الرياضية</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5;">تعزيز قيم النزاهة والمنافسة الشريفة بين الأكاديميات</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0;">
+          <div style="font-size:24px;margin-bottom:6px;">📈</div>
+          <div style="font-size:12px;font-weight:900;color:#0d3318;margin-bottom:4px;">مسار احترافي</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5;">بيئة احترافية تمنح اللاعبين خبرة البطولات الدولية</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:10px;padding:12px;text-align:center;border:1px solid #e2e8f0;">
+          <div style="font-size:24px;margin-bottom:6px;">🌍</div>
+          <div style="font-size:12px;font-weight:900;color:#0d3318;margin-bottom:4px;">التواصل الثقافي</div>
+          <div style="font-size:10px;color:#64748b;line-height:1.5;">تعزيز التبادل الثقافي بين المشاركين من الدول العربية</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- نظام البطولة -->
+    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:12px;">
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">نظام البطولة</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f0fdf4;border-radius:10px;">
+          <span style="color:#16a34a;font-size:18px;">✅</span>
+          <span style="font-size:12px;color:#374151;">من <strong>32 إلى 48 فريقاً</strong> مقسمين على 4 فئات عمرية</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f0fdf4;border-radius:10px;">
+          <span style="color:#16a34a;font-size:18px;">✅</span>
+          <span style="font-size:12px;color:#374151;">كل فئة تضم <strong>8 إلى 12 فريقاً</strong> في دور المجموعات</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#f0fdf4;border-radius:10px;">
+          <span style="color:#16a34a;font-size:18px;">✅</span>
+          <span style="font-size:12px;color:#374151;">كل فريق يضمن لعب <strong>8 مباريات</strong> على الأقل</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- الفئات العمرية -->
+    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:12px;">
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">الفئات العمرية</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead>
+            <tr style="background:#0d3318;color:#fff;">
+              <th style="padding:8px;text-align:center;border-radius:8px 0 0 0;">الفئة</th>
+              <th style="padding:8px;text-align:center;">المواليد</th>
+              <th style="padding:8px;text-align:center;">اللاعبون</th>
+              <th style="padding:8px;text-align:center;">وقت المباراة</th>
+              <th style="padding:8px;text-align:center;border-radius:0 8px 0 0;">الملعب</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f8fafc;">
+              <td style="padding:8px;text-align:center;font-weight:900;color:#0d3318;">U-10</td>
+              <td style="padding:8px;text-align:center;">2016-2017</td>
+              <td style="padding:8px;text-align:center;">8</td>
+              <td style="padding:8px;text-align:center;">15×2 د</td>
+              <td style="padding:8px;text-align:center;">50×30م</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;text-align:center;font-weight:900;color:#0d3318;">U-12</td>
+              <td style="padding:8px;text-align:center;">2014-2015</td>
+              <td style="padding:8px;text-align:center;">8</td>
+              <td style="padding:8px;text-align:center;">15×2 د</td>
+              <td style="padding:8px;text-align:center;">50×30م</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+              <td style="padding:8px;text-align:center;font-weight:900;color:#0d3318;">U-14</td>
+              <td style="padding:8px;text-align:center;">2012-2013</td>
+              <td style="padding:8px;text-align:center;">9</td>
+              <td style="padding:8px;text-align:center;">20×2 د</td>
+              <td style="padding:8px;text-align:center;">70×50م</td>
+            </tr>
+            <tr>
+              <td style="padding:8px;text-align:center;font-weight:900;color:#0d3318;">U-16</td>
+              <td style="padding:8px;text-align:center;">2010-2011</td>
+              <td style="padding:8px;text-align:center;">9</td>
+              <td style="padding:8px;text-align:center;">20×2 د</td>
+              <td style="padding:8px;text-align:center;">70×50م</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- باقات التسجيل -->
+    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:12px;">
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">باقات التسجيل</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="border:2px solid #16a34a;border-radius:12px;padding:14px;background:#f0fdf4;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:900;color:#0d3318;">الباقة 1 — للفريق</span>
+            <span style="font-size:18px;font-weight:900;color:#16a34a;">350 ر.ع</span>
+          </div>
+          <div style="font-size:11px;color:#374151;display:flex;flex-direction:column;gap:3px;">
+            <span>✓ التسجيل في البطولة</span>
+            <span>✓ المشروبات والضيافة</span>
+            <span>✓ دعوة حفل الاستقبال</span>
+          </div>
+        </div>
+        <div style="border:2px solid #d4af37;border-radius:12px;padding:14px;background:#fffbeb;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:900;color:#0d3318;">الباقة 2 — للاعب</span>
+            <span style="font-size:18px;font-weight:900;color:#92400e;">250 ر.ع</span>
+          </div>
+          <div style="font-size:11px;color:#374151;display:flex;flex-direction:column;gap:3px;">
+            <span>✓ إقامة 4 أيام / 3 ليالٍ</span>
+            <span>✓ وجبات الإفطار والعشاء</span>
+            <span>✓ النقل والمواصلات</span>
+            <span>✓ رسوم المشاركة كاملة</span>
+          </div>
+        </div>
+        <div style="border:2px solid #94a3b8;border-radius:12px;padding:14px;background:#f8fafc;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:13px;font-weight:900;color:#0d3318;">باقة المرافقين</span>
+            <span style="font-size:18px;font-weight:900;color:#475569;">160-200 ر.ع</span>
+          </div>
+          <div style="font-size:11px;color:#374151;display:flex;flex-direction:column;gap:3px;">
+            <span>✓ فندق 4 أيام / 3 ليالٍ</span>
+            <span>✓ غرف مفردة أو مزدوجة</span>
+            <span>✓ تشمل الإفطار والعشاء</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- المواعيد الهامة -->
+    <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
+      <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:12px;">
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">المواعيد الهامة</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;gap:12px;align-items:center;padding:10px;background:#fef2f2;border-radius:10px;border-right:4px solid #dc2626;">
+          <div style="text-align:center;min-width:50px;"><div style="font-size:16px;font-weight:900;color:#dc2626;">5</div><div style="font-size:9px;color:#dc2626;font-weight:700;">يوليو</div></div>
+          <div style="font-size:11px;color:#374151;">الموعد النهائي لتأكيد التسجيل وتحويل الرسوم</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;padding:10px;background:#f0fdf4;border-radius:10px;border-right:4px solid #16a34a;">
+          <div style="text-align:center;min-width:50px;"><div style="font-size:16px;font-weight:900;color:#16a34a;">5</div><div style="font-size:9px;color:#16a34a;font-weight:700;">أغسطس</div></div>
+          <div style="font-size:11px;color:#374151;">وصول الفرق إلى مدينة صلالة</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;padding:10px;background:#fffbeb;border-radius:10px;border-right:4px solid #d4af37;">
+          <div style="text-align:center;min-width:50px;"><div style="font-size:14px;font-weight:900;color:#92400e;">8-6</div><div style="font-size:9px;color:#92400e;font-weight:700;">أغسطس</div></div>
+          <div style="font-size:11px;color:#374151;">أيام مباريات البطولة والمنافسات</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;padding:10px;background:#fef3c7;border-radius:10px;font-size:11px;color:#92400e;font-weight:600;">
+        ⚠️ أي حجز بعد 5 يوليو لن يشمل أسعار الباقات المذكورة نظراً لموسم السياحة المرتفع في صلالة
+      </div>
+    </div>
+
+    <!-- تواصل معنا -->
+    <div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:14px;padding:16px;margin-bottom:16px;border:1px solid rgba(212,175,55,.3);">
+      <div style="font-size:15px;font-weight:900;color:#d4af37;margin-bottom:12px;text-align:center;">📞 تواصل معنا</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <a href="tel:+96897837551" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.1);border-radius:10px;text-decoration:none;">
+          <i class="fas fa-phone" style="color:#4ade80;width:18px;text-align:center;"></i>
+          <div><div style="font-size:10px;color:rgba(255,255,255,.6);">خدمة العملاء</div><div style="font-size:13px;color:#fff;font-weight:700;">+968 9783 7551</div></div>
+        </a>
+        <a href="tel:+96872750957" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.1);border-radius:10px;text-decoration:none;">
+          <i class="fas fa-headset" style="color:#4ade80;width:18px;text-align:center;"></i>
+          <div><div style="font-size:10px;color:rgba(255,255,255,.6);">الإدارة</div><div style="font-size:13px;color:#fff;font-weight:700;">+968 7275 0957</div></div>
+        </a>
+        <a href="mailto:official.ofal@gmail.com" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.1);border-radius:10px;text-decoration:none;">
+          <i class="fas fa-envelope" style="color:#4ade80;width:18px;text-align:center;"></i>
+          <div><div style="font-size:10px;color:rgba(255,255,255,.6);">البريد الإلكتروني</div><div style="font-size:13px;color:#fff;font-weight:700;">official.ofal@gmail.com</div></div>
+        </a>
+      </div>
+    </div>
+
+  </div>`;
+}
 function renderAcademiesApproval(){
   var app=document.getElementById('app');
   app.innerHTML='<div style="padding:16px;max-width:600px;margin:0 auto;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><button onclick="go(\'admin_panel\')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--red);">&#8594;</button><div style="font-size:17px;font-weight:900;">اعتماد الأكاديميات</div></div><div id="acadApprovalList"><div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i></div></div></div>';
