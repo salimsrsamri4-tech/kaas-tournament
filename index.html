@@ -819,6 +819,24 @@ function doAcadLogin() {
     var acad = list.find(function(a){return String(a.phone)===String(phone) && String(a.pin)===String(pin);});
     btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> دخول';
     if(!acad){err.textContent='رقم الهاتف أو الـ PIN غير صحيح';err.style.display='block';return;}
+
+    // فحص حالة الاعتماد
+    var localStatuses=_getLocalStatuses();
+    var status = localStatuses[acad.id] || acad.status || 'قيد الاعتماد';
+    if(status !== 'معتمد'){
+      document.getElementById('app').innerHTML=
+        '<div style="text-align:center;padding:60px 20px;max-width:360px;margin:0 auto;">'+
+          '<div style="font-size:64px;margin-bottom:16px;">⏳</div>'+
+          '<div style="font-size:18px;font-weight:900;color:#92400e;margin-bottom:8px;">طلبك قيد المراجعة</div>'+
+          '<div style="background:#fef9c3;border:1.5px solid #fde68a;border-radius:12px;padding:16px;margin:16px auto;max-width:300px;">'+
+            '<div style="font-size:12px;color:#78350f;font-weight:700;margin-bottom:6px;">'+acad.name+'</div>'+
+            '<div style="font-size:11px;color:#92400e;">لم يتم اعتماد أكاديميتك بعد من قبل الإدارة.<br>سيتم إبلاغكم بقرار الاعتماد عبر واتساب.</div>'+
+          '</div>'+
+          '<button class="btn btn-light" style="max-width:300px;margin:0 auto;" onclick="go(\'acad_login\')">رجوع</button>'+
+        '</div>';
+      return;
+    }
+
     sessionStorage.setItem('kaasAcadId',acad.id);
     sessionStorage.setItem('kaasAcadName',acad.name);
     sessionStorage.setItem('kaasAcadCats',acad.cats||'');
