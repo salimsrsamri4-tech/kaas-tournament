@@ -2300,10 +2300,10 @@ function approveAcad(id,nameEnc,phoneEnc){
   invalidateCache('الأكاديميات');
   apiAppend('تحديث الأكاديميات',{academy_id:id,status:'معتمد',updated_at:new Date().toLocaleDateString('ar')}).then(function(){
     // إرسال واتساب للأكاديمية
-    var msg='🎉 *تهانينا!*\n\nتم اعتماد *'+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+'\n\nيمكنكم الآن تسجيل لاعبيكم عبر المنصة.\n\nرقم الأكاديمية: '+id;
-    window.open('https://wa.me/968'+phone+'?text='+encodeURIComponent(msg),'_blank');
-    alert('✅ تم اعتماد الأكاديمية وإرسال إشعار واتساب');
+    var msg='تم اعتماد '+name+' في بطولة '+CONFIG.TOURNAMENT_NAME+'. رقم الاكاديمية: '+id;
+    alert('✅ تم اعتماد الأكاديمية');
     renderAcademiesApproval();
+    location.href='https://api.whatsapp.com/send?phone=968'+phone+'&text='+encodeURIComponent(msg);
   });
 }
 
@@ -2314,10 +2314,10 @@ function rejectAcad(id,nameEnc,phoneEnc){
   if(reason===null)return;
   invalidateCache('الأكاديميات');
   apiAppend('تحديث الأكاديميات',{academy_id:id,status:'مرفوض',reason:reason,updated_at:new Date().toLocaleDateString('ar')}).then(function(){
-    var msg='عزيزنا / *'+name+'*\n\nنأسف لإبلاغكم بأنه لم يتم اعتماد طلب تسجيل الأكاديمية في الوقت الحالي.'+(reason?'\n\n*السبب:* '+reason:'')+'\n\nللاستفسار يرجى التواصل مع الإدارة.';
-    window.open('https://wa.me/968'+phone+'?text='+encodeURIComponent(msg),'_blank');
-    alert('تم رفض الأكاديمية وإرسال إشعار واتساب');
+    var msg='نأسف، لم يتم اعتماد '+name+(reason?' - السبب: '+reason:'')+'. للاستفسار تواصل مع الادارة.';
+    alert('تم رفض الأكاديمية');
     renderAcademiesApproval();
+    location.href='https://api.whatsapp.com/send?phone=968'+phone+'&text='+encodeURIComponent(msg);
   });
 }
 
