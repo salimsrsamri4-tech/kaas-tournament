@@ -746,6 +746,17 @@ function submitAcadReg() {
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
 
   var catLabels = cats.map(function(cid){var c=CATEGORIES.find(function(x){return x.id===cid;});return c?c.name:cid;}).join('، ');
+  var adminMsg = '🔔 *طلب تسجيل أكاديمية جديد*\n\n'+
+    '🏫 *الاسم:* '+name+'\n'+
+    '📍 *المدينة:* '+city+' — '+country+'\n'+
+    '👤 *المدرب:* '+coach+'\n'+
+    '📱 *الهاتف:* '+phone+'\n'+
+    (email?'📧 *الإيميل:* '+email+'\n':'')+
+    '⚽ *الفئات:* '+catLabels+'\n'+
+    '🆔 *رقم الأكاديمية:* '+id+'\n\n'+
+    '➡️ يرجى مراجعة المنصة للاعتماد أو الرفض.';
+  var adminWaUrl = 'https://wa.me/96892126558?text='+encodeURIComponent(adminMsg);
+
   apiAppend('الأكاديميات',{
     id:id, name:name, city:city, country:country,
     coach:coach, phone:phone, email:email,
@@ -753,21 +764,11 @@ function submitAcadReg() {
     status:'قيد الاعتماد',
     date: new Date().toLocaleDateString('ar')
   }).then(function(){
-    // إرسال إشعار واتساب للإدارة
-    var adminMsg = '🔔 *طلب تسجيل أكاديمية جديد*\n\n'+
-      '🏫 *الاسم:* '+name+'\n'+
-      '📍 *المدينة:* '+city+' — '+country+'\n'+
-      '👤 *المدرب:* '+coach+'\n'+
-      '📱 *الهاتف:* '+phone+'\n'+
-      (email?'📧 *الإيميل:* '+email+'\n':'')+
-      '⚽ *الفئات:* '+catLabels+'\n'+
-      '🆔 *رقم الأكاديمية:* '+id+'\n\n'+
-      '➡️ يرجى مراجعة المنصة للاعتماد أو الرفض.';
-    var adminWa = 'https://wa.me/96892126558?text='+encodeURIComponent(adminMsg);
-    window.open(adminWa, '_blank');
-
+    sessionStorage.setItem('kaasAcadId', id);
+    sessionStorage.setItem('kaasAcadName', name);
+    sessionStorage.setItem('kaasAcadPin', pin);
     document.getElementById('app').innerHTML =
-      '<div style="text-align:center;padding:60px 20px;">'+
+      '<div style="text-align:center;padding:40px 16px;">'+
         '<div style="font-size:64px;margin-bottom:16px;">🎉</div>'+
         '<div style="font-size:20px;font-weight:900;color:#16a34a;margin-bottom:6px;">تم إرسال طلب التسجيل!</div>'+
         '<div style="font-size:13px;color:#64748b;margin-bottom:6px;">'+name+'</div>'+
@@ -780,12 +781,11 @@ function submitAcadReg() {
           '<div style="font-size:24px;font-weight:900;color:#0f172a;letter-spacing:2px;">'+id+'</div>'+
           '<div style="font-size:10px;color:#64748b;margin-top:4px;">احتفظ بهذا الرقم وبالـ PIN</div>'+
         '</div>'+
+        '<a href="'+adminWaUrl+'" target="_blank" class="btn" style="max-width:300px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;text-decoration:none;border-radius:12px;padding:13px;font-size:13px;font-weight:900;">'+
+          '<i class="fab fa-whatsapp" style="font-size:18px;"></i> إرسال إشعار للإدارة عبر واتساب</a>'+
         '<button class="btn btn-dark" style="max-width:300px;margin:0 auto 8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول لوحة التحكم</button>'+
         '<button class="btn btn-light" style="max-width:300px;margin:0 auto;" onclick="go(\'home\')">العودة للرئيسية</button>'+
       '</div>';
-    sessionStorage.setItem('kaasAcadId', id);
-    sessionStorage.setItem('kaasAcadName', name);
-    sessionStorage.setItem('kaasAcadPin', pin);
   });
 }
 
