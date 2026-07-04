@@ -815,14 +815,15 @@ function doAcadLogin() {
   var btn = document.querySelector('#app .btn-red');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ التحقق...';
 
+  // جلب مباشر بدون كاش لضمان أحدث حالة اعتماد
+  invalidateCache('الأكاديميات');
   apiGet('الأكاديميات').then(function(list){
     var acad = list.find(function(a){return String(a.phone)===String(phone) && String(a.pin)===String(pin);});
     btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> دخول';
     if(!acad){err.textContent='رقم الهاتف أو الـ PIN غير صحيح';err.style.display='block';return;}
 
-    // فحص حالة الاعتماد
-    var localStatuses=_getLocalStatuses();
-    var status = localStatuses[acad.id] || acad.status || 'قيد الاعتماد';
+    // فحص حالة الاعتماد من الشيت مباشرة
+    var status = acad.status || 'قيد الاعتماد';
     if(status !== 'معتمد'){
       document.getElementById('app').innerHTML=
         '<div style="text-align:center;padding:60px 20px;max-width:360px;margin:0 auto;">'+
