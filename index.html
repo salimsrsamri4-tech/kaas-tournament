@@ -773,8 +773,8 @@ function submitAcadReg() {
           '<div style="font-size:24px;font-weight:900;color:#0f172a;letter-spacing:2px;">'+id+'</div>'+
           '<div style="font-size:10px;color:#64748b;margin-top:4px;">احتفظ بهذا الرقم وبالـ PIN</div>'+
         '</div>'+
-        '<a href="'+adminWaUrl+'" target="_blank" class="btn" style="max-width:300px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;text-decoration:none;border-radius:12px;padding:13px;font-size:13px;font-weight:900;">'+
-          '<i class="fab fa-whatsapp" style="font-size:18px;"></i> إرسال إشعار للإدارة عبر واتساب</a>'+
+        '<button onclick="location.href=\''+adminWaUrl+'\'" class="btn" style="max-width:300px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;border:none;border-radius:12px;padding:13px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;width:100%;box-sizing:border-box;">'+
+          '<i class="fab fa-whatsapp" style="font-size:18px;"></i> إرسال إشعار للإدارة عبر واتساب</button>'+
         '<button class="btn btn-dark" style="max-width:300px;margin:0 auto 8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول لوحة التحكم</button>'+
         '<button class="btn btn-light" style="max-width:300px;margin:0 auto;" onclick="go(\'home\')">العودة للرئيسية</button>'+
       '</div>';
