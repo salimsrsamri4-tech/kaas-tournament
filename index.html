@@ -431,6 +431,9 @@ function go(page) {
     admin_notifications: renderAdminNotifications,
     admin_messages: renderAdminMessages,
     admin_match: renderMatchSchedule,
+    admin_match_result: renderMatchResult,
+    admin_best_player: renderBestPlayer,
+    admin_referee: renderRefereeReport,
     acad_message: renderAcadMessage,
   };
   if(pages[page]) pages[page]();
@@ -1602,6 +1605,9 @@ function renderAdminPanel() {
           '<button onclick="go(\'admin_match\')" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-calendar-alt"></i><br>جدول المباريات</button>'+
           '<button onclick="go(\'admin_messages\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-envelope"></i><br>رسائل الأكاديميات</button>'+
           '<button onclick="go(\'admin_notifications\')" style="background:linear-gradient(135deg,#b8960c,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-bell"></i><br>الإشعارات</button>'+
+          '<button onclick="go(\'admin_match_result\')" style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-futbol"></i><br>نتائج المباريات</button>'+
+          '<button onclick="go(\'admin_best_player\')" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-star"></i><br>أفضل لاعب</button>'+
+          '<button onclick="go(\'admin_referee\')" style="background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-whistle"></i><br>تقارير الحكام</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<button onclick="testGasConnection()" style="width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-top:8px;"><i class="fas fa-wifi"></i> اختبار الاتصال بجوجل شيت</button>'+
@@ -1762,6 +1768,447 @@ function applyAdminFilter(){
 
   var list = document.getElementById('adminPlayersList');
   if(list) list.innerHTML = html;
+}
+
+// ════════════════════════════════════════
+// نتائج المباريات
+// ════════════════════════════════════════
+function renderMatchResult(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('اللاعبون').then(function(players){
+    window._mrPlayers = players;
+    var acadNames=[];
+    players.forEach(function(p){var n=p.academy_name||'';if(n&&acadNames.indexOf(n)<0)acadNames.push(n);});
+    acadNames.sort();
+    var acadOpts = acadNames.map(function(n){return '<option>'+n+'</option>';}).join('');
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:15px;font-weight:900;"><i class="fas fa-futbol"></i> نتائج المباريات</div><div style="font-size:10px;opacity:.6;">تسجيل وتحديث نتائج المباريات</div></div>'+
+      '</div>'+
+      '<div style="padding:16px;padding-bottom:40px;">'+
+
+      /* بطاقة معلومات المباراة */
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-info-circle"></i> معلومات المباراة</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">الفريق الأول</label>'+
+          '<select class="inp" id="mrTeam1"><option value="">-- اختر أكاديمية --</option>'+acadOpts+'</select></div>'+
+          '<div><label class="lbl">الفريق الثاني / المنافس</label>'+
+          '<input class="inp" id="mrTeam2" placeholder="اسم الفريق..."></div>'+
+        '</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">التاريخ</label><input type="date" class="inp" id="mrDate"></div>'+
+          '<div><label class="lbl">الوقت</label><input type="time" class="inp" id="mrTime"></div>'+
+        '</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">الملعب</label><input class="inp" id="mrVenue" placeholder="اسم الملعب..."></div>'+
+          '<div><label class="lbl">الفئة</label>'+
+          '<select class="inp" id="mrCat">'+
+            '<option value="">اختر الفئة</option>'+
+            CATEGORIES.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('')+
+          '</select></div>'+
+        '</div>'+
+      '</div>'+
+
+      /* النتيجة */
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-chart-bar"></i> النتيجة النهائية</div>'+
+        '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 0;">'+
+          '<div style="text-align:center;">'+
+            '<div style="font-size:11px;color:#64748b;font-weight:700;margin-bottom:6px;">الفريق الأول</div>'+
+            '<input type="number" id="mrScore1" min="0" value="0" style="width:70px;height:70px;border:3px solid #1d4ed8;border-radius:14px;font-size:32px;font-weight:900;text-align:center;font-family:Cairo,sans-serif;outline:none;color:#1d4ed8;">'+
+          '</div>'+
+          '<div style="font-size:28px;font-weight:900;color:#94a3b8;">—</div>'+
+          '<div style="text-align:center;">'+
+            '<div style="font-size:11px;color:#64748b;font-weight:700;margin-bottom:6px;">الفريق الثاني</div>'+
+            '<input type="number" id="mrScore2" min="0" value="0" style="width:70px;height:70px;border:3px solid var(--red);border-radius:14px;font-size:32px;font-weight:900;text-align:center;font-family:Cairo,sans-serif;outline:none;color:var(--red);">'+
+          '</div>'+
+        '</div>'+
+        '<div class="mb" style="margin-top:8px;">'+
+          '<label class="lbl">حالة المباراة</label>'+
+          '<select class="inp" id="mrStatus">'+
+            '<option value="منتهية">منتهية</option>'+
+            '<option value="جارية">جارية</option>'+
+            '<option value="موقوفة">موقوفة</option>'+
+            '<option value="ملغاة">ملغاة</option>'+
+          '</select>'+
+        '</div>'+
+      '</div>'+
+
+      /* الأهداف */
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<span><i class="fas fa-futbol"></i> الأهداف</span>'+
+          '<button onclick="addGoalRow()" style="background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">+ إضافة هدف</button>'+
+        '</div>'+
+        '<div id="goalsList"></div>'+
+      '</div>'+
+
+      /* التبديلات */
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<span><i class="fas fa-exchange-alt"></i> التبديلات</span>'+
+          '<button onclick="addSubRow()" style="background:#0d3318;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">+ إضافة تبديل</button>'+
+        '</div>'+
+        '<div id="subsList"></div>'+
+      '</div>'+
+
+      /* اسم الحكم */
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-whistle"></i> الحكم</div>'+
+        '<input class="inp" id="mrReferee" placeholder="اسم الحكم الرئيسي...">'+
+      '</div>'+
+
+      /* ملاحظات */
+      '<div class="card" style="margin-bottom:20px;">'+
+        '<div class="sec-title"><i class="fas fa-sticky-note"></i> ملاحظات</div>'+
+        '<textarea class="inp" id="mrNotes" rows="3" placeholder="أي ملاحظات إضافية..."></textarea>'+
+      '</div>'+
+
+      '<button onclick="saveMatchResult()" class="btn" style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;width:100%;font-size:14px;font-weight:900;">'+
+        '<i class="fas fa-save"></i> حفظ النتيجة</button>'+
+      '</div>';
+  });
+}
+
+function addGoalRow(){
+  var div=document.createElement('div');
+  div.className='goal-row';
+  div.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:8px;';
+  div.innerHTML=
+    '<input class="inp goal-scorer" placeholder="اسم اللاعب..." style="flex:2;font-size:12px;padding:8px 10px;">'+
+    '<input type="number" class="inp goal-min" placeholder="د" min="1" max="120" style="flex:0 0 52px;font-size:12px;padding:8px 6px;text-align:center;">'+
+    '<select class="inp goal-team" style="flex:1;font-size:11px;padding:8px 4px;">'+
+      '<option value="1">فريق 1</option>'+
+      '<option value="2">فريق 2</option>'+
+    '</select>'+
+    '<button onclick="this.parentElement.remove()" style="background:#fff0f0;color:var(--red);border:1px solid #fecaca;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:13px;">✕</button>';
+  document.getElementById('goalsList').appendChild(div);
+}
+
+function addSubRow(){
+  var div=document.createElement('div');
+  div.className='sub-row';
+  div.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:8px;';
+  div.innerHTML=
+    '<input class="inp sub-out" placeholder="خارج..." style="flex:2;font-size:12px;padding:8px 10px;">'+
+    '<span style="color:#94a3b8;font-size:12px;">↔</span>'+
+    '<input class="inp sub-in" placeholder="داخل..." style="flex:2;font-size:12px;padding:8px 10px;">'+
+    '<input type="number" class="inp sub-min" placeholder="د" min="1" max="120" style="flex:0 0 52px;font-size:12px;padding:8px 6px;text-align:center;">'+
+    '<button onclick="this.parentElement.remove()" style="background:#fff0f0;color:var(--red);border:1px solid #fecaca;border-radius:8px;padding:7px 10px;cursor:pointer;font-size:13px;">✕</button>';
+  document.getElementById('subsList').appendChild(div);
+}
+
+function saveMatchResult(){
+  var team1   = (document.getElementById('mrTeam1').value||'').trim();
+  var team2   = (document.getElementById('mrTeam2').value||'').trim();
+  var score1  = document.getElementById('mrScore1').value||'0';
+  var score2  = document.getElementById('mrScore2').value||'0';
+  var date    = document.getElementById('mrDate').value;
+  var time    = document.getElementById('mrTime').value;
+  var venue   = (document.getElementById('mrVenue').value||'').trim();
+  var catId   = document.getElementById('mrCat').value;
+  var status  = document.getElementById('mrStatus').value;
+  var referee = (document.getElementById('mrReferee').value||'').trim();
+  var notes   = (document.getElementById('mrNotes').value||'').trim();
+
+  if(!team1||!team2){alert('الرجاء إدخال اسمي الفريقين');return;}
+
+  var goals=[], subs=[];
+  document.querySelectorAll('.goal-row').forEach(function(r){
+    var s=(r.querySelector('.goal-scorer').value||'').trim();
+    var m=r.querySelector('.goal-min').value;
+    var t=r.querySelector('.goal-team').value;
+    if(s) goals.push({scorer:s, minute:m, team:t==='1'?team1:team2});
+  });
+  document.querySelectorAll('.sub-row').forEach(function(r){
+    var o=(r.querySelector('.sub-out').value||'').trim();
+    var i=(r.querySelector('.sub-in').value||'').trim();
+    var m=r.querySelector('.sub-min').value;
+    if(o||i) subs.push({out:o, in:i, minute:m});
+  });
+
+  var row = {
+    match_id: 'M'+Date.now().toString().slice(-8),
+    team1:team1, team2:team2, score1:score1, score2:score2,
+    result: score1+' - '+score2,
+    winner: parseInt(score1)>parseInt(score2)?team1:(parseInt(score2)>parseInt(score1)?team2:'تعادل'),
+    date:date, time:time, venue:venue, cat_id:catId,
+    status:status, referee:referee, notes:notes,
+    goals: JSON.stringify(goals), subs: JSON.stringify(subs),
+    saved_at: new Date().toLocaleDateString('ar')
+  };
+
+  var btn=document.querySelector('[onclick="saveMatchResult()"]');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
+
+  apiAppend('نتائج المباريات', row).then(function(){
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> تم الحفظ بنجاح!';
+    btn.style.background='linear-gradient(135deg,#16a34a,#14532d)';
+    /* عرض ملخص */
+    var summary = '⚽ '+team1+' '+score1+' - '+score2+' '+team2;
+    if(goals.length) summary += '\n\n📌 الأهداف:\n'+goals.map(function(g){return '• '+g.scorer+' ('+g.minute+'د) - '+g.team;}).join('\n');
+    if(subs.length)  summary += '\n\n🔄 التبديلات:\n'+subs.map(function(s){return '• ↑'+s.in+' ↓'+s.out+' ('+s.minute+'د)';}).join('\n');
+    setTimeout(function(){ alert('✅ تم حفظ النتيجة بنجاح!\n\n'+summary); go('admin_panel'); }, 400);
+  });
+}
+
+// ════════════════════════════════════════
+// أفضل لاعب
+// ════════════════════════════════════════
+function renderBestPlayer(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  Promise.all([apiGet('اللاعبون'), apiGet('أفضل لاعب')]).then(function(res){
+    var players=res[0], prev=res[1]||[];
+    window._bpPlayers=players;
+    var last = prev.length ? prev[prev.length-1] : null;
+
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#92700a,#d4af37);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:15px;font-weight:900;">⭐ أفضل لاعب</div><div style="font-size:10px;opacity:.8;">اختيار أفضل لاعب وعرضه على المنصة</div></div>'+
+      '</div>'+
+      '<div style="padding:16px;padding-bottom:40px;">'+
+
+      /* آخر اختيار */
+      (last ?
+      '<div style="background:linear-gradient(135deg,#fefce8,#fef9c3);border:2px solid #d4af37;border-radius:14px;padding:14px;margin-bottom:16px;">'+
+        '<div style="font-size:11px;color:#92700a;font-weight:800;margin-bottom:6px;">⭐ آخر اختيار معتمد</div>'+
+        '<div style="font-size:14px;font-weight:900;color:#1a1a2e;">'+last.player_name+'</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-top:2px;">'+last.academy_name+' · '+last.category+' · '+last.award_title+'</div>'+
+      '</div>' : '')+
+
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-filter"></i> تصفية اللاعبين</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">الفئة</label>'+
+          '<select class="inp" id="bpCat" onchange="filterBpPlayers()">'+
+            '<option value="">كل الفئات</option>'+
+            CATEGORIES.map(function(c){return '<option value="'+c.id+'">'+c.name+'</option>';}).join('')+
+          '</select></div>'+
+          '<div><label class="lbl">الأكاديمية</label>'+
+          '<select class="inp" id="bpAcad" onchange="filterBpPlayers()"><option value="">الكل</option>'+
+            (function(){var ns=[];players.forEach(function(p){var n=p.academy_name||'';if(n&&ns.indexOf(n)<0)ns.push(n);});ns.sort();return ns.map(function(n){return '<option>'+n+'</option>';}).join('');})() +
+          '</select></div>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">🔍 بحث باسم اللاعب</label>'+
+          '<input class="inp" id="bpSearch" oninput="filterBpPlayers()" placeholder="ابحث...">'+
+        '</div>'+
+        '<div id="bpPlayersList" style="max-height:300px;overflow-y:auto;"></div>'+
+      '</div>'+
+
+      '<div class="card" id="bpSelected" style="display:none;margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-star"></i> اللاعب المختار</div>'+
+        '<div id="bpSelectedInfo" style="background:#fefce8;border-radius:10px;padding:12px;margin-bottom:12px;"></div>'+
+        '<div class="mb"><label class="lbl">عنوان الجائزة</label>'+
+          '<select class="inp" id="bpTitle">'+
+            '<option>أفضل لاعب في المباراة</option>'+
+            '<option>أفضل لاعب في الجولة</option>'+
+            '<option>أفضل لاعب في البطولة</option>'+
+            '<option>أفضل هداف</option>'+
+            '<option>أفضل حارس مرمى</option>'+
+          '</select>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">المباراة / المناسبة</label>'+
+          '<input class="inp" id="bpMatch" placeholder="مثال: مباراة أكاديمية X ضد Y">'+
+        '</div>'+
+        '<button onclick="saveBestPlayer()" class="btn" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;width:100%;font-size:14px;font-weight:900;">'+
+          '<i class="fas fa-star"></i> تأكيد الاختيار ونشره</button>'+
+      '</div>'+
+      '</div>';
+
+    filterBpPlayers();
+  });
+}
+
+function filterBpPlayers(){
+  var cat=(document.getElementById('bpCat')||{}).value||'';
+  var acad=(document.getElementById('bpAcad')||{}).value||'';
+  var search=((document.getElementById('bpSearch')||{}).value||'').toLowerCase();
+  var players=(window._bpPlayers||[]).filter(function(p){
+    return (!cat||p.cat_id===cat)&&(!acad||p.academy_name===acad)&&
+           (!search||(p.name||'').toLowerCase().includes(search));
+  });
+  var html=players.map(function(p){
+    var cat=CATEGORIES.find(function(c){return c.id===p.cat_id;})||{};
+    var photo=getPlayerPhoto(p.id||'');
+    return '<div onclick="selectBpPlayer(\''+p.id+'\',\''+p.name.replace(/'/g,'')+'\',\''+p.academy_name+'\',\''+(cat.name||'')+'\')\" '+
+      'style="display:flex;align-items:center;gap:10px;padding:10px;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:6px;cursor:pointer;background:#fff;transition:border .15s;" '+
+      'onmouseover="this.style.borderColor=\'#d4af37\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">'+
+      (photo?'<img src="'+photo+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;">':
+        '<div style="width:38px;height:38px;border-radius:50%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">👤</div>')+
+      '<div style="flex:1;"><div style="font-weight:800;font-size:13px;">'+p.name+'</div>'+
+      '<div style="font-size:10px;color:#64748b;">'+p.academy_name+' · '+(cat.label||'')+'</div></div>'+
+      '<i class="fas fa-chevron-left" style="color:#cbd5e1;font-size:12px;"></i>'+
+      '</div>';
+  }).join('');
+  var el=document.getElementById('bpPlayersList');
+  if(el) el.innerHTML=html||(players.length?'':'<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;">لا توجد نتائج</div>');
+}
+
+function selectBpPlayer(id,name,acad,cat){
+  window._bpChosen={id:id,name:name,acad:acad,cat:cat};
+  var info=document.getElementById('bpSelectedInfo');
+  if(info) info.innerHTML='<div style="font-size:14px;font-weight:900;color:#1a1a2e;">'+name+'</div>'+
+    '<div style="font-size:11px;color:#64748b;margin-top:3px;">'+acad+' · '+cat+'</div>';
+  var box=document.getElementById('bpSelected');
+  if(box){box.style.display='block';box.scrollIntoView({behavior:'smooth'});}
+}
+
+function saveBestPlayer(){
+  var ch=window._bpChosen;
+  if(!ch){alert('اختر لاعباً أولاً');return;}
+  var title=(document.getElementById('bpTitle').value||'').trim();
+  var match=(document.getElementById('bpMatch').value||'').trim();
+  var row={
+    player_id:ch.id, player_name:ch.name, academy_name:ch.acad,
+    category:ch.cat, award_title:title, match_context:match,
+    date:new Date().toLocaleDateString('ar'),
+    awarded_by: sessionStorage.getItem('kaasAcadName')||'الإدارة'
+  };
+  var btn=document.querySelector('[onclick="saveBestPlayer()"]');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ النشر...';
+  invalidateCache('أفضل لاعب');
+  apiAppend('أفضل لاعب',row).then(function(){
+    alert('✅ تم اختيار '+ch.name+' كـ"'+title+'" ونشره على المنصة!');
+    go('admin_panel');
+  });
+}
+
+// ════════════════════════════════════════
+// تقارير الحكام
+// ════════════════════════════════════════
+function renderRefereeReport(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('تقارير الحكام').then(function(reports){
+    var prev=(reports||[]).slice(-5).reverse();
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:15px;font-weight:900;"><i class="fas fa-whistle"></i> تقارير الحكام</div><div style="font-size:10px;opacity:.7;">توثيق بيانات وتقرير الحكم</div></div>'+
+      '</div>'+
+      '<div style="padding:16px;padding-bottom:40px;">'+
+
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-user-tie"></i> بيانات الحكم</div>'+
+        '<div class="mb"><label class="lbl">اسم الحكم الرئيسي</label><input class="inp" id="rfName" placeholder="اسم الحكم..."></div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">الحكم المساعد 1</label><input class="inp" id="rfAs1" placeholder="الاسم..."></div>'+
+          '<div><label class="lbl">الحكم المساعد 2</label><input class="inp" id="rfAs2" placeholder="الاسم..."></div>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">الرابع</label><input class="inp" id="rfFourth" placeholder="اسم الحكم الرابع..."></div>'+
+      '</div>'+
+
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-futbol"></i> تفاصيل المباراة</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">الفريق الأول</label><input class="inp" id="rfTeam1" placeholder="الفريق..."></div>'+
+          '<div><label class="lbl">الفريق الثاني</label><input class="inp" id="rfTeam2" placeholder="الفريق..."></div>'+
+        '</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">التاريخ</label><input type="date" class="inp" id="rfDate"></div>'+
+          '<div><label class="lbl">الملعب</label><input class="inp" id="rfVenue" placeholder="الملعب..."></div>'+
+        '</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">النتيجة (فريق 1)</label><input type="number" class="inp" id="rfScore1" value="0" min="0"></div>'+
+          '<div><label class="lbl">النتيجة (فريق 2)</label><input type="number" class="inp" id="rfScore2" value="0" min="0"></div>'+
+        '</div>'+
+      '</div>'+
+
+      '<div class="card" style="margin-bottom:14px;">'+
+        '<div class="sec-title"><i class="fas fa-cards-blank"></i> البطاقات والحوادث</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">'+
+          '<div style="text-align:center;background:#fef9c3;border-radius:10px;padding:10px 4px;">'+
+            '<div style="font-size:20px;">🟨</div>'+
+            '<div style="font-size:10px;color:#92700a;font-weight:800;margin:4px 0;">صفراء ف1</div>'+
+            '<input type="number" id="rfY1" value="0" min="0" style="width:100%;text-align:center;border:1.5px solid #fde68a;border-radius:6px;padding:4px;font-family:Cairo,sans-serif;font-size:13px;font-weight:800;">'+
+          '</div>'+
+          '<div style="text-align:center;background:#fef9c3;border-radius:10px;padding:10px 4px;">'+
+            '<div style="font-size:20px;">🟨</div>'+
+            '<div style="font-size:10px;color:#92700a;font-weight:800;margin:4px 0;">صفراء ف2</div>'+
+            '<input type="number" id="rfY2" value="0" min="0" style="width:100%;text-align:center;border:1.5px solid #fde68a;border-radius:6px;padding:4px;font-family:Cairo,sans-serif;font-size:13px;font-weight:800;">'+
+          '</div>'+
+          '<div style="text-align:center;background:#fff1f2;border-radius:10px;padding:10px 4px;">'+
+            '<div style="font-size:20px;">🟥</div>'+
+            '<div style="font-size:10px;color:#9f1239;font-weight:800;margin:4px 0;">حمراء ف1</div>'+
+            '<input type="number" id="rfR1" value="0" min="0" style="width:100%;text-align:center;border:1.5px solid #fecdd3;border-radius:6px;padding:4px;font-family:Cairo,sans-serif;font-size:13px;font-weight:800;">'+
+          '</div>'+
+          '<div style="text-align:center;background:#fff1f2;border-radius:10px;padding:10px 4px;">'+
+            '<div style="font-size:20px;">🟥</div>'+
+            '<div style="font-size:10px;color:#9f1239;font-weight:800;margin:4px 0;">حمراء ف2</div>'+
+            '<input type="number" id="rfR2" value="0" min="0" style="width:100%;text-align:center;border:1.5px solid #fecdd3;border-radius:6px;padding:4px;font-family:Cairo,sans-serif;font-size:13px;font-weight:800;">'+
+          '</div>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">تقرير الحكم (ملاحظات وحوادث)</label>'+
+          '<textarea class="inp" id="rfNotes" rows="4" placeholder="سجّل أي حوادث أو ملاحظات هامة خلال المباراة..."></textarea>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">تقييم سير المباراة</label>'+
+          '<select class="inp" id="rfRating">'+
+            '<option value="ممتاز">ممتاز</option>'+
+            '<option value="جيد جداً">جيد جداً</option>'+
+            '<option value="جيد">جيد</option>'+
+            '<option value="مقبول">مقبول</option>'+
+          '</select>'+
+        '</div>'+
+      '</div>'+
+
+      '<button onclick="saveRefereeReport()" class="btn" style="background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;width:100%;font-size:14px;font-weight:900;margin-bottom:20px;">'+
+        '<i class="fas fa-save"></i> حفظ التقرير</button>'+
+
+      /* آخر التقارير */
+      (prev.length ?
+      '<div class="card">'+
+        '<div class="sec-title"><i class="fas fa-history"></i> آخر التقارير</div>'+
+        prev.map(function(r){
+          return '<div style="padding:10px;border:1px solid #f1f5f9;border-radius:10px;margin-bottom:8px;">'+
+            '<div style="font-size:12px;font-weight:800;color:#1a1a2e;">'+r.referee_name+' — '+r.team1+' vs '+r.team2+'</div>'+
+            '<div style="font-size:10px;color:#64748b;margin-top:2px;">'+r.date+' · '+r.rating+'</div>'+
+          '</div>';
+        }).join('')+
+      '</div>' : '')+
+
+      '</div>';
+  });
+}
+
+function saveRefereeReport(){
+  var name=(document.getElementById('rfName').value||'').trim();
+  var team1=(document.getElementById('rfTeam1').value||'').trim();
+  var team2=(document.getElementById('rfTeam2').value||'').trim();
+  if(!name){alert('أدخل اسم الحكم');return;}
+  if(!team1||!team2){alert('أدخل اسمي الفريقين');return;}
+
+  var row={
+    report_id:'RF'+Date.now().toString().slice(-8),
+    referee_name:name,
+    assistant1:(document.getElementById('rfAs1').value||'').trim(),
+    assistant2:(document.getElementById('rfAs2').value||'').trim(),
+    fourth:(document.getElementById('rfFourth').value||'').trim(),
+    team1:team1, team2:team2,
+    score1:document.getElementById('rfScore1').value,
+    score2:document.getElementById('rfScore2').value,
+    date:document.getElementById('rfDate').value,
+    venue:(document.getElementById('rfVenue').value||'').trim(),
+    yellow1:document.getElementById('rfY1').value,
+    yellow2:document.getElementById('rfY2').value,
+    red1:document.getElementById('rfR1').value,
+    red2:document.getElementById('rfR2').value,
+    notes:(document.getElementById('rfNotes').value||'').trim(),
+    rating:document.getElementById('rfRating').value,
+    saved_at:new Date().toLocaleDateString('ar')
+  };
+
+  var btn=document.querySelector('[onclick="saveRefereeReport()"]');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
+  invalidateCache('تقارير الحكام');
+  apiAppend('تقارير الحكام',row).then(function(){
+    alert('✅ تم حفظ تقرير الحكم بنجاح!');
+    go('admin_panel');
+  });
 }
 
 function exportWA() {
