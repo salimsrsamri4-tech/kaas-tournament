@@ -188,6 +188,12 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('about_tournament')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(212,175,55,.15);border:none;border-radius:10px;color:#ffdd57;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;text-align:right;margin-bottom:4px;">
       <i class="fas fa-info-circle" style="width:18px;text-align:center;color:#ffdd57;"></i> عن البطولة
     </button>
+    <button onclick="closeSidebar();go('match_schedule')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-calendar-check" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> جدول المباريات
+    </button>
+    <button onclick="closeSidebar();go('standings')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-table" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> لوحة الترتيب
+    </button>
   </div>
 
   <!-- قسم الإدارة -->
@@ -437,6 +443,8 @@ function go(page) {
     admin_academies_approval: renderAcademiesApproval,
     about_tournament: renderAboutTournament,
     acad_message: renderAcadMessage,
+    match_schedule: renderPublicMatchSchedule,
+    standings: renderStandings,
   };
   if(pages[page]) pages[page]();
 }
@@ -531,6 +539,7 @@ function renderHome() {
           '<div class="hstat"><div class="hstat-n">'+total+'</div><div class="hstat-l">أكاديمية</div></div>'+
           '<div class="hstat"><div class="hstat-n">'+totalPlayers+'</div><div class="hstat-l">لاعب</div></div>'+
           '<div class="hstat"><div class="hstat-n">4</div><div class="hstat-l">فئات</div></div>'+
+          '<div class="hstat"><div class="hstat-n" style="color:#ff6b6b;" id="homeCountdown">...</div><div class="hstat-l">يوم متبقي</div></div>'+
         '</div>'+
       '</div>'+
       // معلومات البطولة
@@ -611,6 +620,16 @@ function renderHome() {
         '</div>'+
         '<div style="height:16px;"></div>'+
       '</div>';
+    // حساب العد التنازلي
+    setTimeout(function(){
+      var el = document.getElementById('homeCountdown');
+      if(el){
+        var deadline = new Date('2026-08-06T00:00:00');
+        var now = new Date();
+        var diff = Math.ceil((deadline - now)/(1000*60*60*24));
+        el.textContent = diff > 0 ? diff : '0';
+      }
+    }, 100);
   });
 }
 
@@ -904,6 +923,10 @@ function renderAcadDashboard() {
             '<button class="btn" onclick="printKaasCards()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;padding:11px;"><i class="fas fa-file-pdf"></i> طباعة / PDF</button>'+
           '</div>':'')+
         '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة / ملاحظة للإدارة</button>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
+          '<button class="btn" onclick="printPlayersList()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;padding:11px;"><i class="fas fa-print"></i> طباعة القائمة</button>'+
+          '<button class="btn" onclick="showAcadCard()" style="background:linear-gradient(135deg,var(--gold),#b8960c);color:var(--dark);padding:11px;"><i class="fas fa-id-card"></i> بطاقتي</button>'+
+        '</div>'+
       '</div>'+
       '<div class="section">'+
         '<div class="sec-title"><i class="fas fa-users" style="color:var(--red)"></i> اللاعبون المسجلون</div>';
@@ -1639,6 +1662,10 @@ function renderAdminPanel() {
           '<button onclick="go(\'admin_academies_approval\')" style="background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;position:relative;"><i class="fas fa-building"></i><br>اعتماد الأكاديميات</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
+          '<button onclick="exportToCSV()" style="background:linear-gradient(135deg,#065f46,#047857);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-file-csv"></i><br>تصدير Excel</button>'+
+          '<button onclick="sendReminderWhatsApp()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fab fa-whatsapp"></i><br>تذكير الأكاديميات</button>'+
+        '</div>'+
         '<button onclick="testGasConnection()" style="width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-top:8px;"><i class="fas fa-wifi"></i> اختبار الاتصال بجوجل شيت</button>'+
       '</div>';
   });
@@ -2680,6 +2707,26 @@ function renderAdminNotifications(){
             '<div style="font-size:11px;color:#64748b;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(r['الرسالة']||'')+'</div></div>';
         }).join('')
       :'')+
+
+      // زر تذكير الأكاديميات المعلقة
+      '<div style="margin-top:16px;background:#fff;border-radius:12px;padding:14px;box-shadow:0 1px 6px rgba(0,0,0,.06);">'+
+        '<div style="font-size:13px;font-weight:900;color:#0f172a;margin-bottom:10px;"><i class="fab fa-whatsapp" style="color:#25d366;"></i> تذكير الأكاديميات المعلقة</div>'+
+        (function(){
+          var pending = acadList.filter(function(a){ return (a.status||'') !== 'معتمد'; });
+          if(!pending.length) return '<div style="color:#16a34a;font-size:12px;font-weight:700;">✓ جميع الأكاديميات معتمدة</div>';
+          return '<div style="font-size:11px;color:#64748b;margin-bottom:8px;">'+pending.length+' أكاديمية لم تكتمل بعد:</div>'+
+            pending.map(function(a){
+              var phone = (a.phone||'').replace(/\D/g,'');
+              var msg = encodeURIComponent('السلام عليكم ' + (a.name||'') + ' 🏆\nنذكّركم بضرورة إكمال تسجيل أكاديميتكم في بطولة كأس العرب للأكاديميات KAAS 2026.\nآخر موعد: 5 يوليو 2026\nللتسجيل: ' + (window.location.origin + window.location.pathname));
+              var waLink = phone ? 'https://api.whatsapp.com/send?phone=968'+phone+'&text='+msg : 'https://api.whatsapp.com/send?text='+msg;
+              return '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f1f5f9;">'+
+                '<div style="font-size:12px;font-weight:800;color:#0f172a;">'+(a.name||'أكاديمية')+'</div>'+
+                '<a href="'+waLink+'" target="_blank" style="background:#25d366;color:#fff;border-radius:8px;padding:5px 10px;text-decoration:none;font-size:11px;font-weight:700;white-space:nowrap;"><i class="fab fa-whatsapp"></i> إرسال</a>'+
+              '</div>';
+            }).join('');
+        })()+
+      '</div>'+
+
       '</div>';
   });
 }
@@ -3118,6 +3165,303 @@ function handleAcadLink(){
     go('home');
   });
   return true;
+}
+
+// ════════════════════════════════════════
+// جدول المباريات العام (public)
+// ════════════════════════════════════════
+function renderPublicMatchSchedule(){
+  showL();
+  apiGet('جدول المباريات').then(function(rows){
+    if(!Array.isArray(rows)) rows=[];
+    // تجميع حسب التاريخ
+    var byDate={};
+    rows.forEach(function(r){
+      var d=r.date||r['التاريخ']||'غير محدد';
+      if(!byDate[d]) byDate[d]=[];
+      byDate[d].push(r);
+    });
+    var dates=Object.keys(byDate).sort();
+    var html=
+      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:16px;font-weight:900;">📅 جدول المباريات</div><div style="font-size:10px;opacity:.6;">'+rows.length+' مباراة</div></div>'+
+      '</div>'+
+      '<div style="padding:14px;">';
+    if(!rows.length){
+      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم يُنشر جدول المباريات بعد</div>';
+    } else {
+      dates.forEach(function(d){
+        html+='<div style="font-size:13px;font-weight:900;color:var(--dark);margin:14px 0 8px;display:flex;align-items:center;gap:8px;">'+
+          '<span style="background:var(--green);color:#fff;border-radius:20px;padding:2px 12px;font-size:11px;">'+d+'</span>'+
+        '</div>';
+        byDate[d].forEach(function(m){
+          var team1=m.team1||m['الفريق الأول']||'؟';
+          var team2=m.team2||m['الفريق الثاني']||'؟';
+          var time=m.time||m['الوقت']||'';
+          var field=m.field||m['الملعب']||'';
+          var result=m.result||m['النتيجة']||'';
+          var catId=m.cat_id||m['الفئة']||'';
+          var ci=getCatInfo(catId);
+          html+='<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid #e2e8f0;box-shadow:0 2px 6px rgba(0,0,0,.05);">'+
+            (ci?'<div style="margin-bottom:8px;"><span style="background:#f0fdf4;color:var(--green);font-size:10px;font-weight:800;padding:2px 10px;border-radius:10px;">'+ci.name+'</span></div>':'')+
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+              '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:var(--dark);">'+team1+'</div>'+
+              '<div style="background:'+(result?'var(--green)':'#e2e8f0')+';color:'+(result?'#fff':'#64748b')+';border-radius:10px;padding:6px 14px;font-size:'+(result?'14px':'12px')+';font-weight:900;text-align:center;min-width:60px;">'+
+                (result||'vs')+
+              '</div>'+
+              '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:var(--dark);">'+team2+'</div>'+
+            '</div>'+
+            '<div style="display:flex;gap:12px;margin-top:8px;justify-content:center;">'+
+              (time?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-clock" style="color:var(--gold);"></i> '+time+'</span>':'')+
+              (field?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-map-marker-alt" style="color:var(--red);"></i> '+field+'</span>':'')+
+            '</div>'+
+          '</div>';
+        });
+      });
+    }
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  }).catch(function(){
+    document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل الجدول</div>';
+  });
+}
+
+// ════════════════════════════════════════
+// لوحة الترتيب (public)
+// ════════════════════════════════════════
+function renderStandings(){
+  showL();
+  apiGet('الترتيب').then(function(rows){
+    if(!Array.isArray(rows)) rows=[];
+    // تجميع حسب الفئة
+    var byCat={};
+    rows.forEach(function(r){
+      var c=r.cat_id||r['الفئة']||'عام';
+      if(!byCat[c]) byCat[c]=[];
+      byCat[c].push(r);
+    });
+    // ترتيب كل فئة حسب النقاط
+    Object.keys(byCat).forEach(function(c){
+      byCat[c].sort(function(a,b){ return (Number(b.points||b['النقاط']||0))-(Number(a.points||a['النقاط']||0)); });
+    });
+    var html=
+      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:16px;font-weight:900;">🏆 لوحة الترتيب</div><div style="font-size:10px;opacity:.6;">ترتيب الفرق</div></div>'+
+      '</div>'+
+      '<div style="padding:14px;">';
+    if(!rows.length){
+      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم تُنشر نتائج الترتيب بعد</div>';
+    } else {
+      Object.keys(byCat).forEach(function(catId){
+        var ci=getCatInfo(catId);
+        var label=ci?ci.name:catId;
+        var teams=byCat[catId];
+        html+='<div style="margin-bottom:18px;">'+
+          '<div style="font-size:13px;font-weight:900;color:var(--dark);margin-bottom:8px;display:flex;align-items:center;gap:8px;">'+
+            '<span style="background:var(--green);color:#fff;border-radius:20px;padding:2px 12px;font-size:11px;">'+label+'</span>'+
+          '</div>'+
+          '<div style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.06);">'+
+          '<table style="width:100%;border-collapse:collapse;font-family:Cairo,sans-serif;font-size:11px;">'+
+            '<thead><tr style="background:var(--green);color:#fff;">'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;">#</th>'+
+              '<th style="padding:8px 6px;text-align:right;font-weight:900;">الفريق</th>'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;">ل</th>'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;">ف</th>'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;">ت</th>'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;">خ</th>'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;">ف/ع</th>'+
+              '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#ffdd57;">ن</th>'+
+            '</tr></thead>'+
+            '<tbody>'+
+            teams.map(function(t,i){
+              var gf=Number(t.gf||t['له']||0);
+              var ga=Number(t.ga||t['عليه']||0);
+              var pts=Number(t.points||t['النقاط']||0);
+              var rowBg=i===0?'#fefce8':i===1?'#f0fdf4':i===2?'#fef2f2':'#fff';
+              return '<tr style="background:'+rowBg+';border-bottom:1px solid #f1f5f9;">'+
+                '<td style="padding:8px 6px;text-align:center;font-weight:900;color:'+(i===0?'var(--gold)':i===1?'#94a3b8':i===2?'#b87333':'#64748b')+'">'+(i+1)+'</td>'+
+                '<td style="padding:8px 6px;font-weight:800;color:var(--dark);">'+(t.team||t['الفريق']||'')+'</td>'+
+                '<td style="padding:8px 6px;text-align:center;">'+(t.played||t['لعب']||0)+'</td>'+
+                '<td style="padding:8px 6px;text-align:center;color:#16a34a;">'+(t.won||t['فاز']||0)+'</td>'+
+                '<td style="padding:8px 6px;text-align:center;color:#d97706;">'+(t.drawn||t['تعادل']||0)+'</td>'+
+                '<td style="padding:8px 6px;text-align:center;color:var(--red);">'+(t.lost||t['خسر']||0)+'</td>'+
+                '<td style="padding:8px 6px;text-align:center;">'+gf+':'+ga+'</td>'+
+                '<td style="padding:8px 6px;text-align:center;font-weight:900;font-size:13px;color:var(--green);">'+pts+'</td>'+
+              '</tr>';
+            }).join('')+
+            '</tbody></table></div></div>';
+      });
+    }
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  }).catch(function(){
+    document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل الترتيب</div>';
+  });
+}
+
+// ════════════════════════════════════════
+// طباعة قائمة اللاعبين
+// ════════════════════════════════════════
+function printPlayersList(){
+  var players=window._kaasPlayers||[];
+  var acadName=sessionStorage.getItem('kaasAcadName')||'الأكاديمية';
+  var acadId=sessionStorage.getItem('kaasAcadId')||'';
+  if(!players.length){ alert('لا يوجد لاعبون مسجلون بعد'); return; }
+  var catLabels={cat1:'U10',cat2:'U12',cat3:'U14',cat4:'U16',cat5:'U18'};
+  var rows=players.map(function(p,i){
+    return '<tr style="border-bottom:1px solid #e2e8f0;">'+
+      '<td style="padding:8px;text-align:center;">'+(i+1)+'</td>'+
+      '<td style="padding:8px;font-weight:700;">'+(p.name||p['اسم اللاعب']||'')+'</td>'+
+      '<td style="padding:8px;text-align:center;">'+(p.birth||p['تاريخ الميلاد']||'')+'</td>'+
+      '<td style="padding:8px;text-align:center;">'+(p.jersey||p['رقم القميص']||'')+'</td>'+
+      '<td style="padding:8px;text-align:center;">'+(catLabels[p.cat_id||p['الفئة']]||p.cat_id||'')+'</td>'+
+    '</tr>';
+  }).join('');
+  var win=window.open('','_blank','width=800,height=600');
+  win.document.write('<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">'+
+    '<title>قائمة لاعبي '+acadName+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;color:#000;}'+
+    'h2{text-align:center;margin-bottom:4px;}p{text-align:center;color:#555;margin-bottom:16px;}'+
+    'table{width:100%;border-collapse:collapse;}th{background:#1b5e2e;color:#fff;padding:10px 8px;}'+
+    'tr:nth-child(even){background:#f8fafc;}@media print{button{display:none!important;}}</style>'+
+    '</head><body>'+
+    '<h2>'+acadName+'</h2>'+
+    '<p>رمز الأكاديمية: '+acadId+' &nbsp;|&nbsp; عدد اللاعبين: '+players.length+'</p>'+
+    '<button onclick="window.print()" style="display:block;margin:0 auto 16px;background:#1b5e2e;color:#fff;border:none;border-radius:8px;padding:10px 24px;font-size:14px;cursor:pointer;">طباعة</button>'+
+    '<table><thead><tr><th>#</th><th>اسم اللاعب</th><th>تاريخ الميلاد</th><th>رقم القميص</th><th>الفئة</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '</body></html>');
+  win.document.close();
+}
+
+// ════════════════════════════════════════
+// تصدير بيانات CSV/Excel
+// ════════════════════════════════════════
+function exportToCSV(){
+  showL();
+  Promise.all([apiGet('الأكاديميات'),apiGet('اللاعبون')]).then(function(res){
+    var acadList=res[0]||[];
+    var players=res[1]||[];
+    // BOM for Excel Arabic support
+    var BOM='﻿';
+    // Sheet 1: academies
+    var acadCsv=BOM+'اسم الأكاديمية,المدينة,الهاتف,الفئات,عدد اللاعبين,الحالة\n'+
+      acadList.map(function(a){
+        return [a.name||'',a.city||'',a.phone||'',a.cats||'',a.players||'',a.status||''].map(function(v){
+          return '"'+String(v).replace(/"/g,'""')+'"';
+        }).join(',');
+      }).join('\n');
+    var playersCsv='\n\nاسم اللاعب,تاريخ الميلاد,رقم القميص,الفئة,الأكاديمية\n'+
+      players.map(function(p){
+        return [p.name||'',p.birth||'',p.jersey||'',p.cat_id||'',p.academy_name||''].map(function(v){
+          return '"'+String(v).replace(/"/g,'""')+'"';
+        }).join(',');
+      }).join('\n');
+    var blob=new Blob([acadCsv+playersCsv],{type:'text/csv;charset=utf-8;'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='KAAS_Data_'+new Date().toISOString().slice(0,10)+'.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    hideL();
+  }).catch(function(){ hideL(); alert('فشل التصدير، حاول مجدداً'); });
+}
+
+// ════════════════════════════════════════
+// إرسال تذكير للأكاديميات غير المكتملة
+// ════════════════════════════════════════
+function sendReminderWhatsApp(){
+  showL();
+  apiGet('الأكاديميات').then(function(acadList){
+    hideL();
+    var pending=acadList.filter(function(a){ return (a.status||'')!=='معتمد'; });
+    if(!pending.length){
+      alert('جميع الأكاديميات معتمدة! لا يوجد تذكير مطلوب.');
+      return;
+    }
+    var regUrl=window.location.origin+window.location.pathname;
+    var modalHtml=
+      '<div class="modal-bg" onclick="if(event.target===this)this.remove()">'+
+        '<div class="modal">'+
+          '<div class="modal-handle"></div>'+
+          '<div class="modal-title"><i class="fab fa-whatsapp" style="color:#25d366;"></i> تذكير الأكاديميات المعلقة</div>'+
+          '<div style="background:#fffbeb;border-radius:10px;padding:10px 12px;font-size:12px;font-weight:700;color:#d97706;margin-bottom:12px;">'+
+            pending.length+' أكاديمية لم تكتمل — اضغط "إرسال" لكل أكاديمية'+
+          '</div>'+
+          pending.map(function(a){
+            var phone=(a.phone||'').replace(/\D/g,'');
+            var msg=encodeURIComponent('السلام عليكم '+( a.name||'')+' 🏆\nنذكّركم بضرورة إكمال تسجيل أكاديميتكم في بطولة كأس العرب للأكاديميات KAAS 2026.\nآخر موعد: 5 يوليو 2026\nرابط التسجيل: '+regUrl);
+            var waLink=phone?'https://api.whatsapp.com/send?phone=968'+phone+'&text='+msg:'https://api.whatsapp.com/send?text='+msg;
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">'+
+              '<div>'+
+                '<div style="font-size:13px;font-weight:800;">'+(a.name||'أكاديمية')+'</div>'+
+                '<div style="font-size:10px;color:#64748b;">'+(a.city||'')+(phone?' · '+phone:'')+'</div>'+
+              '</div>'+
+              '<a href="'+waLink+'" target="_blank" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border-radius:8px;padding:7px 12px;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap;">'+
+                '<i class="fab fa-whatsapp"></i> إرسال'+
+              '</a>'+
+            '</div>';
+          }).join('')+
+          '<button onclick="this.closest(\'.modal-bg\').remove()" class="btn btn-light" style="margin-top:12px;">إغلاق</button>'+
+        '</div>'+
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend',modalHtml);
+  }).catch(function(){ hideL(); alert('فشل تحميل البيانات'); });
+}
+
+// ════════════════════════════════════════
+// بطاقة الأكاديمية
+// ════════════════════════════════════════
+function showAcadCard(){
+  var id=sessionStorage.getItem('kaasAcadId')||'';
+  var name=sessionStorage.getItem('kaasAcadName')||'الأكاديمية';
+  var cats=(sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
+  var players=window._kaasPlayers||[];
+  var catLabels={cat1:'U10',cat2:'U12',cat3:'U14',cat4:'U16',cat5:'U18'};
+  var catByCat={};
+  cats.forEach(function(c){ catByCat[c]=players.filter(function(p){return (p.cat_id||p['الفئة'])===c;}).length; });
+
+  var cardHtml=
+    '<div class="modal-bg" onclick="if(event.target===this)this.remove()">'+
+      '<div class="modal">'+
+        '<div class="modal-handle"></div>'+
+        '<div id="acadCardPrint" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:16px;padding:20px;color:#fff;text-align:center;margin-bottom:14px;">'+
+          '<div style="width:64px;height:64px;border-radius:16px;background:rgba(212,175,55,.3);border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#ffdd57;margin:0 auto 12px;">'+
+            name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2)+
+          '</div>'+
+          '<div style="font-size:18px;font-weight:900;color:#fff;margin-bottom:4px;">'+name+'</div>'+
+          '<div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:12px;">'+id+' · '+CONFIG.TOURNAMENT_NAME+'</div>'+
+          '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'+
+            '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">'+
+              '<div style="font-size:20px;font-weight:900;color:var(--gold);">'+players.length+'</div>'+
+              '<div style="font-size:9px;color:rgba(255,255,255,.6);">لاعب</div>'+
+            '</div>'+
+            '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">'+
+              '<div style="font-size:20px;font-weight:900;color:var(--gold);">'+cats.length+'</div>'+
+              '<div style="font-size:9px;color:rgba(255,255,255,.6);">فئات</div>'+
+            '</div>'+
+            '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;">'+
+              '<div style="font-size:20px;font-weight:900;color:#10b981;">✓</div>'+
+              '<div style="font-size:9px;color:rgba(255,255,255,.6);">مسجل</div>'+
+            '</div>'+
+          '</div>'+
+          '<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;">'+
+            cats.map(function(c){
+              var ci=getCatInfo(c);
+              return '<span style="background:rgba(212,175,55,.25);border:1px solid rgba(212,175,55,.5);color:#ffdd57;font-size:10px;font-weight:800;padding:3px 10px;border-radius:10px;">'+(ci?ci.name:catLabels[c]||c)+' ('+( catByCat[c]||0)+' لاعب)</span>';
+            }).join('')+
+          '</div>'+
+          '<div style="margin-top:12px;font-size:10px;color:rgba(255,255,255,.5);">'+CONFIG.SEASON+' · KAAS</div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+          '<button onclick="window.print()" class="btn btn-dark" style="padding:11px;"><i class="fas fa-print"></i> طباعة</button>'+
+          '<button onclick="this.closest(\'.modal-bg\').remove()" class="btn btn-light" style="padding:11px;">إغلاق</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  document.body.insertAdjacentHTML('beforeend',cardHtml);
 }
 
 // ════════════════════════════════════════
