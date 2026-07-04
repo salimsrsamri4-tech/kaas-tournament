@@ -14,11 +14,11 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
 :root{--red:#b81d22;--green:#1b5e2e;--light-green:#2d7a40;--dark:#0f172a;--gold:#d4af37;}
 
 /* شريط التنقل */
-.navbar{background:#fff;padding:0 20px;height:72px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:3px solid #1b5e2e;box-shadow:0 2px 12px rgba(0,0,0,.12);}
+.navbar{background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:0 16px;height:64px;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:3px solid #d4af37;box-shadow:0 2px 12px rgba(0,0,0,.3);}
 .nav-brand{display:flex;align-items:center;gap:10px;}
 .nav-logo{width:36px;height:36px;background:var(--red);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0;letter-spacing:-1px;}
-.nav-title{font-size:14px;font-weight:900;color:#0d3318;letter-spacing:-.2px;}
-.nav-sub{font-size:9px;color:#1b5e2e;font-weight:700;letter-spacing:.5px;opacity:.8;}
+.nav-title{font-size:14px;font-weight:900;color:#fff;letter-spacing:-.2px;}
+.nav-sub{font-size:9px;color:rgba(255,255,255,.7);font-weight:700;letter-spacing:.5px;}
 .nav-btns{display:flex;gap:8px;}
 .nav-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Cairo',sans-serif;}
 .nav-btn.gold{background:var(--red);border-color:var(--red);color:#fff;}
@@ -134,7 +134,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
       <div class="nav-sub">ARAB ACADEMIES CUP (KAAS)</div>
     </div>
   </div>
-  <button onclick="openSidebar()" style="background:#1b5e2e;border:none;color:#fff;width:40px;height:40px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+  <button onclick="openSidebar()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
     <i class="fas fa-bars"></i>
   </button>
 </nav>
