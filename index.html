@@ -2229,6 +2229,12 @@ function renderAcademiesApproval(){
 }
 
 function _renderApprovalList(list){
+  var local=_getLocalStatuses();
+  // دمج القرارات المحلية مع بيانات الشيت
+  list=list.map(function(a){
+    if(local[a.id]) a.status=local[a.id];
+    return a;
+  });
   var pending=list.filter(function(a){return !a.status||a.status==='قيد الاعتماد';});
   var approved=list.filter(function(a){return a.status==='معتمد';});
   var rejected=list.filter(function(a){return a.status==='مرفوض';});
@@ -2293,41 +2299,43 @@ function _acadCard(a,showBtns){
   '</div>';
 }
 
+function _getLocalStatuses(){
+  try{return JSON.parse(localStorage.getItem('kaasAcadStatuses')||'{}');}catch(e){return {};}
+}
+function _saveLocalStatus(id,status){
+  var s=_getLocalStatuses(); s[id]=status;
+  localStorage.setItem('kaasAcadStatuses',JSON.stringify(s));
+}
+
 function approveAcad(id,nameEnc,phoneEnc){
   var name=decodeURIComponent(nameEnc);
-  var phone=decodeURIComponent(phoneEnc);
   if(!confirm('اعتماد أكاديمية: '+name+'؟'))return;
-  // تغيير مظهر البطاقة فوراً
+  _saveLocalStatus(id,'معتمد');
   var card=document.getElementById('acadCard_'+id);
   if(card){
+    card.style.transition='all .3s';
     card.style.background='#f0fdf4';
     card.style.border='2px solid #16a34a';
-    card.innerHTML='<div style="text-align:center;padding:16px;"><div style="font-size:32px;">✅</div><div style="font-size:13px;font-weight:900;color:#16a34a;margin-top:6px;">تم اعتماد '+name+'</div><div style="font-size:11px;color:#64748b;margin-top:4px;">جارٍ الحفظ...</div></div>';
+    card.innerHTML='<div style="text-align:center;padding:20px;"><div style="font-size:36px;">✅</div><div style="font-size:13px;font-weight:900;color:#16a34a;margin-top:8px;">تم الاعتماد</div><div style="font-size:11px;color:#64748b;margin-top:4px;">'+name+'</div></div>';
   }
   invalidateCache('الأكاديميات');
-  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'معتمد',updated_at:new Date().toLocaleDateString('ar')}).then(function(){
-    if(card) card.querySelector('div>div:last-child').textContent='تم الحفظ ✓';
-    setTimeout(function(){renderAcademiesApproval();},1200);
-  });
+  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'معتمد',updated_at:new Date().toLocaleDateString('ar')});
 }
 
 function rejectAcad(id,nameEnc,phoneEnc){
   var name=decodeURIComponent(nameEnc);
-  var phone=decodeURIComponent(phoneEnc);
   var reason=prompt('سبب الرفض (اختياري):','');
   if(reason===null)return;
-  // تغيير مظهر البطاقة فوراً
+  _saveLocalStatus(id,'مرفوض');
   var card=document.getElementById('acadCard_'+id);
   if(card){
+    card.style.transition='all .3s';
     card.style.background='#fef2f2';
     card.style.border='2px solid #dc2626';
-    card.innerHTML='<div style="text-align:center;padding:16px;"><div style="font-size:32px;">❌</div><div style="font-size:13px;font-weight:900;color:#dc2626;margin-top:6px;">تم رفض '+name+'</div><div style="font-size:11px;color:#64748b;margin-top:4px;">جارٍ الحفظ...</div></div>';
+    card.innerHTML='<div style="text-align:center;padding:20px;"><div style="font-size:36px;">❌</div><div style="font-size:13px;font-weight:900;color:#dc2626;margin-top:8px;">تم الرفض</div><div style="font-size:11px;color:#64748b;margin-top:4px;">'+name+'</div></div>';
   }
   invalidateCache('الأكاديميات');
-  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'مرفوض',reason:reason,updated_at:new Date().toLocaleDateString('ar')}).then(function(){
-    if(card) card.querySelector('div>div:last-child').textContent='تم الحفظ ✓';
-    setTimeout(function(){renderAcademiesApproval();},1200);
-  });
+  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'مرفوض',reason:reason,updated_at:new Date().toLocaleDateString('ar')});
 }
 
 function exportWA() {
