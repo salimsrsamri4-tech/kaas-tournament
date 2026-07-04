@@ -2355,7 +2355,7 @@ function approveAcad(id,nameEnc,phoneEnc){
     '</div>';
   }
   invalidateCache('الأكاديميات');
-  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'معتمد',updated_at:new Date().toLocaleDateString('ar')});
+  apiAppend('تحديث الأكاديميات',{'رقم الأكاديمية':id,'الحالة':'معتمد','سبب الرفض':'','تاريخ التحديث':new Date().toLocaleDateString('ar')});
 }
 
 function rejectAcad(id,nameEnc,phoneEnc){
@@ -2371,7 +2371,7 @@ function rejectAcad(id,nameEnc,phoneEnc){
     card.innerHTML='<div style="text-align:center;padding:20px;"><div style="font-size:36px;">❌</div><div style="font-size:13px;font-weight:900;color:#dc2626;margin-top:8px;">تم الرفض</div><div style="font-size:11px;color:#64748b;margin-top:4px;">'+name+'</div></div>';
   }
   invalidateCache('الأكاديميات');
-  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'مرفوض',reason:reason,updated_at:new Date().toLocaleDateString('ar')});
+  apiAppend('تحديث الأكاديميات',{'رقم الأكاديمية':id,'الحالة':'مرفوض','سبب الرفض':reason,'تاريخ التحديث':new Date().toLocaleDateString('ar')});
 }
 
 function exportWA() {
