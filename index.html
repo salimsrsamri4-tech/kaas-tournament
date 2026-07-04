@@ -2305,14 +2305,18 @@ function _acadCard(a,showBtns){
       '<i class="fas fa-phone"></i> '+(a.phone||'—')+
     '</div>'+
     (showBtns?
-      '<div style="display:flex;gap:8px;">'+
+      '<div style="display:flex;gap:8px;margin-bottom:8px;">'+
         '<button onclick="approveAcad(\''+a.id+'\',\''+encodeURIComponent(a.name||'')+'\',\''+encodeURIComponent(a.phone||'')+'\')" style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-check"></i> اعتماد</button>'+
         '<button onclick="rejectAcad(\''+a.id+'\',\''+encodeURIComponent(a.name||'')+'\',\''+encodeURIComponent(a.phone||'')+'\')" style="flex:1;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-times"></i> رفض</button>'+
-        '<a href="https://wa.me/968'+a.phone+'?text='+encodeURIComponent('السلام عليكم، نود الاستفسار بشأن طلب تسجيل أكاديمية '+(a.name||''))+'" target="_blank" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="fab fa-whatsapp"></i> تواصل</a>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button onclick="location.href=\'https://api.whatsapp.com/send?phone=968'+a.phone+'&text='+encodeURIComponent('السلام عليكم، نود الاستفسار بشأن طلب تسجيل أكاديمية '+(a.name||''))+'\';" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="fab fa-whatsapp" style="font-size:15px;"></i> واتساب</button>'+
+        '<a href="tel:'+a.phone+'" style="flex:1;background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="fas fa-phone-alt" style="font-size:13px;"></i> اتصال</a>'+
       '</div>'
     :
       '<div style="display:flex;gap:8px;">'+
-        '<a href="https://wa.me/968'+a.phone+'?text='+encodeURIComponent('السلام عليكم، هذا تأكيد بشأن تسجيل أكاديمية '+(a.name||''))+'" target="_blank" style="background:#25d366;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="fab fa-whatsapp"></i> تواصل</a>'+
+        '<button onclick="location.href=\'https://api.whatsapp.com/send?phone=968'+a.phone+'&text='+encodeURIComponent('السلام عليكم، بشأن أكاديمية '+(a.name||''))+'\';" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="fab fa-whatsapp" style="font-size:15px;"></i> واتساب</button>'+
+        '<a href="tel:'+a.phone+'" style="flex:1;background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;"><i class="fas fa-phone-alt" style="font-size:13px;"></i> اتصال</a>'+
       '</div>'
     )+
   '</div>';
