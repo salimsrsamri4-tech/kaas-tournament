@@ -209,8 +209,11 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('admin_best_player')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
       <i class="fas fa-star" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> أفضل لاعب
     </button>
-    <button onclick="closeSidebar();go('admin_referee')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;text-align:right;">
+    <button onclick="closeSidebar();go('admin_referee')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
       <i class="fas fa-whistle" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> تقارير الحكام
+    </button>
+    <button onclick="closeSidebar();go('admin_academies_approval')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;text-align:right;">
+      <i class="fas fa-building" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> اعتماد الأكاديميات <span id="sidebarPendingBadge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:900;border-radius:999px;padding:1px 6px;margin-right:4px;"></span>
     </button>
   </div>
 
@@ -423,6 +426,7 @@ function go(page) {
     admin_match_result: renderMatchResult,
     admin_best_player: renderBestPlayer,
     admin_referee: renderRefereeReport,
+    admin_academies_approval: renderAcademiesApproval,
     acad_message: renderAcadMessage,
   };
   if(pages[page]) pages[page]();
@@ -741,18 +745,37 @@ function submitAcadReg() {
   var btn = document.querySelector('.btn-red');
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الإرسال...';
 
+  var catLabels = cats.map(function(cid){var c=CATEGORIES.find(function(x){return x.id===cid;});return c?c.name:cid;}).join('، ');
   apiAppend('الأكاديميات',{
     id:id, name:name, city:city, country:country,
     coach:coach, phone:phone, email:email,
     cats:cats.join(','), pin:pin, players:'0',
+    status:'قيد الاعتماد',
     date: new Date().toLocaleDateString('ar')
   }).then(function(){
+    // إرسال إشعار واتساب للإدارة
+    var adminMsg = '🔔 *طلب تسجيل أكاديمية جديد*\n\n'+
+      '🏫 *الاسم:* '+name+'\n'+
+      '📍 *المدينة:* '+city+' — '+country+'\n'+
+      '👤 *المدرب:* '+coach+'\n'+
+      '📱 *الهاتف:* '+phone+'\n'+
+      (email?'📧 *الإيميل:* '+email+'\n':'')+
+      '⚽ *الفئات:* '+catLabels+'\n'+
+      '🆔 *رقم الأكاديمية:* '+id+'\n\n'+
+      '➡️ يرجى مراجعة المنصة للاعتماد أو الرفض.';
+    var adminWa = 'https://wa.me/96892126558?text='+encodeURIComponent(adminMsg);
+    window.open(adminWa, '_blank');
+
     document.getElementById('app').innerHTML =
       '<div style="text-align:center;padding:60px 20px;">'+
         '<div style="font-size:64px;margin-bottom:16px;">🎉</div>'+
-        '<div style="font-size:20px;font-weight:900;color:#16a34a;margin-bottom:6px;">تم التسجيل بنجاح!</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#16a34a;margin-bottom:6px;">تم إرسال طلب التسجيل!</div>'+
         '<div style="font-size:13px;color:#64748b;margin-bottom:6px;">'+name+'</div>'+
-        '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin:20px auto;max-width:300px;">'+
+        '<div style="background:#fef9c3;border:1.5px solid #fde68a;border-radius:12px;padding:14px;margin:16px auto;max-width:320px;">'+
+          '<div style="font-size:12px;font-weight:800;color:#92400e;margin-bottom:4px;"><i class="fas fa-clock"></i> قيد الاعتماد</div>'+
+          '<div style="font-size:11px;color:#78350f;">طلبك تحت المراجعة، ستُبلَّغ بقرار الإدارة.</div>'+
+        '</div>'+
+        '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin:16px auto;max-width:300px;">'+
           '<div style="font-size:11px;color:#16a34a;font-weight:700;margin-bottom:6px;">رقم الأكاديمية</div>'+
           '<div style="font-size:24px;font-weight:900;color:#0f172a;letter-spacing:2px;">'+id+'</div>'+
           '<div style="font-size:10px;color:#64748b;margin-top:4px;">احتفظ بهذا الرقم وبالـ PIN</div>'+
@@ -760,7 +783,6 @@ function submitAcadReg() {
         '<button class="btn btn-dark" style="max-width:300px;margin:0 auto 8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول لوحة التحكم</button>'+
         '<button class="btn btn-light" style="max-width:300px;margin:0 auto;" onclick="go(\'home\')">العودة للرئيسية</button>'+
       '</div>';
-    // حفظ في الجلسة
     sessionStorage.setItem('kaasAcadId', id);
     sessionStorage.setItem('kaasAcadName', name);
     sessionStorage.setItem('kaasAcadPin', pin);
@@ -1597,6 +1619,7 @@ function renderAdminPanel() {
           '<button onclick="go(\'admin_match_result\')" style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-futbol"></i><br>نتائج المباريات</button>'+
           '<button onclick="go(\'admin_best_player\')" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-star"></i><br>أفضل لاعب</button>'+
           '<button onclick="go(\'admin_referee\')" style="background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-whistle"></i><br>تقارير الحكام</button>'+
+          '<button onclick="go(\'admin_academies_approval\')" style="background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;position:relative;"><i class="fas fa-building"></i><br>اعتماد الأكاديميات</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<button onclick="testGasConnection()" style="width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-top:8px;"><i class="fas fa-wifi"></i> اختبار الاتصال بجوجل شيت</button>'+
@@ -2197,6 +2220,112 @@ function saveRefereeReport(){
   apiAppend('تقارير الحكام',row).then(function(){
     alert('✅ تم حفظ تقرير الحكم بنجاح!');
     go('admin_panel');
+  });
+}
+
+// ════════════════════════════════════════
+// اعتماد الأكاديميات
+// ════════════════════════════════════════
+function renderAcademiesApproval(){
+  var app=document.getElementById('app');
+  app.innerHTML='<div style="padding:16px;max-width:600px;margin:0 auto;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><button onclick="go(\'admin_panel\')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--red);">&#8594;</button><div style="font-size:17px;font-weight:900;">اعتماد الأكاديميات</div></div><div id="acadApprovalList"><div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i></div></div></div>';
+  apiGet('الأكاديميات').then(function(rows){
+    var list=rows||[];
+    window._allAcadsApproval=list;
+    _renderApprovalList(list);
+  });
+}
+
+function _renderApprovalList(list){
+  var pending=list.filter(function(a){return !a.status||a.status==='قيد الاعتماد';});
+  var approved=list.filter(function(a){return a.status==='معتمد';});
+  var rejected=list.filter(function(a){return a.status==='مرفوض';});
+
+  // تحديث badge الشريط الجانبي
+  var badge=document.getElementById('sidebarPendingBadge');
+  if(badge){if(pending.length>0){badge.textContent=pending.length;badge.style.display='';}else{badge.style.display='none';}}
+
+  var html='';
+
+  // طلبات قيد الاعتماد
+  html+='<div style="font-size:12px;font-weight:900;color:#92400e;background:#fef9c3;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;margin-bottom:12px;">'+
+    '<i class="fas fa-clock"></i> قيد الاعتماد ('+pending.length+')</div>';
+  if(pending.length===0){
+    html+='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:12px;">لا توجد طلبات جديدة</div>';
+  } else {
+    pending.forEach(function(a){html+=_acadCard(a,true);});
+  }
+
+  // الأكاديميات المعتمدة
+  if(approved.length>0){
+    html+='<div style="font-size:12px;font-weight:900;color:#166534;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin:16px 0 10px;">'+
+      '<i class="fas fa-check-circle"></i> معتمدة ('+approved.length+')</div>';
+    approved.forEach(function(a){html+=_acadCard(a,false);});
+  }
+
+  // الأكاديميات المرفوضة
+  if(rejected.length>0){
+    html+='<div style="font-size:12px;font-weight:900;color:#991b1b;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:10px 14px;margin:16px 0 10px;">'+
+      '<i class="fas fa-times-circle"></i> مرفوضة ('+rejected.length+')</div>';
+    rejected.forEach(function(a){html+=_acadCard(a,false);});
+  }
+
+  document.getElementById('acadApprovalList').innerHTML=html;
+}
+
+function _acadCard(a,showBtns){
+  var statusColor={معتمد:'#16a34a',مرفوض:'#dc2626','قيد الاعتماد':'#d97706'}[a.status]||'#64748b';
+  return '<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:10px;">'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:900;color:#0f172a;">'+(a.name||a['اسم الأكاديمية']||'—')+'</div>'+
+        '<div style="font-size:10px;color:#64748b;margin-top:2px;">'+(a.id||'')+(a.city?' · '+a.city:'')+(a.country?' — '+a.country:'')+'</div>'+
+      '</div>'+
+      '<span style="font-size:10px;font-weight:800;color:'+statusColor+';background:'+statusColor+'18;border-radius:999px;padding:3px 10px;">'+(a.status||'قيد الاعتماد')+'</span>'+
+    '</div>'+
+    '<div style="font-size:11px;color:#475569;margin-bottom:8px;">'+
+      '<i class="fas fa-user"></i> '+(a.coach||'—')+'&nbsp;&nbsp;'+
+      '<i class="fas fa-phone"></i> '+(a.phone||'—')+
+    '</div>'+
+    (showBtns?
+      '<div style="display:flex;gap:8px;">'+
+        '<button onclick="approveAcad(\''+a.id+'\',\''+encodeURIComponent(a.name||'')+'\',\''+encodeURIComponent(a.phone||'')+'\')" style="flex:1;background:#16a34a;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-check"></i> اعتماد</button>'+
+        '<button onclick="rejectAcad(\''+a.id+'\',\''+encodeURIComponent(a.name||'')+'\',\''+encodeURIComponent(a.phone||'')+'\')" style="flex:1;background:#dc2626;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-times"></i> رفض</button>'+
+        '<a href="https://wa.me/968'+a.phone+'?text='+encodeURIComponent('السلام عليكم، نود الاستفسار بشأن طلب تسجيل أكاديمية '+(a.name||''))+'" target="_blank" style="flex:1;background:#25d366;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:800;cursor:pointer;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:4px;"><i class="fab fa-whatsapp"></i> تواصل</a>'+
+      '</div>'
+    :
+      '<div style="display:flex;gap:8px;">'+
+        '<a href="https://wa.me/968'+a.phone+'?text='+encodeURIComponent('السلام عليكم، هذا تأكيد بشأن تسجيل أكاديمية '+(a.name||''))+'" target="_blank" style="background:#25d366;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:4px;"><i class="fab fa-whatsapp"></i> تواصل</a>'+
+      '</div>'
+    )+
+  '</div>';
+}
+
+function approveAcad(id,nameEnc,phoneEnc){
+  var name=decodeURIComponent(nameEnc);
+  var phone=decodeURIComponent(phoneEnc);
+  if(!confirm('اعتماد أكاديمية: '+name+'؟'))return;
+  invalidateCache('الأكاديميات');
+  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'معتمد',updated_at:new Date().toLocaleDateString('ar')}).then(function(){
+    // إرسال واتساب للأكاديمية
+    var msg='🎉 *تهانينا!*\n\nتم اعتماد *'+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+'\n\nيمكنكم الآن تسجيل لاعبيكم عبر المنصة.\n\nرقم الأكاديمية: '+id;
+    window.open('https://wa.me/968'+phone+'?text='+encodeURIComponent(msg),'_blank');
+    alert('✅ تم اعتماد الأكاديمية وإرسال إشعار واتساب');
+    renderAcademiesApproval();
+  });
+}
+
+function rejectAcad(id,nameEnc,phoneEnc){
+  var name=decodeURIComponent(nameEnc);
+  var phone=decodeURIComponent(phoneEnc);
+  var reason=prompt('سبب الرفض (اختياري):','');
+  if(reason===null)return;
+  invalidateCache('الأكاديميات');
+  apiAppend('تحديث الأكاديميات',{academy_id:id,status:'مرفوض',reason:reason,updated_at:new Date().toLocaleDateString('ar')}).then(function(){
+    var msg='عزيزنا / *'+name+'*\n\nنأسف لإبلاغكم بأنه لم يتم اعتماد طلب تسجيل الأكاديمية في الوقت الحالي.'+(reason?'\n\n*السبب:* '+reason:'')+'\n\nللاستفسار يرجى التواصل مع الإدارة.';
+    window.open('https://wa.me/968'+phone+'?text='+encodeURIComponent(msg),'_blank');
+    alert('تم رفض الأكاديمية وإرسال إشعار واتساب');
+    renderAcademiesApproval();
   });
 }
 
