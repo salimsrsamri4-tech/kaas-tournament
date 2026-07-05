@@ -201,6 +201,9 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('match_schedule')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-calendar-check" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> جدول المباريات
     </button>
+    <button onclick="closeSidebar();go('public_results')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-futbol" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> نتائج المباريات
+    </button>
     <button onclick="closeSidebar();go('standings')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-table" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> لوحة الترتيب
     </button>
@@ -470,6 +473,7 @@ function go(page) {
     about_tournament: renderAboutTournament,
     acad_message: renderAcadMessage,
     match_schedule: renderPublicMatchSchedule,
+    public_results: renderPublicResults,
     standings: renderStandings,
   };
   if(pages[page]) pages[page]();
@@ -3362,6 +3366,66 @@ function renderPublicMatchSchedule(){
     document.getElementById('app').innerHTML=html;
   }).catch(function(){
     document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل الجدول</div>';
+  });
+}
+
+// ════════════════════════════════════════
+// نتائج المباريات (public)
+// ════════════════════════════════════════
+function renderPublicResults(){
+  showL();
+  function fmtDate(v){
+    if(!v) return '';
+    var s=String(v);
+    var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if(m) return m[3]+'/'+m[2]+'/'+m[1];
+    return s;
+  }
+  apiGet('نتائج المباريات').then(function(rows){
+    if(!Array.isArray(rows)) rows=[];
+    var html=
+      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:16px;font-weight:900;">⚽ نتائج المباريات</div><div style="font-size:10px;opacity:.6;">'+rows.length+' نتيجة</div></div>'+
+      '</div>'+
+      '<div style="padding:14px;">';
+    if(!rows.length){
+      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم تُسجَّل أي نتائج بعد</div>';
+    } else {
+      rows.slice().reverse().forEach(function(m){
+        var team1=m['الفريق الأول']||m.team1||'؟';
+        var team2=m['الفريق الثاني']||m.team2||'؟';
+        var result=m['النتيجة']||m.result||'';
+        var date=fmtDate(m['التاريخ']||m.date||'');
+        var time=m['الوقت']||m.time||'';
+        var venue=m['الملعب']||m.venue||'';
+        var cat=m['الفئة']||m.cat_id||'';
+        if(!result) return;
+        html+=
+          '<div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;border:1px solid #e2e8f0;box-shadow:0 2px 6px rgba(0,0,0,.05);">'+
+            (cat?'<div style="margin-bottom:8px;"><span style="background:#f0fdf4;color:#166534;font-size:10px;font-weight:800;padding:2px 10px;border-radius:10px;">'+cat+'</span></div>':'')+
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+              '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0d3318;">'+team1+'</div>'+
+              '<div style="background:#16a34a;color:#fff;border-radius:10px;padding:6px 14px;font-size:16px;font-weight:900;text-align:center;min-width:64px;">'+result+'</div>'+
+              '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0d3318;">'+team2+'</div>'+
+            '</div>'+
+            '<div style="display:flex;gap:12px;margin-top:8px;justify-content:center;flex-wrap:wrap;">'+
+              (date?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-calendar" style="color:#d4af37;"></i> '+date+'</span>':'')+
+              (venue?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-map-marker-alt" style="color:#ef4444;"></i> '+venue+'</span>':'')+
+            '</div>'+
+            '<div style="margin-top:10px;text-align:center;">'+
+              '<button onclick="shareMatchResult(\''+team1.replace(/'/g,"\\'")+'\''+',\''+team2.replace(/'/g,"\\'")+'\',\''+result+'\',\''+date+'\',\''+time+'\',\''+venue+'\',\''+cat+'\')" '+
+                'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:10px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:inline-flex;align-items:center;gap:6px;">'+
+                '<i class="fab fa-whatsapp" style="font-size:14px;"></i> شارك النتيجة'+
+              '</button>'+
+            '</div>'+
+          '</div>';
+      });
+    }
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  }).catch(function(){
+    document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل النتائج</div>';
   });
 }
 
