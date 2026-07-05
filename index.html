@@ -477,6 +477,29 @@ function go(page) {
 
 function showL(){document.getElementById('app').innerHTML='<div class="ldg"><span class="sp"></span></div>';}
 
+function shareMatchResult(team1,team2,result,date,time,field,cat){
+  var msg =
+    '🏆 *كأس العرب للأكاديميات - KAAS 2026*\n'+
+    '━━━━━━━━━━━━━━━━━━\n'+
+    (cat ? '📌 الفئة: *'+cat+'*\n' : '')+
+    '📅 '+date+(time?' | ⏰ '+time:'')+'\n'+
+    (field?'🏟️ '+field+'\n':'')+
+    '━━━━━━━━━━━━━━━━━━\n'+
+    '⚽ *'+team1+'*\n'+
+    '🆚\n'+
+    '⚽ *'+team2+'*\n'+
+    '━━━━━━━━━━━━━━━━━━\n'+
+    '🎯 النتيجة النهائية: *'+result+'*\n'+
+    '━━━━━━━━━━━━━━━━━━\n'+
+    '📲 تابع جميع النتائج:\n'+
+    'https://salimsrsamri4-tech.github.io/kaas-tournament/';
+  if(navigator.share){
+    navigator.share({title:'نتيجة مباراة KAAS',text:msg}).catch(function(){});
+  } else {
+    location.href='https://api.whatsapp.com/send?text='+encodeURIComponent(msg);
+  }
+}
+
 function shareApp(){
   var url = window.location.origin + window.location.pathname;
   var text = 'منصة كأس العرب للأكاديميات (KAAS) — سجّل أكاديميتك الآن!\n' + url;
@@ -3230,10 +3253,18 @@ function renderPublicMatchSchedule(){
               '</div>'+
               '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:var(--dark);">'+team2+'</div>'+
             '</div>'+
-            '<div style="display:flex;gap:12px;margin-top:8px;justify-content:center;">'+
+            '<div style="display:flex;gap:12px;margin-top:8px;justify-content:center;align-items:center;flex-wrap:wrap;">'+
               (time?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-clock" style="color:var(--gold);"></i> '+time+'</span>':'')+
               (field?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-map-marker-alt" style="color:var(--red);"></i> '+field+'</span>':'')+
             '</div>'+
+            (result?
+              '<div style="margin-top:10px;text-align:center;">'+
+                '<button onclick="shareMatchResult(\''+team1+'\',\''+team2+'\',\''+result+'\',\''+d+'\',\''+time+'\',\''+field+'\',\''+((ci&&ci.name)||catId)+'\')" '+
+                  'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:10px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:inline-flex;align-items:center;gap:6px;">'+
+                  '<i class="fab fa-whatsapp" style="font-size:14px;"></i> شارك النتيجة'+
+                '</button>'+
+              '</div>'
+            : '')+
           '</div>';
         });
       });
@@ -3487,14 +3518,10 @@ function showAcadCard(){
 // ════════════════════════════════════════
 if(!handleAcadLink()) go('home');
 
-// إلغاء Service Worker القديم نهائياً
+// تسجيل Service Worker للعمل بدون إنترنت
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(regs){
-    regs.forEach(function(r){ r.unregister(); });
-  });
-  caches.keys().then(function(keys){
-    keys.forEach(function(k){ caches.delete(k); });
-  });
+  navigator.serviceWorker.register('/kaas-tournament/sw.js')
+    .catch(function(){});
 }
 
 // شاشة الترحيب
