@@ -3468,14 +3468,30 @@ function renderPublicResults(){
 function renderAdminTeams(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
-  apiGet('الفرق').then(function(teams){
+  Promise.all([apiGet('الفرق'), apiGet('الأكاديميات')]).then(function(res){
+    var teams=res[0]||[], acadList=res[1]||[];
     if(!Array.isArray(teams)) teams=[];
+    if(!Array.isArray(acadList)) acadList=[];
     var selCat = window._teamsSelCat || CATEGORIES[0].id;
     var catTabs = CATEGORIES.map(function(c){
       return '<button onclick="window._teamsSelCat=\''+c.id+'\';renderAdminTeams();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
     }).join('');
     var ci = CATEGORIES.find(function(c){return c.id===selCat;});
-    var filtered = teams.filter(function(t){return (t['الفئة']||t.cat_id||'')=== selCat;});
+    var color = ci?ci.color:'#0d3318';
+
+    // الأكاديميات المعتمدة التي لم تُضف بعد لهذه الفئة
+    var addedNames = teams.filter(function(t){return (t['الفئة']||'')=== selCat;}).map(function(t){return t['الاسم']||'';});
+    var availableAcads = acadList.filter(function(a){
+      var n=a.name||a['الاسم']||'';
+      return n && addedNames.indexOf(n)<0;
+    });
+    var acadOpts = '<option value="">-- اختر أكاديمية معتمدة --</option>'+
+      availableAcads.map(function(a){
+        var n=a.name||a['الاسم']||'';
+        return '<option value="'+n+'">'+n+'</option>';
+      }).join('');
+
+    var filtered = teams.filter(function(t){return (t['الفئة']||'')=== selCat;});
     var groups = {};
     filtered.forEach(function(t){
       var g = t['المجموعة']||'بدون مجموعة';
@@ -3488,17 +3504,16 @@ function renderAdminTeams(){
       teamsHtml = '<div style="text-align:center;color:#94a3b8;padding:20px;font-size:13px;">لا توجد فرق مسجلة في هذه الفئة</div>';
     } else {
       ['A','B','C','D','E','F','بدون مجموعة'].forEach(function(g){
-        var gKey = g==='بدون مجموعة'?g:g;
-        var arr = groups[gKey]||groups['المجموعة '+gKey]||[];
+        var arr = groups[g]||groups['المجموعة '+g]||[];
         if(!arr.length) return;
         teamsHtml+='<div style="margin-bottom:10px;">'+
-          '<div style="font-size:11px;font-weight:900;color:'+(ci?ci.color:'#0d3318')+';margin-bottom:6px;display:flex;align-items:center;gap:6px;">'+
-            '<span style="background:'+(ci?ci.color:'#0d3318')+';color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">'+(g==='بدون مجموعة'?'?':g)+'</span>'+
-            'المجموعة '+(g==='بدون مجموعة'?'غير محددة':g)+' ('+arr.length+' فرق)'+
+          '<div style="font-size:11px;font-weight:900;color:'+color+';margin-bottom:6px;display:flex;align-items:center;gap:6px;">'+
+            '<span style="background:'+color+';color:#fff;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">'+(g==='بدون مجموعة'?'?':g)+'</span>'+
+            'المجموعة '+(g==='بدون مجموعة'?'غير محددة':g)+' — '+arr.length+' فرق'+
           '</div>'+
           arr.map(function(n){
             return '<div style="background:#f8fafc;border-radius:8px;padding:8px 12px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:700;">'+
-              '<span>'+n+'</span>'+
+              '<span><i class="fas fa-shield-alt" style="color:'+color+';margin-left:6px;font-size:11px;"></i>'+n+'</span>'+
               '<button onclick="deleteTeam(\''+n.replace(/'/g,"\\'")+'\',\''+selCat+'\')" style="background:#fff0f0;color:#b91c1c;border:1px solid #fecaca;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">حذف</button>'+
             '</div>';
           }).join('')+
@@ -3509,14 +3524,34 @@ function renderAdminTeams(){
     document.getElementById('app').innerHTML=
       '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
         '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
-        '<div><div style="font-size:15px;font-weight:900;">🏟️ إدارة الفرق</div><div style="font-size:10px;opacity:.7;">إضافة وتنظيم فرق البطولة</div></div>'+
+        '<div><div style="font-size:15px;font-weight:900;">🏟️ إدارة الفرق</div><div style="font-size:10px;opacity:.7;">'+filtered.length+' فريق مسجل — '+availableAcads.length+' أكاديمية معتمدة متاحة</div></div>'+
       '</div>'+
       '<div style="padding:14px;">'+
         '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+catTabs+'</div>'+
+
+        /* إضافة من الأكاديميات المعتمدة */
+        (availableAcads.length?
+          '<div class="card" style="margin-bottom:12px;border:2px solid '+color+'20;">'+
+            '<div class="sec-title" style="color:'+color+';">🏫 إضافة من الأكاديميات المعتمدة</div>'+
+            '<div class="r2 mb">'+
+              '<div><label class="lbl">اختر الأكاديمية</label>'+
+              '<select class="inp" id="newTeamAcad">'+acadOpts+'</select></div>'+
+              '<div><label class="lbl">المجموعة</label>'+
+              '<select class="inp" id="newTeamGroupAcad">'+
+                '<option value="">تحديد لاحقاً</option>'+
+                ['A','B','C','D','E','F'].map(function(g){return '<option value="'+g+'">المجموعة '+g+'</option>';}).join('')+
+              '</select></div>'+
+            '</div>'+
+            '<button onclick="addTeamFromAcad(\''+selCat+'\')" class="btn" style="background:linear-gradient(135deg,'+color+','+color+'cc);color:#fff;width:100%;">'+
+              '<i class="fas fa-plus-circle"></i> إضافة للبطولة</button>'+
+          '</div>'
+        :'') +
+
+        /* إضافة يدوية */
         '<div class="card" style="margin-bottom:12px;">'+
-          '<div class="sec-title">➕ إضافة فريق</div>'+
+          '<div class="sec-title">✏️ إضافة فريق يدوياً</div>'+
           '<div class="r2 mb">'+
-            '<div><label class="lbl">اسم الفريق / الأكاديمية</label><input class="inp" id="newTeamName" placeholder="اسم الفريق..."></div>'+
+            '<div><label class="lbl">اسم الفريق</label><input class="inp" id="newTeamName" placeholder="اسم الفريق..."></div>'+
             '<div><label class="lbl">المجموعة</label>'+
             '<select class="inp" id="newTeamGroup">'+
               '<option value="">تحديد لاحقاً</option>'+
@@ -3524,7 +3559,7 @@ function renderAdminTeams(){
             '</select></div>'+
           '</div>'+
           '<button onclick="addTeam(\''+selCat+'\')" class="btn" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;width:100%;">'+
-            '<i class="fas fa-plus"></i> إضافة الفريق</button>'+
+            '<i class="fas fa-plus"></i> إضافة</button>'+
         '</div>'+
         '<div class="card">'+
           '<div class="sec-title">📋 الفرق المسجلة ('+filtered.length+')</div>'+
@@ -3533,6 +3568,16 @@ function renderAdminTeams(){
         '<button onclick="renderAdminGroupGen();" class="btn" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;width:100%;margin-top:12px;font-size:14px;">'+
           '<i class="fas fa-magic"></i> توليد جدول المجموعات تلقائياً</button>'+
       '</div>';
+  });
+}
+
+function addTeamFromAcad(catId){
+  var name=(document.getElementById('newTeamAcad').value||'').trim();
+  var group=document.getElementById('newTeamGroupAcad').value;
+  if(!name){alert('اختر أكاديمية');return;}
+  apiAppend('الفرق',{'الاسم':name,'الفئة':catId,'المجموعة':group?'المجموعة '+group:''}).then(function(){
+    invalidateCache('الفرق');
+    setTimeout(renderAdminTeams,500);
   });
 }
 
