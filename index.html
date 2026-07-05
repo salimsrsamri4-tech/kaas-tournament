@@ -28,7 +28,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
 .nav-btn.gold{background:var(--red);border-color:var(--red);color:#fff;}
 
 /* المحتوى */
-#app{margin-top:56px;min-height:calc(100vh - 56px);}
+#app{margin-top:70px;min-height:calc(100vh - 70px);padding-bottom:64px;}
 
 /* البطل */
 .hero{background:linear-gradient(160deg,#0d3318 0%,#1b5e2e 60%,#0d3318 100%);padding:48px 20px 40px;text-align:center;position:relative;overflow:hidden;}
@@ -485,113 +485,30 @@ function renderHome() {
     var total = acadList.length;
     var totalPlayers = acadList.reduce(function(s,a){var n=Number(a.players);return s+(isNaN(n)?0:n);},0);
     document.getElementById('app').innerHTML =
-      '<div class="hero" style="position:relative;overflow:hidden;">'+
-        
-        '<div style="position:relative;z-index:1;">'+        '<div style="padding:32px 20px 24px;text-align:center;">'+
-          
-          '<h1 style="font-size:32px;font-weight:900;color:#fff;margin:0 0 6px;text-shadow:0 2px 12px rgba(0,0,0,.4);line-height:1.2;">كأس العرب<br>للأكاديميات</h1>'+
-          '<p style="font-size:13px;font-weight:800;color:#d4af37;letter-spacing:2px;margin:0 0 6px;">ARAB ACADEMIES CUP · KAAS</p>'+
-          '<p style="font-size:11px;color:rgba(255,255,255,.65);margin:0 0 20px;">بالتعاون مع الدوري العماني للأكاديميات (OFAL) · '+CONFIG.SEASON+'</p>'+
-          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px;">'+
-            '<div style="background:rgba(255,255,255,.1);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 4px;">'+
-              '<div style="font-size:22px;font-weight:900;color:#d4af37;">'+total+'</div>'+
-              '<div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;">أكاديمية</div>'+
-            '</div>'+
-            '<div style="background:rgba(255,255,255,.1);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 4px;">'+
-              '<div style="font-size:22px;font-weight:900;color:#d4af37;">'+totalPlayers+'</div>'+
-              '<div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;">لاعب</div>'+
-            '</div>'+
-            '<div style="background:rgba(255,255,255,.1);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 4px;">'+
-              '<div style="font-size:22px;font-weight:900;color:#d4af37;">4</div>'+
-              '<div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;">فئات</div>'+
-            '</div>'+
-            '<div style="background:rgba(255,87,87,.15);backdrop-filter:blur(4px);border:1px solid rgba(255,87,87,.3);border-radius:12px;padding:10px 4px;">'+
-              '<div style="font-size:22px;font-weight:900;color:#ff6b6b;" id="homeCountdown">...</div>'+
-              '<div style="font-size:9px;color:rgba(255,255,255,.65);margin-top:2px;">يوم متبقي</div>'+
-            '</div>'+
+      '<div class="hero">'+
+        '<h1 style="font-size:28px;font-weight:900;color:#fff;margin:0 0 4px;text-shadow:0 2px 8px rgba(0,0,0,.4);line-height:1.2;">كأس العرب<br>للأكاديميات</h1>'+
+        '<p style="font-size:12px;font-weight:800;color:#d4af37;letter-spacing:2px;margin:0 0 4px;">ARAB ACADEMIES CUP · KAAS</p>'+
+        '<p style="font-size:10px;color:rgba(255,255,255,.7);margin:0 0 20px;">بالتعاون مع الدوري العماني للأكاديميات (OFAL) · '+CONFIG.SEASON+'</p>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px;">'+
+          '<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 4px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:#d4af37;">'+total+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:2px;">أكاديمية</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 4px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:#d4af37;">'+totalPlayers+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:2px;">لاعب</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 4px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:#d4af37;">4</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:2px;">فئات</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,87,87,.2);border:1px solid rgba(255,87,87,.35);border-radius:12px;padding:10px 4px;text-align:center;">'+
+            '<div style="font-size:22px;font-weight:900;color:#ff6b6b;" id="homeCountdown">...</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.7);margin-top:2px;">يوم متبقي</div>'+
           '</div>'+
         '</div>'+
       '</div>'+
-      '</div>'+
-// معلومات البطولة
-      '<div class="section">'+
-        '<div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px;border-right:4px solid var(--green);">'+
-          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
-            '<div style="display:flex;align-items:center;gap:8px;">'+
-              '<div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;"><i class="fas fa-map-marker-alt" style="color:var(--green);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">المكان</div><div style="font-size:12px;font-weight:900;color:var(--dark);">صلالة، ظفار</div></div>'+
-            '</div>'+
-            '<div style="display:flex;align-items:center;gap:8px;">'+
-              '<div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;"><i class="fas fa-calendar-alt" style="color:var(--red);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">التواريخ</div><div style="font-size:12px;font-weight:900;color:var(--dark);">6-7-8 أغسطس 2026</div></div>'+
-            '</div>'+
-            '<div style="display:flex;align-items:center;gap:8px;">'+
-              '<div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt" style="color:var(--green);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">الفرق</div><div style="font-size:12px;font-weight:900;color:var(--dark);">32 – 48 فريق</div></div>'+
-            '</div>'+
-            '<div style="display:flex;align-items:center;gap:8px;">'+
-              '<div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:var(--red);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">آخر تسجيل</div><div style="font-size:12px;font-weight:900;color:var(--red);">5 يوليو 2026</div></div>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-        '<button class="btn btn-red" onclick="go(\'acad_register\')"><i class="fas fa-plus-circle"></i> سجّل أكاديميتك الآن</button>'+
-        '<button class="btn btn-green-main" style="margin-top:8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول الأكاديميات المسجلة</button>'+
-      '</div>'+
-
-      // الفئات
-      '<div class="section">'+
-        '<div class="sec-title"><i class="fas fa-layer-group" style="color:var(--green)"></i> الفئات العمرية</div>'+
-        '<div class="cats-grid">'+
-          CATEGORIES.map(function(c){
-            return '<div class="cat-card">'+
-              '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">'+
-                '<div class="cat-name">'+c.name+'</div>'+
-                '<span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px;background:#f0fdf4;color:var(--green)">'+c.label+'</span>'+
-              '</div>'+
-              '<div class="cat-years">'+c.years+'</div>'+
-              '<div class="cat-extra">+ '+c.extra+'</div>'+
-            '</div>';
-          }).join('')+
-        '</div>'+
-      '</div>'+
-
-      // الأكاديميات
-      (total > 0 ?
-      '<div class="section">'+
-        '<div class="sec-title"><i class="fas fa-shield-alt" style="color:var(--green)"></i> الأكاديميات المسجلة</div>'+
-        acadList.slice(0,5).map(function(a){
-          var initials = a.name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2);
-          return '<div class="acad-card">'+
-            '<div class="acad-avatar">'+initials+'</div>'+
-            '<div class="acad-info">'+
-              '<div class="acad-name">'+a.name+'</div>'+
-              '<div class="acad-meta"><i class="fas fa-map-marker-alt"></i> '+a.city+' · <i class="fas fa-users"></i> '+(a.players||0)+' لاعب</div>'+
-              '<div class="acad-cats">'+
-                (a.cats||'').split(',').filter(Boolean).map(function(c){
-                  var ci = getCatInfo(c.trim());
-                  return ci ? '<span class="cat-pill">'+ci.name+'</span>' : '';
-                }).join('')+
-              '</div>'+
-            '</div>'+
-          '</div>';
-        }).join('')+
-        (total>5?'<div style="text-align:center;padding:8px;"><button class="btn btn-light" onclick="go(\'academies\')">عرض الكل ('+total+')</button></div>':'')+
-      '</div>' : '')+
-
-      // التواصل
-      '<div class="section">'+
-        '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:14px;padding:16px;color:#fff;text-align:center;">'+
-          '<div style="font-size:13px;font-weight:900;margin-bottom:12px;">📞 تواصل معنا</div>'+
-          '<div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">'+
-            '<a href="tel:+96897837551" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-phone"></i> خدمة العملاء<br><span style="font-size:12px;font-weight:900;">9783 7551</span></a>'+
-            '<a href="tel:+96872750957" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-headset"></i> الإدارة<br><span style="font-size:12px;font-weight:900;">7275 0957</span></a>'+
-            '<a href="mailto:official.ofal@gmail.com" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-envelope"></i> البريد<br><span style="font-size:10px;font-weight:800;">official.ofal@gmail.com</span></a>'+
-          '</div>'+
-        '</div>'+
-        '<div style="height:16px;"></div>'+
-      '</div>';
-    // حساب العد التنازلي
+// حساب العد التنازلي
     setTimeout(function(){
       var el = document.getElementById('homeCountdown');
       if(el){
