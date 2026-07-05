@@ -3267,10 +3267,27 @@ function renderPublicMatchSchedule(){
   showL();
   apiGet('جدول المباريات').then(function(rows){
     if(!Array.isArray(rows)) rows=[];
+    function fmtDate(v){
+      if(!v) return 'غير محدد';
+      var s=String(v);
+      var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if(m) return m[3]+'/'+m[2]+'/'+m[1];
+      return s;
+    }
+    function fmtTime(v){
+      if(!v) return '';
+      var s=String(v);
+      var m=s.match(/T(\d{2}):(\d{2})/);
+      if(m) return m[1]+':'+m[2];
+      if(/^\d{2}:\d{2}/.test(s)) return s.slice(0,5);
+      return s;
+    }
     // تجميع حسب التاريخ
     var byDate={};
     rows.forEach(function(r){
-      var d=r.date||r['التاريخ']||'غير محدد';
+      var raw=r.date||r['التاريخ']||'غير محدد';
+      var d=fmtDate(raw);
+      r._dateKey=d;
       if(!byDate[d]) byDate[d]=[];
       byDate[d].push(r);
     });
@@ -3294,7 +3311,7 @@ function renderPublicMatchSchedule(){
         byDate[d].forEach(function(m){
           var team1=m.team1||m['الفريق الأول']||'؟';
           var team2=m.team2||m['الفريق الثاني']||'؟';
-          var time=m.time||m['الوقت']||'';
+          var time=fmtTime(m.time||m['الوقت']||'');
           var field=m.field||m['الملعب']||'';
           var result=m.result||m['النتيجة']||'';
           var catId=m.cat_id||m['الفئة']||'';
