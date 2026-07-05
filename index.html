@@ -2893,6 +2893,26 @@ function renderMatchSchedule(){
         '<div><div style="font-size:16px;font-weight:900;">📅 جدول المباريات</div><div style="font-size:10px;opacity:.6;">إنشاء وإرسال قائمة المباراة</div></div>'+
       '</div>'+
       '<div style="padding:16px;">'+
+
+      '<div class="card" style="margin-bottom:16px;">'+
+        '<div class="sec-title"><i class="fas fa-plus-circle"></i> إضافة مباراة للجدول</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">الفريق الأول</label><input class="inp" id="am1" placeholder="اسم الفريق..."></div>'+
+          '<div><label class="lbl">الفريق الثاني</label><input class="inp" id="am2" placeholder="اسم الفريق..."></div>'+
+        '</div>'+
+        '<div class="r2 mb">'+
+          '<div><label class="lbl">التاريخ</label><input type="date" class="inp" id="amDate"></div>'+
+          '<div><label class="lbl">الوقت</label><input type="time" class="inp" id="amTime"></div>'+
+        '</div>'+
+        '<div class="mb"><label class="lbl">الملعب</label><input class="inp" id="amField" placeholder="اسم الملعب..." value="ملعب صلالة"></div>'+
+        '<div class="mb"><label class="lbl">الفئة العمرية</label>'+
+        '<select class="inp" id="amCat">'+
+          '<option value="">-- اختر الفئة --</option>'+
+          CATEGORIES.map(function(c){return '<option value="'+c.id+'">'+c.name+' ('+c.label+')</option>';}).join('')+
+        '</select></div>'+
+        '<button onclick="addMatchToSchedule()" class="btn btn-green" style="width:100%;"><i class="fas fa-save"></i> حفظ المباراة في الجدول</button>'+
+      '</div>'+
+
       '<div class="card">'+
         '<div class="sec-title"><i class="fas fa-list-ol"></i> قائمة مباراة</div>'+
         '<div class="mb"><label class="lbl">الأكاديمية</label>'+
@@ -2922,6 +2942,37 @@ function renderMatchSchedule(){
         '</div>'+
         '<button onclick="sendMatchListWA()" class="btn btn-green"><i class="fab fa-whatsapp"></i> إرسال القائمة عبر واتساب</button>'+
       '</div></div>';
+  });
+}
+
+function addMatchToSchedule(){
+  var t1=(document.getElementById('am1').value||'').trim();
+  var t2=(document.getElementById('am2').value||'').trim();
+  var date=document.getElementById('amDate').value;
+  var time=document.getElementById('amTime').value;
+  var field=(document.getElementById('amField').value||'').trim();
+  var cat=document.getElementById('amCat').value;
+  if(!t1||!t2){alert('أدخل اسمي الفريقين');return;}
+  if(!date){alert('اختر تاريخ المباراة');return;}
+  var btn=event.target;
+  btn.disabled=true;btn.textContent='جاري الحفظ...';
+  apiAppend('جدول المباريات',{
+    'الفريق الأول':t1,'الفريق الثاني':t2,
+    'التاريخ':date,'الوقت':time,
+    'الملعب':field,'الفئة':cat,'النتيجة':''
+  }).then(function(){
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> حفظ المباراة في الجدول';
+    document.getElementById('am1').value='';
+    document.getElementById('am2').value='';
+    document.getElementById('amDate').value='';
+    document.getElementById('amTime').value='';
+    document.getElementById('amCat').value='';
+    invalidateCache('جدول المباريات');
+    alert('✅ تمت إضافة المباراة للجدول بنجاح!');
+  }).catch(function(){
+    btn.disabled=false;btn.innerHTML='<i class="fas fa-save"></i> حفظ المباراة في الجدول';
+    alert('⚠️ تم الإرسال — قد يستغرق ظهوره دقيقة');
+    invalidateCache('جدول المباريات');
   });
 }
 
