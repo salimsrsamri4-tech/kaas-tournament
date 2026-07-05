@@ -2028,14 +2028,15 @@ function saveMatchResult(){
   });
 
   var row = {
-    match_id: 'M'+Date.now().toString().slice(-8),
-    team1:team1, team2:team2, score1:score1, score2:score2,
-    result: score1+' - '+score2,
-    winner: parseInt(score1)>parseInt(score2)?team1:(parseInt(score2)>parseInt(score1)?team2:'تعادل'),
-    date:date, time:time, venue:venue, cat_id:catId,
-    status:status, referee:referee, notes:notes,
-    goals: JSON.stringify(goals), subs: JSON.stringify(subs),
-    saved_at: new Date().toLocaleDateString('ar')
+    'رقم المباراة': 'M'+Date.now().toString().slice(-8),
+    'الفريق الأول':team1, 'الفريق الثاني':team2,
+    'أهداف الأول':score1, 'أهداف الثاني':score2,
+    'النتيجة': score1+' - '+score2,
+    'الفائز': parseInt(score1)>parseInt(score2)?team1:(parseInt(score2)>parseInt(score1)?team2:'تعادل'),
+    'التاريخ':date, 'الوقت':time, 'الملعب':venue, 'الفئة':catId,
+    'الحالة':status, 'الحكم':referee, 'ملاحظات':notes,
+    'الأهداف': JSON.stringify(goals), 'التبديلات': JSON.stringify(subs),
+    'وقت الحفظ': new Date().toLocaleDateString('ar')
   };
 
   var btn=document.querySelector('[onclick="saveMatchResult()"]');
