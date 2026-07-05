@@ -3479,6 +3479,16 @@ function showAcadCard(){
 // ════════════════════════════════════════
 if(!handleAcadLink()) go('home');
 
+// إلغاء Service Worker القديم نهائياً
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){ r.unregister(); });
+  });
+  caches.keys().then(function(keys){
+    keys.forEach(function(k){ caches.delete(k); });
+  });
+}
+
 // شاشة الترحيب
 setTimeout(function(){
   var splash = document.getElementById('splash');
