@@ -3281,7 +3281,10 @@ function renderPublicMatchSchedule(){
       '</div>'+
       '<div style="padding:14px;">';
     if(!rows.length){
-      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم يُنشر جدول المباريات بعد</div>';
+      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">'+
+        'لم يُنشر جدول المباريات بعد<br><br>'+
+        '<span style="font-size:11px;color:#cbd5e1;">إذا أضفت مباريات من الإدارة — تأكد من وجود ورقة<br>"جدول المباريات" في Google Sheets</span>'+
+      '</div>';
     } else {
       dates.forEach(function(d){
         html+='<div style="font-size:13px;font-weight:900;color:var(--dark);margin:14px 0 8px;display:flex;align-items:center;gap:8px;">'+
