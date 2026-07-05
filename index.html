@@ -588,17 +588,58 @@ function renderHome() {
           '</div>'+
         '</div>'+
         '<div style="height:16px;"></div>'+
+
+      // قسم العد التنازلي
+      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:20px;padding:20px 16px;margin-bottom:16px;text-align:center;border:1px solid rgba(212,175,55,.3);box-shadow:0 4px 20px rgba(0,0,0,.1);">'+
+        '<div style="font-size:11px;font-weight:800;color:#d4af37;letter-spacing:2px;margin-bottom:4px;">⏱ العد التنازلي لانطلاق البطولة</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:16px;">6 أغسطس 2026 · صلالة</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="countdownGrid">'+
+          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
+            '<div style="font-size:28px;font-weight:900;color:#fff;line-height:1;" id="cdDays">--</div>'+
+            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">يوم</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
+            '<div style="font-size:28px;font-weight:900;color:#fff;line-height:1;" id="cdHours">--</div>'+
+            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ساعة</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
+            '<div style="font-size:28px;font-weight:900;color:#fff;line-height:1;" id="cdMins">--</div>'+
+            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">دقيقة</div>'+
+          '</div>'+
+          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
+            '<div style="font-size:28px;font-weight:900;color:#ff6b6b;line-height:1;" id="cdSecs">--</div>'+
+            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ثانية</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+        '<div style="height:16px;"></div>'+
       '</div>';
-    // حساب العد التنازلي
-    setTimeout(function(){
-      var el = document.getElementById('homeCountdown');
-      if(el){
-        var deadline = new Date('2026-08-06T00:00:00');
-        var now = new Date();
-        var diff = Math.ceil((deadline - now)/(1000*60*60*24));
-        el.textContent = diff > 0 ? diff : '0';
+
+    // العد التنازلي الكامل - يتحدث كل ثانية
+    function updateCountdown(){
+      var deadline = new Date('2026-08-06T00:00:00');
+      var now = new Date();
+      var diff = deadline - now;
+      if(diff <= 0){
+        ['cdDays','cdHours','cdMins','cdSecs'].forEach(function(id){
+          var el=document.getElementById(id); if(el) el.textContent='0';
+        });
+        var el=document.getElementById('homeCountdown'); if(el) el.textContent='0';
+        return;
       }
-    }, 100);
+      var days  = Math.floor(diff/(1000*60*60*24));
+      var hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+      var mins  = Math.floor((diff%(1000*60*60))/(1000*60));
+      var secs  = Math.floor((diff%(1000*60))/1000);
+      var d=document.getElementById('cdDays');     if(d) d.textContent=days;
+      var h=document.getElementById('cdHours');    if(h) h.textContent=String(hours).padStart(2,'0');
+      var m=document.getElementById('cdMins');     if(m) m.textContent=String(mins).padStart(2,'0');
+      var s=document.getElementById('cdSecs');     if(s) s.textContent=String(secs).padStart(2,'0');
+      var hc=document.getElementById('homeCountdown'); if(hc) hc.textContent=days;
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
   });
 }
 
