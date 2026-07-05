@@ -510,6 +510,29 @@ function renderHome() {
           '<div class="hstat"><div class="hstat-n">4</div><div class="hstat-l">فئات</div></div>'+
           '<div class="hstat"><div class="hstat-n" style="color:#ff6b6b;" id="homeCountdown">...</div><div class="hstat-l">يوم متبقي</div></div>'+
         '</div>'+
+
+        '<div style="margin-top:24px;border-top:1px solid rgba(255,255,255,.15);padding-top:20px;">'+
+          '<div style="font-size:10px;font-weight:800;color:#d4af37;letter-spacing:2px;margin-bottom:12px;">⏱ العد التنازلي لانطلاق البطولة</div>'+
+          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">'+
+            '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
+              '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1;" id="cdDays">--</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">يوم</div>'+
+            '</div>'+
+            '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
+              '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1;" id="cdHours">--</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ساعة</div>'+
+            '</div>'+
+            '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
+              '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1;" id="cdMins">--</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">دقيقة</div>'+
+            '</div>'+
+            '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
+              '<div style="font-size:26px;font-weight:900;color:#ff6b6b;line-height:1;" id="cdSecs">--</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ثانية</div>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+
       '</div>'+
       // معلومات البطولة
       '<div class="section">'+
@@ -589,29 +612,6 @@ function renderHome() {
         '</div>'+
         '<div style="height:16px;"></div>'+
 
-      // قسم العد التنازلي
-      '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:20px;padding:20px 16px;margin-bottom:16px;text-align:center;border:1px solid rgba(212,175,55,.3);box-shadow:0 4px 20px rgba(0,0,0,.1);">'+
-        '<div style="font-size:11px;font-weight:800;color:#d4af37;letter-spacing:2px;margin-bottom:4px;">⏱ العد التنازلي لانطلاق البطولة</div>'+
-        '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:16px;">6 أغسطس 2026 · صلالة</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="countdownGrid">'+
-          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
-            '<div style="font-size:28px;font-weight:900;color:#fff;line-height:1;" id="cdDays">--</div>'+
-            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">يوم</div>'+
-          '</div>'+
-          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
-            '<div style="font-size:28px;font-weight:900;color:#fff;line-height:1;" id="cdHours">--</div>'+
-            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ساعة</div>'+
-          '</div>'+
-          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
-            '<div style="font-size:28px;font-weight:900;color:#fff;line-height:1;" id="cdMins">--</div>'+
-            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">دقيقة</div>'+
-          '</div>'+
-          '<div style="background:rgba(255,255,255,.08);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.2);">'+
-            '<div style="font-size:28px;font-weight:900;color:#ff6b6b;line-height:1;" id="cdSecs">--</div>'+
-            '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ثانية</div>'+
-          '</div>'+
-        '</div>'+
-      '</div>'+
 
         '<div style="height:16px;"></div>'+
       '</div>';
