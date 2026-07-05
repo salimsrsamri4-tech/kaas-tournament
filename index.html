@@ -2043,13 +2043,30 @@ function saveMatchResult(){
   btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
 
   apiAppend('نتائج المباريات', row).then(function(){
-    btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> تم الحفظ بنجاح!';
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> تم الحفظ!';
     btn.style.background='linear-gradient(135deg,#16a34a,#14532d)';
-    /* عرض ملخص */
-    var summary = '⚽ '+team1+' '+score1+' - '+score2+' '+team2;
-    if(goals.length) summary += '\n\n📌 الأهداف:\n'+goals.map(function(g){return '• '+g.scorer+' ('+g.minute+'د) - '+g.team;}).join('\n');
-    if(subs.length)  summary += '\n\n🔄 التبديلات:\n'+subs.map(function(s){return '• ↑'+s.in+' ↓'+s.out+' ('+s.minute+'د)';}).join('\n');
-    setTimeout(function(){ alert('✅ تم حفظ النتيجة بنجاح!\n\n'+summary); go('admin_panel'); }, 400);
+    // نافذة المشاركة
+    var overlay=document.createElement('div');
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    overlay.innerHTML=
+      '<div style="background:#fff;border-radius:20px;padding:24px;width:100%;max-width:340px;text-align:center;font-family:Cairo,sans-serif;">'+
+        '<div style="font-size:40px;margin-bottom:8px;">✅</div>'+
+        '<div style="font-size:16px;font-weight:900;color:#0d3318;margin-bottom:4px;">تم حفظ النتيجة بنجاح!</div>'+
+        '<div style="font-size:22px;font-weight:900;color:#16a34a;margin:12px 0;padding:10px;background:#f0fdf4;border-radius:12px;">'+
+          team1+' &nbsp;'+score1+' - '+score2+'&nbsp; '+team2+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">'+
+          '<button onclick="shareMatchResult(\''+team1+'\',\''+team2+'\',\''+score1+' - '+score2+'\',\''+date+'\',\''+time+'\',\''+venue+'\',\''+catId+'\')" '+
+            'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">'+
+            '<i class="fab fa-whatsapp" style="font-size:18px;"></i> شارك النتيجة على واتساب'+
+          '</button>'+
+          '<button onclick="this.closest(\'div[style*=fixed]\').remove();go(\'admin_panel\')" '+
+            'style="background:#f1f5f9;border:none;color:#475569;border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+            'العودة للإدارة'+
+          '</button>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(overlay);
   });
 }
 
