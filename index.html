@@ -486,6 +486,7 @@ function go(page) {
     admin_teams: renderAdminTeams,
     admin_group_gen: renderAdminGroupGen,
     admin_knockout: renderAdminKnockout,
+    match_schedule_editor: renderMatchScheduleEditor,
   };
   if(pages[page]) pages[page]();
 }
@@ -3319,7 +3320,22 @@ function handleAcadLink(){
 // ════════════════════════════════════════
 function renderPublicMatchSchedule(){
   showL();
-  apiGet('جدول المباريات').then(function(rows){
+  Promise.all([apiGet('جدول المباريات'), apiGet('نتائج المباريات')]).then(function(res){
+    var rows=res[0]||[], resultRows=res[1]||[];
+    // بناء فهرس النتائج: الفريق الأول + الفريق الثاني + الفئة → النتيجة
+    var resultsMap={};
+    resultRows.forEach(function(r){
+      var t1=(r['الفريق الأول']||r.team1||'').trim();
+      var t2=(r['الفريق الثاني']||r.team2||'').trim();
+      var cat=(r['الفئة']||r.cat_id||'').trim();
+      var res2=(r['النتيجة']||r.result||'').trim();
+      if(t1&&t2&&res2){
+        resultsMap[t1+'|'+t2+'|'+cat]=res2;
+        resultsMap[t2+'|'+t1+'|'+cat]=res2;
+      }
+    });
+    rows = rows; // نمرر resultsMap للدالة الداخلية
+    if(!Array.isArray(rows)) rows=[];
     if(!Array.isArray(rows)) rows=[];
     function fmtDate(v){
       if(!v) return 'غير محدد';
@@ -3367,14 +3383,28 @@ function renderPublicMatchSchedule(){
           var team2=m.team2||m['الفريق الثاني']||'؟';
           var time=fmtTime(m.time||m['الوقت']||'');
           var field=m.field||m['الملعب']||'';
-          var result=m.result||m['النتيجة']||'';
           var catId=m.cat_id||m['الفئة']||'';
+          var group=m['المجموعة']||'';
+          var stage=m['المرحلة']||'';
+          // النتيجة: من جدول المباريات أو من نتائج المباريات
+          var result=m.result||m['النتيجة']||resultsMap[team1+'|'+team2+'|'+catId]||'';
           var ci=getCatInfo(catId);
+          var isFinished=!!result;
+          var now=new Date(), matchDate=m['التاريخ']||'';
+          var isPast = matchDate && new Date(matchDate)<now;
+          var statusColor = isFinished?'#16a34a':(isPast?'#dc2626':'#64748b');
+          var statusText = isFinished?'منتهية':(isPast?'فائتة':'قادمة');
           html+='<div style="background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid #e2e8f0;box-shadow:0 2px 6px rgba(0,0,0,.05);">'+
-            (ci?'<div style="margin-bottom:8px;"><span style="background:#f0fdf4;color:var(--green);font-size:10px;font-weight:800;padding:2px 10px;border-radius:10px;">'+ci.name+'</span></div>':'')+
+            '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+              (ci?'<span style="background:#f0fdf4;color:var(--green);font-size:10px;font-weight:800;padding:2px 10px;border-radius:10px;">'+ci.name+'</span>':'<span></span>')+
+              '<div style="display:flex;gap:4px;align-items:center;">'+
+                (group?'<span style="background:#e2e8f0;color:#475569;font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;">'+group+'</span>':'')+
+                '<span style="background:'+statusColor+'20;color:'+statusColor+';font-size:9px;font-weight:800;padding:2px 8px;border-radius:10px;">'+statusText+'</span>'+
+              '</div>'+
+            '</div>'+
             '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
               '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:var(--dark);">'+team1+'</div>'+
-              '<div style="background:'+(result?'var(--green)':'#e2e8f0')+';color:'+(result?'#fff':'#64748b')+';border-radius:10px;padding:6px 14px;font-size:'+(result?'14px':'12px')+';font-weight:900;text-align:center;min-width:60px;">'+
+              '<div style="background:'+(isFinished?'var(--green)':'#e2e8f0')+';color:'+(isFinished?'#fff':'#64748b')+';border-radius:10px;padding:6px 14px;font-size:'+(isFinished?'15px':'12px')+';font-weight:900;text-align:center;min-width:60px;">'+
                 (result||'vs')+
               '</div>'+
               '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:var(--dark);">'+team2+'</div>'+
@@ -3383,14 +3413,14 @@ function renderPublicMatchSchedule(){
               (time?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-clock" style="color:var(--gold);"></i> '+time+'</span>':'')+
               (field?'<span style="font-size:11px;color:#64748b;font-weight:700;"><i class="fas fa-map-marker-alt" style="color:var(--red);"></i> '+field+'</span>':'')+
             '</div>'+
-            (result?
+            (isFinished?
               '<div style="margin-top:10px;text-align:center;">'+
-                '<button onclick="shareMatchResult(\''+team1+'\',\''+team2+'\',\''+result+'\',\''+d+'\',\''+time+'\',\''+field+'\',\''+((ci&&ci.name)||catId)+'\')" '+
+                '<button onclick="shareMatchResult(\''+team1.replace(/'/g,"\\'")+'\',\''+team2.replace(/'/g,"\\'")+'\',\''+result+'\',\''+d+'\',\''+time+'\',\''+field.replace(/'/g,"\\'")+'\',\''+((ci&&ci.name)||catId)+'\')" '+
                   'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:10px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:inline-flex;align-items:center;gap:6px;">'+
                   '<i class="fab fa-whatsapp" style="font-size:14px;"></i> شارك النتيجة'+
                 '</button>'+
               '</div>'
-            : '')+
+            :'')+
           '</div>';
         });
       });
@@ -3715,7 +3745,7 @@ function generateGroupMatches(catId){
     var startDate = document.getElementById('genStartDate')?document.getElementById('genStartDate').value:'';
     var genTime = document.getElementById('genTime')?document.getElementById('genTime').value:'';
     var allMatches = [];
-    Object.keys(groups).forEach(function(g){
+    Object.keys(groups).sort().forEach(function(g){
       var arr = groups[g];
       var venueEl = document.getElementById('genVenue_'+g.replace(/\s/g,'_'));
       var venue = venueEl?(venueEl.value||'').trim():'';
@@ -3730,17 +3760,92 @@ function generateGroupMatches(catId){
       }
     });
     if(!allMatches.length){alert('لا توجد مباريات لتوليدها');return;}
-    var btn=document.querySelector('[onclick*="generateGroupMatches"]');
-    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
-    var promises = allMatches.map(function(m){return apiAppend('جدول المباريات',m);});
-    Promise.all(promises).then(function(){
-      invalidateCache('جدول المباريات');
-      alert('✅ تم توليد '+allMatches.length+' مباراة بنجاح!\nستجدها في جدول المباريات.');
-      go('admin_panel');
-    }).catch(function(){
-      alert('⚠️ تم الإرسال — قد يستغرق ظهوره بضع دقائق');
-      go('admin_panel');
-    });
+    // انتقل لمحرر المواعيد
+    window._pendingMatches = allMatches;
+    window._pendingCatId = catId;
+    renderMatchScheduleEditor();
+  });
+}
+
+// ════════════════════════════════════════
+// محرر مواعيد المباريات
+// ════════════════════════════════════════
+function renderMatchScheduleEditor(){
+  var matches = window._pendingMatches || [];
+  var catId = window._pendingCatId || '';
+  var ci = CATEGORIES.find(function(c){return c.id===catId;});
+  var color = ci?ci.color:'#0d3318';
+
+  // تجميع حسب المجموعة
+  var byGroup = {};
+  matches.forEach(function(m,i){
+    var g = m['المجموعة']||'بدون مجموعة';
+    if(!byGroup[g]) byGroup[g]=[];
+    byGroup[g].push({m:m,i:i});
+  });
+
+  var groupsHtml = Object.keys(byGroup).sort().map(function(g){
+    return '<div style="margin-bottom:16px;">'+
+      '<div style="background:'+color+';color:#fff;border-radius:10px 10px 0 0;padding:10px 14px;font-size:13px;font-weight:900;">'+
+        g+' — '+byGroup[g].length+' مباريات'+
+      '</div>'+
+      byGroup[g].map(function(item){
+        var m=item.m, idx=item.i;
+        return '<div style="background:#fff;border:1px solid #e2e8f0;border-top:none;padding:12px;'+
+          (idx===byGroup[g][byGroup[g].length-1].i?'border-radius:0 0 10px 10px;':'')+'">'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'+
+            '<span style="font-size:12px;font-weight:900;color:'+color+';">'+m['الفريق الأول']+'</span>'+
+            '<span style="font-size:10px;color:#94a3b8;font-weight:700;">vs</span>'+
+            '<span style="font-size:12px;font-weight:900;color:'+color+';">'+m['الفريق الثاني']+'</span>'+
+          '</div>'+
+          '<div style="display:flex;gap:6px;">'+
+            '<input type="date" class="inp pm-date" data-idx="'+idx+'" value="'+m['التاريخ']+'" style="flex:1;font-size:11px;padding:6px 8px;">'+
+            '<input type="time" class="inp pm-time" data-idx="'+idx+'" value="'+m['الوقت']+'" style="flex:1;font-size:11px;padding:6px 8px;">'+
+            '<input class="inp pm-venue" data-idx="'+idx+'" value="'+m['الملعب']+'" placeholder="الملعب" style="flex:2;font-size:11px;padding:6px 8px;">'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>';
+  }).join('');
+
+  document.getElementById('app').innerHTML=
+    '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
+      '<button onclick="renderAdminGroupGen()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+      '<div><div style="font-size:15px;font-weight:900;">📅 ضبط مواعيد المباريات</div>'+
+      '<div style="font-size:10px;opacity:.8;">'+matches.length+' مباراة — عدّل التاريخ والوقت والملعب لكل مباراة</div></div>'+
+    '</div>'+
+    '<div style="padding:14px;padding-bottom:90px;">'+groupsHtml+'</div>'+
+    '<div style="position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e2e8f0;padding:12px 16px;z-index:100;">'+
+      '<button onclick="saveAllPendingMatches()" class="btn" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;width:100%;font-size:14px;font-weight:900;padding:14px;">'+
+        '<i class="fas fa-save"></i> حفظ '+matches.length+' مباراة في جدول المباريات</button>'+
+    '</div>';
+}
+
+function saveAllPendingMatches(){
+  var matches = window._pendingMatches || [];
+  // قراءة القيم المعدّلة
+  document.querySelectorAll('.pm-date').forEach(function(el){
+    var idx=parseInt(el.dataset.idx); if(matches[idx]) matches[idx]['التاريخ']=el.value;
+  });
+  document.querySelectorAll('.pm-time').forEach(function(el){
+    var idx=parseInt(el.dataset.idx); if(matches[idx]) matches[idx]['الوقت']=el.value;
+  });
+  document.querySelectorAll('.pm-venue').forEach(function(el){
+    var idx=parseInt(el.dataset.idx); if(matches[idx]) matches[idx]['الملعب']=el.value;
+  });
+
+  var btn=document.querySelector('[onclick="saveAllPendingMatches()"]');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جارٍ الحفظ...';
+
+  var promises = matches.map(function(m){ return apiAppend('جدول المباريات',m); });
+  Promise.all(promises).then(function(){
+    invalidateCache('جدول المباريات');
+    window._pendingMatches=[];
+    alert('✅ تم حفظ '+matches.length+' مباراة بنجاح!');
+    go('admin_panel');
+  }).catch(function(){
+    alert('⚠️ تم الإرسال — قد يستغرق ظهوره بضع دقائق');
+    go('admin_panel');
   });
 }
 
