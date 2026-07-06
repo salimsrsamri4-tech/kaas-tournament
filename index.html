@@ -3503,9 +3503,11 @@ function renderAdminTeams(){
     if(!Array.isArray(teams)) teams=[];
     if(!Array.isArray(acadList)) acadList=[];
     if(!Array.isArray(deleted)) deleted=[];
-    // بناء قائمة المحذوفين
+    // بناء قائمة المحذوفين (سيرفر + محلي)
     var deletedKeys={};
     deleted.forEach(function(d){ var k=(d['الاسم']||'')+'|'+(d['الفئة']||''); deletedKeys[k]=true; });
+    var localDel = JSON.parse(sessionStorage.getItem('_localDeleted')||'[]');
+    localDel.forEach(function(d){ var k=(d['الاسم']||'')+'|'+(d['الفئة']||''); deletedKeys[k]=true; });
     // فلترة المحذوفين وإزالة التكرار
     var seenTeams={};
     teams = teams.filter(function(t){
@@ -3646,11 +3648,15 @@ function addTeam(catId){
 
 function deleteTeam(name,catId){
   if(!confirm('حذف فريق "'+name+'"؟')) return;
-  apiAppend('فرق محذوفة',{'الاسم':name,'الفئة':catId,'وقت':new Date().toISOString()}).then(function(){
-    invalidateCache('الفرق');
-    invalidateCache('فرق محذوفة');
-    setTimeout(renderAdminTeams,500);
-  });
+  // حذف فوري محلي في sessionStorage
+  var localDel = JSON.parse(sessionStorage.getItem('_localDeleted')||'[]');
+  localDel.push({الاسم:name,الفئة:catId});
+  sessionStorage.setItem('_localDeleted', JSON.stringify(localDel));
+  // إرسال للسيرفر (لا نحتاج انتظار الرد)
+  apiAppend('فرق محذوفة',{'الاسم':name,'الفئة':catId,'وقت':new Date().toISOString()});
+  invalidateCache('الفرق');
+  invalidateCache('فرق محذوفة');
+  renderAdminTeams();
 }
 
 // ════════════════════════════════════════
@@ -3659,8 +3665,24 @@ function deleteTeam(name,catId){
 function renderAdminGroupGen(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
-  apiGet('الفرق').then(function(teams){
+  Promise.all([apiGet('الفرق'), apiGet('فرق محذوفة')]).then(function(res){
+    var teams=res[0]||[], deleted=res[1]||[];
     if(!Array.isArray(teams)) teams=[];
+    if(!Array.isArray(deleted)) deleted=[];
+    // فلترة المحذوفين وإزالة التكرار (سيرفر + محلي)
+    var deletedKeys={};
+    deleted.forEach(function(d){ var k=(d['الاسم']||'')+'|'+(d['الفئة']||''); deletedKeys[k]=true; });
+    var localDel = JSON.parse(sessionStorage.getItem('_localDeleted')||'[]');
+    localDel.forEach(function(d){ var k=(d['الاسم']||'')+'|'+(d['الفئة']||''); deletedKeys[k]=true; });
+    var seenT={};
+    teams = teams.filter(function(t){
+      var n=(t['الاسم']||'').trim(), c=(t['الفئة']||'').trim();
+      if(!n||!c) return false;
+      var k=n+'|'+c;
+      if(deletedKeys[k]) return false;
+      if(seenT[k]) return false;
+      seenT[k]=true; return true;
+    });
     var selCat = window._teamsSelCat || CATEGORIES[0].id;
     var ci = CATEGORIES.find(function(c){return c.id===selCat;});
     var catTabs = CATEGORIES.map(function(c){
