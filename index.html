@@ -2058,6 +2058,36 @@ function selectMatchByIdx(idx){
       '</div>'+
     '</div>'+
 
+    /* مسجلو الأهداف */
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">'+
+        '<span>⚽ مسجلو الأهداف</span>'+
+        '<button onclick="addGoalRowNew(\''+t1.replace(/'/g,"\\'")+'\''+',\''+t2.replace(/'/g,"\\'")+'\''+')" style="background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">+ هدف</button>'+
+      '</div>'+
+      '<div id="goalsList" style="margin-top:4px;"></div>'+
+    '</div>'+
+
+    /* البطاقات */
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title" style="display:flex;justify-content:space-between;align-items:center;">'+
+        '<span>🟨 البطاقات</span>'+
+        '<button onclick="addCardRow(\''+t1.replace(/'/g,"\\'")+'\''+',\''+t2.replace(/'/g,"\\'")+'\''+')" style="background:#d97706;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">+ بطاقة</button>'+
+      '</div>'+
+      '<div id="cardsList" style="margin-top:4px;"></div>'+
+    '</div>'+
+
+    /* أفضل لاعب */
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title">🌟 أفضل لاعب في المباراة</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<input class="inp" id="mrMOM" placeholder="اسم اللاعب..." style="flex:2;">'+
+        '<select class="inp" id="mrMOMTeam" style="flex:1;font-size:11px;">'+
+          '<option value="'+t1+'">'+t1+'</option>'+
+          '<option value="'+t2+'">'+t2+'</option>'+
+        '</select>'+
+      '</div>'+
+    '</div>'+
+
     /* الحكم */
     '<div class="card" style="margin-bottom:14px;">'+
       '<div class="sec-title"><i class="fas fa-whistle"></i> الحكم (اختياري)</div>'+
@@ -2067,6 +2097,45 @@ function selectMatchByIdx(idx){
     '<button onclick="saveMatchResult()" class="btn" style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;width:100%;font-size:15px;font-weight:900;padding:16px;">'+
       '<i class="fas fa-save"></i> حفظ النتيجة</button>'+
     '</div>';
+}
+
+function addGoalRowNew(t1,t2){
+  var div=document.createElement('div');
+  div.className='goal-row-new';
+  div.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;';
+  div.innerHTML=
+    '<select class="inp goal-team-sel" style="flex:1;min-width:120px;font-size:11px;padding:8px 6px;">'+
+      '<option value="'+t1+'">'+t1+'</option>'+
+      '<option value="'+t2+'">'+t2+'</option>'+
+    '</select>'+
+    '<input class="inp goal-scorer-name" placeholder="اسم اللاعب..." style="flex:2;min-width:100px;font-size:12px;padding:8px 10px;">'+
+    '<input type="number" class="inp goal-min-new" placeholder="د" min="1" max="120" style="width:52px;font-size:12px;padding:8px 6px;text-align:center;">'+
+    '<select class="inp goal-type-sel" style="width:70px;font-size:10px;padding:8px 4px;">'+
+      '<option value="عادي">عادي</option>'+
+      '<option value="ركلة جزاء">ج.ز</option>'+
+      '<option value="مرمى ذاتي">ذاتي</option>'+
+    '</select>'+
+    '<button onclick="this.parentElement.remove()" style="background:#fff0f0;color:#b91c1c;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;">✕</button>';
+  document.getElementById('goalsList').appendChild(div);
+}
+
+function addCardRow(t1,t2){
+  var div=document.createElement('div');
+  div.className='card-row';
+  div.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;';
+  div.innerHTML=
+    '<select class="inp card-team-sel" style="flex:1;min-width:120px;font-size:11px;padding:8px 6px;">'+
+      '<option value="'+t1+'">'+t1+'</option>'+
+      '<option value="'+t2+'">'+t2+'</option>'+
+    '</select>'+
+    '<input class="inp card-player-name" placeholder="اسم اللاعب..." style="flex:2;min-width:100px;font-size:12px;padding:8px 10px;">'+
+    '<input type="number" class="inp card-min" placeholder="د" min="1" max="120" style="width:52px;font-size:12px;padding:8px 6px;text-align:center;">'+
+    '<select class="inp card-type-sel" style="width:70px;font-size:11px;padding:8px 4px;">'+
+      '<option value="صفراء">🟨</option>'+
+      '<option value="حمراء">🟥</option>'+
+    '</select>'+
+    '<button onclick="this.parentElement.remove()" style="background:#fff0f0;color:#b91c1c;border:1px solid #fecaca;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:13px;flex-shrink:0;">✕</button>';
+  document.getElementById('cardsList').appendChild(div);
 }
 
 function addGoalRow(){
@@ -2113,6 +2182,28 @@ function saveMatchResult(){
 
   if(!team1||!team2){alert('لم يتم اختيار مباراة');return;}
 
+  // جمع الأهداف
+  var goals=[];
+  document.querySelectorAll('.goal-row-new').forEach(function(r){
+    var scorer=(r.querySelector('.goal-scorer-name').value||'').trim();
+    var team=r.querySelector('.goal-team-sel').value;
+    var min=r.querySelector('.goal-min-new').value||'';
+    var type=r.querySelector('.goal-type-sel').value;
+    if(scorer) goals.push({scorer:scorer,team:team,minute:min,type:type});
+  });
+  // جمع البطاقات
+  var cards=[];
+  document.querySelectorAll('.card-row').forEach(function(r){
+    var player=(r.querySelector('.card-player-name').value||'').trim();
+    var team=r.querySelector('.card-team-sel').value;
+    var min=r.querySelector('.card-min').value||'';
+    var type=r.querySelector('.card-type-sel').value;
+    if(player) cards.push({player:player,team:team,minute:min,type:type});
+  });
+  // أفضل لاعب
+  var mom=(document.getElementById('mrMOM').value||'').trim();
+  var momTeam=(document.getElementById('mrMOMTeam')?document.getElementById('mrMOMTeam').value:'');
+
   var row = {
     'رقم المباراة': 'M'+Date.now().toString().slice(-8),
     'الفريق الأول':team1, 'الفريق الثاني':team2,
@@ -2123,7 +2214,10 @@ function saveMatchResult(){
     'المجموعة': group,
     'المرحلة': 'دور المجموعات',
     'الحالة':status, 'الحكم':referee, 'ملاحظات':'',
-    'الأهداف': '[]', 'التبديلات': '[]',
+    'الأهداف': JSON.stringify(goals),
+    'البطاقات': JSON.stringify(cards),
+    'أفضل لاعب': mom, 'فريق أفضل لاعب': momTeam,
+    'التبديلات': '[]',
     'وقت الحفظ': new Date().toLocaleDateString('ar')
   };
 
