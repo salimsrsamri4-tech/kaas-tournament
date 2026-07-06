@@ -1893,7 +1893,8 @@ window._scheduleList = [];
 function renderMatchResult(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
-  Promise.all([apiGet('جدول المباريات'), apiGet('نتائج المباريات')]).then(function(res){
+  var safe = function(p){ return p.catch(function(){ return []; }); };
+  Promise.all([safe(apiGet('جدول المباريات')), safe(apiGet('نتائج المباريات'))]).then(function(res){
     var schedule=Array.isArray(res[0])?res[0]:[];
     var results=Array.isArray(res[1])?res[1]:[];
     // خريطة النتائج المسجلة
