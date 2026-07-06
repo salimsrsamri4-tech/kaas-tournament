@@ -1962,11 +1962,12 @@ function renderMatchResult(){
         pendingHtml+
         (doneHtml?'<div style="font-size:12px;font-weight:900;color:#16a34a;margin:14px 0 8px;">✓ مسجلة ('+doneCount+')</div>'+doneHtml:'')+
       '</div>';
-  }).catch(function(){
+  }).catch(function(err){
     document.getElementById('app').innerHTML=
       '<div style="padding:30px;text-align:center;color:#ef4444;font-family:Cairo,sans-serif;">'+
         '<div style="font-size:30px;margin-bottom:8px;">⚠️</div>'+
         '<div style="font-weight:700;">تعذّر تحميل المباريات</div>'+
+        '<div style="font-size:11px;color:#64748b;margin-top:8px;word-break:break-all;">'+String(err)+'</div>'+
         '<button onclick="renderMatchResult()" style="margin-top:16px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">إعادة المحاولة</button>'+
       '</div>';
   });
