@@ -3756,7 +3756,23 @@ function renderAdminGroupGen(){
 }
 
 function generateGroupMatches(catId){
-  apiGet('الفرق').then(function(teams){
+  Promise.all([apiGet('الفرق'), apiGet('فرق محذوفة')]).then(function(res){
+    var teams=res[0]||[], deleted=res[1]||[];
+    if(!Array.isArray(teams)) teams=[];
+    if(!Array.isArray(deleted)) deleted=[];
+    // فلترة المحذوفين + المحلي + إزالة التكرار
+    var deletedKeys={};
+    deleted.forEach(function(d){ deletedKeys[(d['الاسم']||'')+'|'+(d['الفئة']||'')]=true; });
+    var localDel = JSON.parse(sessionStorage.getItem('_localDeleted')||'[]');
+    localDel.forEach(function(d){ deletedKeys[(d['الاسم']||'')+'|'+(d['الفئة']||'')]=true; });
+    var seen={};
+    teams = teams.filter(function(t){
+      var n=(t['الاسم']||'').trim(), c=(t['الفئة']||'').trim();
+      if(!n||!c) return false;
+      var k=n+'|'+c;
+      if(deletedKeys[k]||seen[k]) return false;
+      seen[k]=true; return true;
+    });
     var filtered = teams.filter(function(t){return (t['الفئة']||'')=== catId;});
     var groups = {};
     filtered.forEach(function(t){
