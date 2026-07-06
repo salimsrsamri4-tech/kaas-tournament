@@ -1893,10 +1893,35 @@ window._scheduleList = [];
 function renderMatchResult(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
-  var safe = function(p){ return p.catch(function(){ return []; }); };
-  Promise.all([safe(apiGet('جدول المباريات')), safe(apiGet('نتائج المباريات'))]).then(function(res){
-    var schedule=Array.isArray(res[0])?res[0]:[];
-    var results=Array.isArray(res[1])?res[1]:[];
+  var schedule=[], results=[];
+  function proceed(){
+    try { _renderMatchResultInner(schedule, results); }
+    catch(e){
+      document.getElementById('app').innerHTML=
+        '<div style="padding:30px;text-align:center;font-family:Cairo,sans-serif;">'+
+        '<div style="font-size:28px;">⚠️</div>'+
+        '<div style="color:#ef4444;font-weight:700;margin:8px 0;">خطأ في الصفحة</div>'+
+        '<div style="font-size:11px;color:#64748b;word-break:break-all;">'+e.message+'</div>'+
+        '<button onclick="renderMatchResult()" style="margin-top:16px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:Cairo,sans-serif;font-weight:700;cursor:pointer;">إعادة المحاولة</button>'+
+        '</div>';
+    }
+  }
+  apiGet('جدول المباريات').then(function(d){ schedule=Array.isArray(d)?d:[]; })
+    .catch(function(){schedule=[];})
+    .then(function(){
+      return apiGet('نتائج المباريات').then(function(d){ results=Array.isArray(d)?d:[]; }).catch(function(){results=[];});
+    }).then(proceed).catch(function(e){
+      document.getElementById('app').innerHTML=
+        '<div style="padding:30px;text-align:center;font-family:Cairo,sans-serif;">'+
+        '<div style="font-size:28px;">⚠️</div>'+
+        '<div style="color:#ef4444;font-weight:700;">تعذّر التحميل</div>'+
+        '<div style="font-size:11px;color:#64748b;">'+String(e)+'</div>'+
+        '<button onclick="renderMatchResult()" style="margin-top:16px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:Cairo,sans-serif;font-weight:700;cursor:pointer;">إعادة المحاولة</button>'+
+        '</div>';
+    });
+}
+
+function _renderMatchResultInner(schedule, results){
     // خريطة النتائج المسجلة
     var doneMap={};
     results.forEach(function(r){
@@ -1962,15 +1987,6 @@ function renderMatchResult(){
         pendingHtml+
         (doneHtml?'<div style="font-size:12px;font-weight:900;color:#16a34a;margin:14px 0 8px;">✓ مسجلة ('+doneCount+')</div>'+doneHtml:'')+
       '</div>';
-  }).catch(function(err){
-    document.getElementById('app').innerHTML=
-      '<div style="padding:30px;text-align:center;color:#ef4444;font-family:Cairo,sans-serif;">'+
-        '<div style="font-size:30px;margin-bottom:8px;">⚠️</div>'+
-        '<div style="font-weight:700;">تعذّر تحميل المباريات</div>'+
-        '<div style="font-size:11px;color:#64748b;margin-top:8px;word-break:break-all;">'+String(err)+'</div>'+
-        '<button onclick="renderMatchResult()" style="margin-top:16px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">إعادة المحاولة</button>'+
-      '</div>';
-  });
 }
 
 function selectMatchByIdx(idx){
