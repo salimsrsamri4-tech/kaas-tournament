@@ -3481,13 +3481,21 @@ function renderAdminTeams(){
 
     // الأكاديميات المعتمدة التي لم تُضف بعد لهذه الفئة
     var addedNames = teams.filter(function(t){return (t['الفئة']||'')=== selCat;}).map(function(t){return t['الاسم']||'';});
+    var INVALID = ['الاسم','اسم الأكاديمية','name',''];
     var availableAcads = acadList.filter(function(a){
-      var n=a.name||a['الاسم']||'';
-      return n && addedNames.indexOf(n)<0;
+      var n=(a.name||a['الاسم']||'').trim();
+      return n && INVALID.indexOf(n)<0 && addedNames.indexOf(n)<0;
+    });
+    // إزالة التكرار
+    var seen={};
+    availableAcads = availableAcads.filter(function(a){
+      var n=(a.name||a['الاسم']||'').trim();
+      if(seen[n]) return false;
+      seen[n]=true; return true;
     });
     var acadOpts = '<option value="">-- اختر أكاديمية معتمدة --</option>'+
       availableAcads.map(function(a){
-        var n=a.name||a['الاسم']||'';
+        var n=(a.name||a['الاسم']||'').trim();
         return '<option value="'+n+'">'+n+'</option>';
       }).join('');
 
@@ -3654,11 +3662,23 @@ function renderAdminGroupGen(){
             '</div>'+
           '</div>'+
           '<div class="card" style="margin-bottom:12px;">'+
-            '<div class="sec-title">📅 إعدادات المباريات (اختياري)</div>'+
+            '<div class="sec-title">📅 إعدادات عامة</div>'+
             '<div class="r2 mb">'+
               '<div><label class="lbl">تاريخ البداية</label><input type="date" class="inp" id="genStartDate"></div>'+
-              '<div><label class="lbl">الملعب الافتراضي</label><input class="inp" id="genVenue" placeholder="اسم الملعب..."></div>'+
+              '<div><label class="lbl">الوقت الافتراضي</label><input type="time" class="inp" id="genTime"></div>'+
             '</div>'+
+          '</div>'+
+          '<div class="card" style="margin-bottom:12px;">'+
+            '<div class="sec-title">🏟️ ملعب لكل مجموعة</div>'+
+            Object.keys(groups).sort().filter(function(g){return groups[g].length;}).map(function(g){
+              return '<div class="r2 mb">'+
+                '<div style="display:flex;align-items:center;gap:8px;">'+
+                  '<span style="background:#0d3318;color:#fff;border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;">'+g.replace('المجموعة ','')+'</span>'+
+                  '<label class="lbl" style="margin:0;">'+g+'</label>'+
+                '</div>'+
+                '<input class="inp" id="genVenue_'+g.replace(/\s/g,'_')+'" placeholder="اسم الملعب...">'+
+              '</div>';
+            }).join('')+
           '</div>'+
           '<button onclick="generateGroupMatches(\''+selCat+'\')" class="btn" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;width:100%;font-size:14px;font-weight:900;padding:14px;">'+
             '<i class="fas fa-magic"></i> توليد '+totalMatches+' مباراة وحفظها في جدول المباريات</button>'
@@ -3678,16 +3698,18 @@ function generateGroupMatches(catId){
       if(!groups[g]) groups[g]=[];
       groups[g].push(t['الاسم']||'');
     });
-    var startDate = document.getElementById('genStartDate').value;
-    var venue = (document.getElementById('genVenue').value||'').trim();
+    var startDate = document.getElementById('genStartDate')?document.getElementById('genStartDate').value:'';
+    var genTime = document.getElementById('genTime')?document.getElementById('genTime').value:'';
     var allMatches = [];
     Object.keys(groups).forEach(function(g){
       var arr = groups[g];
+      var venueEl = document.getElementById('genVenue_'+g.replace(/\s/g,'_'));
+      var venue = venueEl?(venueEl.value||'').trim():'';
       for(var i=0;i<arr.length;i++){
         for(var j=i+1;j<arr.length;j++){
           allMatches.push({
             'الفريق الأول':arr[i], 'الفريق الثاني':arr[j],
-            'التاريخ':startDate, 'الوقت':'', 'الملعب':venue,
+            'التاريخ':startDate, 'الوقت':genTime, 'الملعب':venue,
             'الفئة':catId, 'المجموعة':g, 'المرحلة':'دور المجموعات', 'النتيجة':''
           });
         }
