@@ -419,6 +419,22 @@ function apiGet(sheet, forceRefresh) {
 
 function invalidateCache(sheet){ delete _cache[sheet]; }
 
+function fmtDate(v){
+  if(!v) return '';
+  var s=String(v);
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[3]+'/'+m[2]+'/'+m[1];
+  return s;
+}
+function fmtTime(v){
+  if(!v) return '';
+  var s=String(v);
+  var m=s.match(/T(\d{2}):(\d{2})/);
+  if(m) return m[1]+':'+m[2];
+  if(/^\d{2}:\d{2}/.test(s)) return s.slice(0,5);
+  return s;
+}
+
 // بعد كل كتابة، امسح cache الشيت المعني
 var _origApiAppend = null;
 function apiAppend(sheet, rowObj) {
