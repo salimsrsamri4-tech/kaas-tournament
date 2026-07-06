@@ -503,6 +503,7 @@ function go(page) {
     admin_group_gen: renderAdminGroupGen,
     admin_knockout: renderAdminKnockout,
     match_schedule_editor: renderMatchScheduleEditor,
+    admin_edit_results: renderAdminEditResults,
   };
   if(pages[page]) pages[page]();
 }
@@ -1736,6 +1737,7 @@ function renderAdminPanel() {
           '<button onclick="go(\'admin_teams\')" style="background:linear-gradient(135deg,#0d3318,#166534);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-layer-group"></i><br>إدارة الفرق والمجموعات</button>'+
           '<button onclick="go(\'admin_knockout\')" style="background:linear-gradient(135deg,#7a0f12,#b81d22);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-trophy"></i><br>الأدوار الإقصائية</button>'+
           '<button onclick="go(\'group_standings\')" style="background:linear-gradient(135deg,#0369a1,#075985);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-table"></i><br>ترتيب المجموعات</button>'+
+          '<button onclick="go(\'admin_edit_results\')" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-edit"></i><br>تعديل النتائج</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
@@ -2264,6 +2266,144 @@ function saveMatchResult(){
 // ════════════════════════════════════════
 // أفضل لاعب
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// تعديل النتائج
+// ════════════════════════════════════════
+window._resultsList = [];
+
+function renderAdminEditResults(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  var selCat = window._erSelCat||'';
+  apiGet('نتائج المباريات').then(function(results){
+    if(!Array.isArray(results)) results=[];
+
+    // أحدث نتيجة لكل مباراة (آخر إدخال يتغلب)
+    var latestMap={};
+    results.forEach(function(r,i){
+      var t1=(r['الفريق الأول']||'').trim(), t2=(r['الفريق الثاني']||'').trim(), cat=(r['الفئة']||'').trim();
+      var key=t1+'|'+t2+'|'+cat;
+      latestMap[key]={r:r,i:i};
+    });
+    var unique=Object.values(latestMap).map(function(x){return x.r;});
+
+    var filtered = selCat ? unique.filter(function(r){return (r['الفئة']||'')===selCat;}) : unique;
+    window._resultsList = filtered;
+
+    var catTabs =
+      '<button onclick="window._erSelCat=\'\';renderAdminEditResults();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">الكل</button>'+
+      CATEGORIES.map(function(c){
+        return '<button onclick="window._erSelCat=\''+c.id+'\';renderAdminEditResults();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
+      }).join('');
+
+    var listHtml = filtered.length ? filtered.map(function(r,idx){
+      var t1=(r['الفريق الأول']||'').trim(), t2=(r['الفريق الثاني']||'').trim();
+      var cat=(r['الفئة']||'').trim(), grp=(r['المجموعة']||'').trim();
+      var res=(r['النتيجة']||'').trim(), status=(r['الحالة']||'منتهية');
+      var ci=CATEGORIES.find(function(c){return c.id===cat;})||{color:'#0d3318',name:''};
+      var statusColor=status==='منتهية'?'#16a34a':status==='جارية'?'#d97706':'#dc2626';
+      return '<div style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-right:4px solid '+ci.color+';">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+          '<span style="background:'+ci.color+'22;color:'+ci.color+';font-size:10px;font-weight:900;padding:2px 8px;border-radius:10px;">'+ci.name+(grp?' · '+grp:'')+'</span>'+
+          '<span style="background:'+statusColor+'22;color:'+statusColor+';font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;">'+status+'</span>'+
+        '</div>'+
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;">'+
+          '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0f172a;">'+t1+'</div>'+
+          '<div style="font-size:16px;font-weight:900;color:#0f172a;flex-shrink:0;background:#f1f5f9;padding:4px 12px;border-radius:8px;">'+res+'</div>'+
+          '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0f172a;">'+t2+'</div>'+
+        '</div>'+
+        '<button onclick="openEditResult('+idx+')" style="width:100%;background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;border:none;border-radius:10px;padding:9px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '✏️ تعديل النتيجة</button>'+
+      '</div>';
+    }).join('') : '<div style="text-align:center;color:#94a3b8;padding:30px;font-size:13px;">لا توجد نتائج مسجلة</div>';
+
+    document.getElementById('app').innerHTML=
+      '<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:15px;font-weight:900;">✏️ تعديل النتائج</div>'+
+        '<div style="font-size:10px;opacity:.7;">'+filtered.length+' نتيجة مسجلة</div></div>'+
+      '</div>'+
+      '<div style="padding:14px;padding-bottom:40px;">'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px;">'+catTabs+'</div>'+
+        listHtml+
+      '</div>';
+  }).catch(function(){ go('admin_panel'); });
+}
+
+function openEditResult(idx){
+  var r = window._resultsList[idx];
+  if(!r) return;
+  var t1=(r['الفريق الأول']||'').trim(), t2=(r['الفريق الثاني']||'').trim();
+  var cat=(r['الفئة']||'').trim(), grp=(r['المجموعة']||'').trim();
+  var date=fmtDate(r['التاريخ']), time=fmtTime(r['الوقت']), venue=(r['الملعب']||'').trim();
+  var res=(r['النتيجة']||'0 - 0'), scores=res.match(/(\d+)\s*[-–]\s*(\d+)/)||['','0','0'];
+  var s1=scores[1], s2=scores[2];
+  var status=(r['الحالة']||'منتهية'), referee=(r['الحكم']||'');
+  var mom=(r['أفضل لاعب']||''), momTeam=(r['فريق أفضل لاعب']||t1);
+  window._mrData={team1:t1,team2:t2,cat:cat,grp:grp,date:date,time:time,venue:venue};
+  var ci=CATEGORIES.find(function(c){return c.id===cat;})||{color:'#1d4ed8',name:''};
+
+  document.getElementById('app').innerHTML=
+    '<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
+      '<button onclick="renderAdminEditResults()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+      '<div><div style="font-size:15px;font-weight:900;">✏️ تعديل النتيجة</div>'+
+      '<div style="font-size:10px;opacity:.7;">'+ci.name+(grp?' · '+grp:'')+'</div></div>'+
+    '</div>'+
+    '<div style="padding:16px;padding-bottom:40px;">'+
+    '<div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);border-top:4px solid '+ci.color+';">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+        '<div style="flex:1;text-align:center;font-size:14px;font-weight:900;color:#0f172a;">'+t1+'</div>'+
+        '<div style="font-size:13px;font-weight:900;color:#cbd5e1;flex-shrink:0;">VS</div>'+
+        '<div style="flex:1;text-align:center;font-size:14px;font-weight:900;color:#0f172a;">'+t2+'</div>'+
+      '</div>'+
+      (date||time||venue?'<div style="margin-top:8px;font-size:10px;color:#94a3b8;text-align:center;">'+(date?'📅 '+date:'')+' '+(time?'⏰ '+time:'')+' '+(venue?'📍 '+venue:'')+'</div>':'')+
+    '</div>'+
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title" style="text-align:center;">النتيجة</div>'+
+      '<div style="display:flex;align-items:center;justify-content:center;gap:20px;padding:10px 0;">'+
+        '<div style="text-align:center;">'+
+          '<div style="font-size:11px;color:#64748b;font-weight:700;margin-bottom:8px;">'+t1+'</div>'+
+          '<input type="number" id="mrScore1" min="0" value="'+s1+'" style="width:80px;height:80px;border:3px solid '+ci.color+';border-radius:16px;font-size:36px;font-weight:900;text-align:center;font-family:Cairo,sans-serif;outline:none;color:'+ci.color+';">'+
+        '</div>'+
+        '<div style="font-size:32px;font-weight:900;color:#e2e8f0;">—</div>'+
+        '<div style="text-align:center;">'+
+          '<div style="font-size:11px;color:#64748b;font-weight:700;margin-bottom:8px;">'+t2+'</div>'+
+          '<input type="number" id="mrScore2" min="0" value="'+s2+'" style="width:80px;height:80px;border:3px solid #ef4444;border-radius:16px;font-size:36px;font-weight:900;text-align:center;font-family:Cairo,sans-serif;outline:none;color:#ef4444;">'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">'+
+        ['منتهية','جارية','ملغاة'].map(function(s,i){
+          var active=s===status;
+          return '<button onclick="document.getElementById(\'mrStatus\').value=\''+s+'\';document.querySelectorAll(\'.status-btn\').forEach(function(b){b.style.opacity=\'.5\';});this.style.opacity=\'1\';" '+
+            'class="status-btn" style="background:'+(i===0?'#16a34a':i===1?'#d97706':'#dc2626')+';color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;opacity:'+(active?'1':'.5')+';">'+s+'</button>';
+        }).join('')+
+        '<input type="hidden" id="mrStatus" value="'+status+'">'+
+      '</div>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title">⚽ مسجلو الأهداف</div>'+
+      '<div id="goalsList"></div>'+
+      '<button onclick="addGoalRowNew(\''+t1.replace(/'/g,"\\'")+'\''+',\''+t2.replace(/'/g,"\\'")+'\''+')" style="background:#1d4ed8;color:#fff;border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-top:4px;">+ هدف</button>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title">🌟 أفضل لاعب</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<input class="inp" id="mrMOM" placeholder="اسم اللاعب..." value="'+mom+'" style="flex:2;">'+
+        '<select class="inp" id="mrMOMTeam" style="flex:1;font-size:11px;">'+
+          '<option value="'+t1+'"'+(momTeam===t1?' selected':'')+'>'+t1+'</option>'+
+          '<option value="'+t2+'"'+(momTeam===t2?' selected':'')+'>'+t2+'</option>'+
+        '</select>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card" style="margin-bottom:14px;">'+
+      '<div class="sec-title"><i class="fas fa-whistle"></i> الحكم</div>'+
+      '<input class="inp" id="mrReferee" placeholder="اسم الحكم..." value="'+referee+'">'+
+    '</div>'+
+    '<button onclick="saveMatchResult()" class="btn" style="background:linear-gradient(135deg,#1d4ed8,#1e3a8a);color:#fff;width:100%;font-size:15px;font-weight:900;padding:16px;">'+
+      '<i class="fas fa-save"></i> حفظ التعديل</button>'+
+    '</div>';
+}
+
 function renderBestPlayer(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
