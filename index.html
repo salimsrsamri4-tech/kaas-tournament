@@ -2242,6 +2242,10 @@ function saveMatchResult(){
             'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">'+
             '<i class="fab fa-whatsapp" style="font-size:18px;"></i> شارك النتيجة على واتساب'+
           '</button>'+
+          '<button onclick="this.closest(\'div[style*=fixed]\').remove();invalidateCache(\'نتائج المباريات\');window._gsSelCat=\''+catId+'\';renderGroupStandings();" '+
+            'style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">'+
+            '🏆 عرض ترتيب المجموعات'+
+          '</button>'+
           '<button onclick="this.closest(\'div[style*=fixed]\').remove();invalidateCache(\'نتائج المباريات\');renderMatchResult();" '+
             'style="background:#1d4ed8;border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">'+
             '⚽ تسجيل مباراة أخرى'+
