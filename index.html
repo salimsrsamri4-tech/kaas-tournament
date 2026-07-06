@@ -3468,10 +3468,24 @@ function renderPublicResults(){
 function renderAdminTeams(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
-  Promise.all([apiGet('الفرق'), apiGet('الأكاديميات')]).then(function(res){
-    var teams=res[0]||[], acadList=res[1]||[];
+  Promise.all([apiGet('الفرق'), apiGet('الأكاديميات'), apiGet('فرق محذوفة')]).then(function(res){
+    var teams=res[0]||[], acadList=res[1]||[], deleted=res[2]||[];
     if(!Array.isArray(teams)) teams=[];
     if(!Array.isArray(acadList)) acadList=[];
+    if(!Array.isArray(deleted)) deleted=[];
+    // بناء قائمة المحذوفين
+    var deletedKeys={};
+    deleted.forEach(function(d){ var k=(d['الاسم']||'')+'|'+(d['الفئة']||''); deletedKeys[k]=true; });
+    // فلترة المحذوفين وإزالة التكرار
+    var seenTeams={};
+    teams = teams.filter(function(t){
+      var n=(t['الاسم']||'').trim(), c=(t['الفئة']||'').trim();
+      if(!n||!c) return false;
+      var k=n+'|'+c;
+      if(deletedKeys[k]) return false;
+      if(seenTeams[k]) return false;
+      seenTeams[k]=true; return true;
+    });
     var selCat = window._teamsSelCat || CATEGORIES[0].id;
     var catTabs = CATEGORIES.map(function(c){
       return '<button onclick="window._teamsSelCat=\''+c.id+'\';renderAdminTeams();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
@@ -3602,9 +3616,9 @@ function addTeam(catId){
 
 function deleteTeam(name,catId){
   if(!confirm('حذف فريق "'+name+'"؟')) return;
-  // نحذف من خلال إضافة صف بعلامة حذف — GAS يعالجه
-  apiAppend('_حذف_فريق',{'الاسم':name,'الفئة':catId,'وقت':new Date().toISOString()}).then(function(){
+  apiAppend('فرق محذوفة',{'الاسم':name,'الفئة':catId,'وقت':new Date().toISOString()}).then(function(){
     invalidateCache('الفرق');
+    invalidateCache('فرق محذوفة');
     setTimeout(renderAdminTeams,500);
   });
 }
