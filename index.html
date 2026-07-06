@@ -1888,68 +1888,66 @@ function applyAdminFilter(){
 // ════════════════════════════════════════
 // نتائج المباريات — اختيار من الجدول
 // ════════════════════════════════════════
+window._scheduleList = [];
+
 function renderMatchResult(){
   if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
   showL();
   Promise.all([apiGet('جدول المباريات'), apiGet('نتائج المباريات')]).then(function(res){
-    var schedule=res[0]||[], results=res[1]||[];
-    if(!Array.isArray(schedule)) schedule=[];
-    // بناء خريطة النتائج المسجلة مسبقاً
+    var schedule=Array.isArray(res[0])?res[0]:[];
+    var results=Array.isArray(res[1])?res[1]:[];
+    // خريطة النتائج المسجلة
     var doneMap={};
     results.forEach(function(r){
       var t1=(r['الفريق الأول']||'').trim(), t2=(r['الفريق الثاني']||'').trim(), cat=(r['الفئة']||'').trim();
-      if(t1&&t2) { doneMap[t1+'|'+t2+'|'+cat]=r['النتيجة']||''; doneMap[t2+'|'+t1+'|'+cat]=r['النتيجة']||''; }
+      if(t1&&t2){ doneMap[t1+'|'+t2+'|'+cat]=r['النتيجة']||'✓'; doneMap[t2+'|'+t1+'|'+cat]=r['النتيجة']||'✓'; }
     });
-    // فلترة المباريات غير المسجلة + فرز بالتاريخ
-    var selCat = window._mrSelCat || '';
-    var catTabs = '<button onclick="window._mrSelCat=\'\';renderMatchResult();" style="padding:6px 14px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">الكل</button>'+
+    var selCat = window._mrSelCat||'';
+    var catTabs =
+      '<button onclick="window._mrSelCat=\'\';renderMatchResult();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">الكل</button>'+
       CATEGORIES.map(function(c){
-        return '<button onclick="window._mrSelCat=\''+c.id+'\';renderMatchResult();" style="padding:6px 14px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
+        return '<button onclick="window._mrSelCat=\''+c.id+'\';renderMatchResult();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
       }).join('');
 
     var filtered = schedule.filter(function(m){
-      var t1=(m['الفريق الأول']||'').trim(), t2=(m['الفريق الثاني']||'').trim(), cat=(m['الفئة']||'').trim();
+      var t1=(m['الفريق الأول']||'').trim(), t2=(m['الفريق الثاني']||'').trim();
       if(!t1||!t2) return false;
-      if(selCat && cat!==selCat) return false;
+      if(selCat && (m['الفئة']||'').trim()!==selCat) return false;
       return true;
     });
 
-    // تقسيم: غير مسجلة / مسجلة
-    var pending=[], done=[];
-    filtered.forEach(function(m){
-      var t1=(m['الفريق الأول']||'').trim(), t2=(m['الفريق الثاني']||'').trim(), cat=(m['الفئة']||'').trim();
-      if(doneMap[t1+'|'+t2+'|'+cat]) done.push(m);
-      else pending.push(m);
-    });
+    // تخزين المباريات في مصفوفة عامة للوصول بالرقم
+    window._scheduleList = filtered;
 
-    function matchCard(m, isDone){
+    var pendingHtml='', doneHtml='', pendingCount=0, doneCount=0;
+    filtered.forEach(function(m,idx){
       var t1=(m['الفريق الأول']||'').trim(), t2=(m['الفريق الثاني']||'').trim();
       var cat=(m['الفئة']||'').trim(), grp=(m['المجموعة']||'').trim();
       var date=fmtDate(m['التاريخ']), time=fmtTime(m['الوقت']), venue=(m['الملعب']||'').trim();
       var ci=CATEGORIES.find(function(c){return c.id===cat;})||{color:'#0d3318',name:''};
-      var result = doneMap[t1+'|'+t2+'|'+cat]||'';
-      return '<div onclick="'+(isDone?'':'selectMatch(\''+t1.replace(/'/g,"\\'")+'\''+',\''+t2.replace(/'/g,"\\'")+'\''+',\''+cat+'\''+',\''+grp.replace(/'/g,"\\'")+'\''+',\''+date+'\''+',\''+time+'\''+',\''+venue.replace(/'/g,"\\'")+'\')')+'" '+
-        'style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-right:4px solid '+ci.color+';'+(isDone?'opacity:.55;':'cursor:pointer;')+'">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
-          '<span style="background:'+ci.color+'22;color:'+ci.color+';font-size:10px;font-weight:900;padding:2px 8px;border-radius:10px;">'+ci.name+(grp?' · '+grp:'')+'</span>'+
-          (isDone?'<span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:900;padding:2px 8px;border-radius:10px;">✓ '+result+'</span>':
-                  '<span style="background:#fef9c3;color:#854d0e;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;">⏳ لم تُسجَّل</span>')+
-        '</div>'+
-        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
-          '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0f172a;">'+t1+'</div>'+
-          '<div style="font-size:11px;font-weight:900;color:#94a3b8;flex-shrink:0;">VS</div>'+
-          '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0f172a;">'+t2+'</div>'+
-        '</div>'+
-        (date||time||venue?'<div style="margin-top:6px;font-size:10px;color:#94a3b8;text-align:center;">'+(date||'')+(time?' · '+time:'')+(venue?' · '+venue:'')+'</div>':'')+
-      '</div>';
-    }
+      var isDone=!!(doneMap[t1+'|'+t2+'|'+cat]);
+      var result=doneMap[t1+'|'+t2+'|'+cat]||'';
+      var card=
+        '<div onclick="'+(isDone?'':'selectMatchByIdx('+idx+')')+'" '+
+        'style="background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.07);border-right:4px solid '+ci.color+';'+(isDone?'opacity:.5;':'cursor:pointer;active-scale:.97;')+'">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+            '<span style="background:'+ci.color+'22;color:'+ci.color+';font-size:10px;font-weight:900;padding:2px 8px;border-radius:10px;">'+ci.name+(grp?' · '+grp:'')+'</span>'+
+            (isDone
+              ?'<span style="background:#dcfce7;color:#16a34a;font-size:11px;font-weight:900;padding:2px 8px;border-radius:10px;">✓ '+result+'</span>'
+              :'<span style="background:#fef9c3;color:#92400e;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;">⏳ لم تُسجَّل</span>')+
+          '</div>'+
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+            '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0f172a;">'+t1+'</div>'+
+            '<div style="font-size:12px;font-weight:900;color:#cbd5e1;flex-shrink:0;">VS</div>'+
+            '<div style="flex:1;text-align:center;font-size:13px;font-weight:900;color:#0f172a;">'+t2+'</div>'+
+          '</div>'+
+          (date||time||venue?'<div style="margin-top:6px;font-size:10px;color:#94a3b8;text-align:center;">'+(date?'📅 '+date:'')+' '+(time?'⏰ '+time:'')+' '+(venue?'📍 '+venue:'')+'</div>':'')+
+        '</div>';
+      if(isDone){doneHtml+=card;doneCount++;}
+      else{pendingHtml+=card;pendingCount++;}
+    });
 
-    var pendingHtml = pending.length
-      ? pending.map(function(m){return matchCard(m,false);}).join('')
-      : '<div style="text-align:center;color:#94a3b8;padding:16px;font-size:12px;">لا توجد مباريات منتظرة</div>';
-    var doneHtml = done.length
-      ? done.map(function(m){return matchCard(m,true);}).join('')
-      : '';
+    if(!pendingHtml) pendingHtml='<div style="text-align:center;color:#94a3b8;padding:20px;font-size:12px;">لا توجد مباريات منتظرة في هذه الفئة</div>';
 
     document.getElementById('app').innerHTML=
       '<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
@@ -1959,16 +1957,28 @@ function renderMatchResult(){
       '</div>'+
       '<div style="padding:14px;padding-bottom:40px;">'+
         '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px;">'+catTabs+'</div>'+
-        '<div style="font-size:12px;font-weight:900;color:#1d4ed8;margin-bottom:8px;">⏳ تنتظر التسجيل ('+pending.length+')</div>'+
+        '<div style="font-size:12px;font-weight:900;color:#1d4ed8;margin-bottom:8px;">⏳ تنتظر التسجيل ('+pendingCount+')</div>'+
         pendingHtml+
-        (doneHtml?'<div style="font-size:12px;font-weight:900;color:#16a34a;margin:14px 0 8px;">✓ مسجلة ('+done.length+')</div>'+doneHtml:'')+
+        (doneHtml?'<div style="font-size:12px;font-weight:900;color:#16a34a;margin:14px 0 8px;">✓ مسجلة ('+doneCount+')</div>'+doneHtml:'')+
+      '</div>';
+  }).catch(function(){
+    document.getElementById('app').innerHTML=
+      '<div style="padding:30px;text-align:center;color:#ef4444;font-family:Cairo,sans-serif;">'+
+        '<div style="font-size:30px;margin-bottom:8px;">⚠️</div>'+
+        '<div style="font-weight:700;">تعذّر تحميل المباريات</div>'+
+        '<button onclick="renderMatchResult()" style="margin-top:16px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;cursor:pointer;">إعادة المحاولة</button>'+
       '</div>';
   });
 }
 
-function selectMatch(t1,t2,cat,grp,date,time,venue){
-  var ci=CATEGORIES.find(function(c){return c.id===cat;})||{color:'#1d4ed8',name:''};
+function selectMatchByIdx(idx){
+  var m=window._scheduleList[idx];
+  if(!m) return;
+  var t1=(m['الفريق الأول']||'').trim(), t2=(m['الفريق الثاني']||'').trim();
+  var cat=(m['الفئة']||'').trim(), grp=(m['المجموعة']||'').trim();
+  var date=fmtDate(m['التاريخ']), time=fmtTime(m['الوقت']), venue=(m['الملعب']||'').trim();
   window._mrData={team1:t1,team2:t2,cat:cat,grp:grp,date:date,time:time,venue:venue};
+  var ci=CATEGORIES.find(function(c){return c.id===cat;})||{color:'#1d4ed8',name:''};
   document.getElementById('app').innerHTML=
     '<div style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
       '<button onclick="renderMatchResult()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
