@@ -148,7 +148,6 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="shareApp()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;" title="مشاركة المنصة">
       <i class="fas fa-share-alt"></i>
     </button>
-    <button onclick="setLang(LANG==='ar'?'en':'ar')" id="langBtn" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 10px;border-radius:8px;font-size:11px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">EN</button>
     <button onclick="openSidebar()" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:10px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
       <i class="fas fa-bars"></i>
     </button>
@@ -188,86 +187,86 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
       <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
     </div>
     <button onclick="closeSidebar();go('acad_register')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-plus-circle" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> <span id="sb-acadreg">'+t('تسجيل أكاديمية جديدة','Register New Academy')+'</span>
+      <i class="fas fa-plus-circle" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> تسجيل أكاديمية جديدة
     </button>
     <button onclick="closeSidebar();go('acad_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(212,175,55,.15);border:1px solid rgba(212,175,55,.3);border-radius:12px;color:#ffdd57;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-sign-in-alt" style="width:18px;text-align:center;"></i> <span id="sb-acadlogin">دخول الأكاديمية</span>
+      <i class="fas fa-sign-in-alt" style="width:18px;text-align:center;"></i> دخول الأكاديمية
     </button>
     <button onclick="closeSidebar();go('academies')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-shield-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> <span id="sb-acadlist">'+t('الأكاديميات المشاركة','Participating Academies')+'</span>
+      <i class="fas fa-shield-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> الأكاديميات المشاركة
     </button>
     <button onclick="closeSidebar();go('about_tournament')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(212,175,55,.15);border:none;border-radius:10px;color:#ffdd57;cursor:pointer;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;text-align:right;margin-bottom:4px;">
-      <i class="fas fa-info-circle" style="width:18px;text-align:center;color:#ffdd57;"></i> <span id="sb-about">عن البطولة</span>
+      <i class="fas fa-info-circle" style="width:18px;text-align:center;color:#ffdd57;"></i> عن البطولة
     </button>
     <button onclick="closeSidebar();go('match_schedule')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-calendar-check" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> <span id="sb-schedule">جدول المباريات</span>
+      <i class="fas fa-calendar-check" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> جدول المباريات
     </button>
     <button onclick="closeSidebar();go('public_results')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-futbol" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> <span id="sb-results">نتائج المباريات</span>
+      <i class="fas fa-futbol" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> نتائج المباريات
     </button>
     <button onclick="closeSidebar();go('group_standings')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-layer-group" style="width:18px;text-align:center;color:#d4af37;"></i> <span id="sb-standings">ترتيب المجموعات</span>
+      <i class="fas fa-layer-group" style="width:18px;text-align:center;color:#d4af37;"></i> ترتيب المجموعات
     </button>
     <button onclick="closeSidebar();go('top_scorers')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-futbol" style="width:18px;text-align:center;color:#f59e0b;"></i> <span id="sb-scorers">هدافو البطولة</span>
+      <i class="fas fa-futbol" style="width:18px;text-align:center;color:#f59e0b;"></i> هدافو البطولة
     </button>
     <button onclick="closeSidebar();go('public_awards')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-medal" style="width:18px;text-align:center;color:#d4af37;"></i> <span id="sb-awards">جوائز البطولة</span>
+      <i class="fas fa-medal" style="width:18px;text-align:center;color:#d4af37;"></i> جوائز البطولة
     </button>
     <button onclick="closeSidebar();go('knockout_bracket')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.2);border:1px solid rgba(184,29,34,.35);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-trophy" style="width:18px;text-align:center;color:#d4af37;"></i> <span id="sb-knockout">الأدوار الإقصائية</span>
+      <i class="fas fa-trophy" style="width:18px;text-align:center;color:#d4af37;"></i> الأدوار الإقصائية
     </button>
     <button onclick="closeSidebar();go('standings')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-table" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> <span id="sb-table">لوحة الترتيب</span>
+      <i class="fas fa-table" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> لوحة الترتيب
     </button>
   </div>
 
   <!-- قسم الإدارة -->
   <div style="padding:14px 16px 6px;">
     <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:900;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-      <span id="sb-admin-hdr">الإدارة</span>
+      <span>الإدارة</span>
       <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
     </div>
     <button onclick="closeSidebar();go('admin_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.25);border:1px solid rgba(184,29,34,.4);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
-      <i class="fas fa-lock" style="width:18px;text-align:center;"></i> <span id="sb-adminpanel">لوحة تحكم الإدارة</span>
+      <i class="fas fa-lock" style="width:18px;text-align:center;"></i> لوحة تحكم الإدارة
     </button>
     <button onclick="closeSidebar();go('admin_players')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-users" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-players">قائمة اللاعبين</span>
+      <i class="fas fa-users" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> قائمة اللاعبين
     </button>
     <button onclick="closeSidebar();go('admin_match')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-calendar-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-schedule">جدول المباريات</span>
+      <i class="fas fa-calendar-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> جدول المباريات
     </button>
     <button onclick="closeSidebar();go('admin_messages')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-envelope" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-messages">رسائل الأكاديميات</span>
+      <i class="fas fa-envelope" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> رسائل الأكاديميات
     </button>
     <button onclick="closeSidebar();go('admin_notifications')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-bell" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-notifs">الإشعارات</span>
+      <i class="fas fa-bell" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> الإشعارات
     </button>
     <button onclick="closeSidebar();go('admin_match_result')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-futbol" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-results">نتائج المباريات</span>
+      <i class="fas fa-futbol" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> نتائج المباريات
     </button>
     <button onclick="closeSidebar();go('admin_best_player')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-star" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-bestplayer">أفضل لاعب</span>
+      <i class="fas fa-star" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> أفضل لاعب
     </button>
     <button onclick="closeSidebar();go('admin_referee')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-whistle" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-referee">تقارير الحكام</span>
+      <i class="fas fa-whistle" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> تقارير الحكام
     </button>
     <button onclick="closeSidebar();go('admin_academies_approval')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;text-align:right;">
-      <i class="fas fa-building" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-acadapproval">اعتماد الأكاديميات</span> <span id="sidebarPendingBadge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:900;border-radius:999px;padding:1px 6px;margin-right:4px;"></span>
+      <i class="fas fa-building" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> اعتماد الأكاديميات <span id="sidebarPendingBadge" style="display:none;background:#ef4444;color:#fff;font-size:9px;font-weight:900;border-radius:999px;padding:1px 6px;margin-right:4px;"></span>
     </button>
   </div>
 
   <!-- قسم التنقل -->
   <div style="padding:14px 16px 6px;">
     <div style="font-size:9px;color:rgba(255,255,255,.45);font-weight:900;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
-      <span id="sb-nav-hdr">التنقل</span>
+      <span>التنقل</span>
       <span style="flex:1;height:1px;background:rgba(255,255,255,.15);"></span>
     </div>
     <button onclick="closeSidebar();go('home')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.75);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
-      <i class="fas fa-home" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-home">الرئيسية</span>
+      <i class="fas fa-home" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> الرئيسية
     </button>
     <button onclick="closeSidebar();go('categories')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.75);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;text-align:right;">
-      <i class="fas fa-layer-group" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> <span id="sb-agecats">الفئات العمرية</span>
+      <i class="fas fa-layer-group" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> الفئات العمرية
     </button>
   </div>
 
@@ -286,16 +285,16 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
 <!-- الشريط السفلي -->
 <div class="bottom-nav">
   <button class="bn-btn active" id="bn-home" onclick="go('home')">
-    <span class="bn-icon">🏆</span><span class="bn-label" id="bn-lbl-home">الرئيسية</span>
+    <span class="bn-icon">🏆</span><span class="bn-label">الرئيسية</span>
   </button>
   <button class="bn-btn" id="bn-cats" onclick="go('categories')">
-    <span class="bn-icon">📋</span><span class="bn-label" id="bn-lbl-cats">الفئات</span>
+    <span class="bn-icon">📋</span><span class="bn-label">الفئات</span>
   </button>
   <button class="bn-btn" id="bn-reg" onclick="go('acad_register')">
-    <span class="bn-icon">➕</span><span class="bn-label" id="bn-lbl-reg">تسجيل</span>
+    <span class="bn-icon">➕</span><span class="bn-label">تسجيل</span>
   </button>
   <button class="bn-btn" id="bn-acadlist" onclick="go('academies')">
-    <span class="bn-icon">🏫</span><span class="bn-label" id="bn-lbl-acadlist">الأكاديميات</span>
+    <span class="bn-icon">🏫</span><span class="bn-label">الأكاديميات</span>
   </button>
 </div>
 
@@ -328,84 +327,34 @@ var CONFIG = {
   SEASON: '2025/2026'
 };
 
-// Language support
-var LANG = localStorage.getItem('kaasLang') || 'ar';
-function t(ar, en){ return LANG === 'en' ? en : ar; }
-function updateStaticUI(){
-  var e;
-  // Bottom nav
-  e=document.getElementById('bn-lbl-home'); if(e) e.textContent=t('الرئيسية','Home');
-  e=document.getElementById('bn-lbl-cats'); if(e) e.textContent=t('الفئات','Categories');
-  e=document.getElementById('bn-lbl-reg'); if(e) e.textContent=t('تسجيل','Register');
-  e=document.getElementById('bn-lbl-acadlist'); if(e) e.textContent=t('الأكاديميات','Academies');
-  // Sidebar
-  e=document.getElementById('sb-home'); if(e) e.textContent=t('الرئيسية','Home');
-  e=document.getElementById('sb-acadreg'); if(e) e.textContent=t('تسجيل أكاديمية جديدة','Register New Academy');
-  e=document.getElementById('sb-acadlogin'); if(e) e.textContent=t('دخول الأكاديمية','Academy Login');
-  e=document.getElementById('sb-acadlist'); if(e) e.textContent=t('الأكاديميات المشاركة','Participating Academies');
-  e=document.getElementById('sb-about'); if(e) e.textContent=t('عن البطولة','About Tournament');
-  e=document.getElementById('sb-schedule'); if(e) e.textContent=t('جدول المباريات','Match Schedule');
-  e=document.getElementById('sb-results'); if(e) e.textContent=t('نتائج المباريات','Match Results');
-  e=document.getElementById('sb-standings'); if(e) e.textContent=t('ترتيب المجموعات','Group Standings');
-  e=document.getElementById('sb-scorers'); if(e) e.textContent=t('هدافو البطولة','Top Scorers');
-  e=document.getElementById('sb-awards'); if(e) e.textContent=t('جوائز البطولة','Awards');
-  e=document.getElementById('sb-knockout'); if(e) e.textContent=t('الأدوار الإقصائية','Knockout Rounds');
-  e=document.getElementById('sb-table'); if(e) e.textContent=t('لوحة الترتيب','Standings Table');
-  e=document.getElementById('sb-agecats'); if(e) e.textContent=t('الفئات العمرية','Age Categories');
-  e=document.getElementById('sb-admin-hdr'); if(e) e.textContent=t('الإدارة','Admin');
-  e=document.getElementById('sb-nav-hdr'); if(e) e.textContent=t('التنقل','Navigation');
-  e=document.getElementById('sb-adminpanel'); if(e) e.textContent=t('لوحة تحكم الإدارة','Admin Control Panel');
-  e=document.getElementById('sb-players'); if(e) e.textContent=t('قائمة اللاعبين','Players List');
-  e=document.getElementById('sb-admin-schedule'); if(e) e.textContent=t('جدول المباريات','Match Schedule');
-  e=document.getElementById('sb-messages'); if(e) e.textContent=t('رسائل الأكاديميات','Academy Messages');
-  e=document.getElementById('sb-notifs'); if(e) e.textContent=t('الإشعارات','Notifications');
-  e=document.getElementById('sb-admin-results'); if(e) e.textContent=t('نتائج المباريات','Match Results');
-  e=document.getElementById('sb-bestplayer'); if(e) e.textContent=t('أفضل لاعب','Best Player');
-  e=document.getElementById('sb-referee'); if(e) e.textContent=t('تقارير الحكام','Referee Reports');
-  e=document.getElementById('sb-acadapproval'); if(e) e.textContent=t('اعتماد الأكاديميات','Academy Approvals');
-}
-function setLang(l){
-  LANG = l;
-  localStorage.setItem('kaasLang', l);
-  document.documentElement.dir = l === 'en' ? 'ltr' : 'rtl';
-  document.documentElement.lang = l === 'en' ? 'en' : 'ar';
-  var btn = document.getElementById('langBtn');
-  if(btn) btn.textContent = l === 'en' ? 'عر' : 'EN';
-  updateStaticUI();
-  if(window._currentPage) go(window._currentPage);
-}
-// Apply saved language on load
-document.documentElement.dir = LANG === 'en' ? 'ltr' : 'rtl';
-document.documentElement.lang = LANG === 'en' ? 'en' : 'ar';
-
-// '+t('الفئات العمرية','Age Categories')+'
+// الفئات العمرية
 var CATEGORIES = [
   {
-    id:'cat1', name:t('الفئة الأولى','Category 1'),
+    id:'cat1', name:'الفئة الأولى',
     label:'U8/U9',
     years:'2017 · 2018',
-    extra:t('يُسمح: أكتوبر/نوفمبر/ديسمبر 2015','Allowed: Oct/Nov/Dec 2015'),
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2015',
     color:'#3b82f6'
   },
   {
-    id:'cat2', name:t('الفئة الثانية','Category 2'),
+    id:'cat2', name:'الفئة الثانية',
     label:'U11/U12',
     years:'2014 · 2015 (يناير–سبتمبر)',
-    extra:t('يُسمح: أكتوبر/نوفمبر/ديسمبر 2013','Allowed: Oct/Nov/Dec 2013'),
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2013',
     color:'#8b5cf6'
   },
   {
-    id:'cat3', name:t('الفئة الثالثة','Category 3'),
+    id:'cat3', name:'الفئة الثالثة',
     label:'U13/U14',
     years:'2012 · 2013 (يناير–سبتمبر)',
-    extra:t('يُسمح: أكتوبر/نوفمبر/ديسمبر 2011','Allowed: Oct/Nov/Dec 2011'),
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2011',
     color:'#f59e0b'
   },
   {
-    id:'cat4', name:t('الفئة الرابعة','Category 4'),
+    id:'cat4', name:'الفئة الرابعة',
     label:'U15/U16',
     years:'2010 · 2011 (يناير–سبتمبر)',
-    extra:t('يُسمح: أكتوبر/نوفمبر/ديسمبر 2009','Allowed: Oct/Nov/Dec 2009'),
+    extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2009',
     color:'#10b981'
   }
 ];
@@ -644,35 +593,35 @@ function renderHome() {
     });
     document.getElementById('app').innerHTML =
       '<div class="hero">'+
-        '<h1>'+t('كأس العرب للأكاديميات','Arab Academies Cup')+'</h1>'+
+        '<h1>كأس العرب للأكاديميات</h1>'+
         '<p style="font-size:13px;font-weight:800;color:#ffdd57;margin-bottom:4px;">ARAB ACADEMIES CUP (KAAS)</p>'+
-        '<p>'+t('بالتعاون مع الدوري العماني للأكاديميات','In cooperation with Oman Football Academies League')+' (OFAL) · '+CONFIG.SEASON+'</p>'+
+        '<p>بالتعاون مع الدوري العماني للأكاديميات (OFAL) · '+CONFIG.SEASON+'</p>'+
         // شعار OFAL
         '<div class="hero-stats">'+
-          '<div class="hstat"><div class="hstat-n">'+total+'</div><div class="hstat-l">'+t('أكاديمية','Academies')+'</div></div>'+
-          '<div class="hstat"><div class="hstat-n">'+totalPlayers+'</div><div class="hstat-l">'+t('لاعب','Players')+'</div></div>'+
-          '<div class="hstat"><div class="hstat-n">4</div><div class="hstat-l">'+t('فئات','Categories')+'</div></div>'+
-          '<div class="hstat"><div class="hstat-n" style="color:#ff6b6b;" id="homeCountdown">...</div><div class="hstat-l">'+t('يوم متبقي','Days Left')+'</div></div>'+
+          '<div class="hstat"><div class="hstat-n">'+total+'</div><div class="hstat-l">أكاديمية</div></div>'+
+          '<div class="hstat"><div class="hstat-n">'+totalPlayers+'</div><div class="hstat-l">لاعب</div></div>'+
+          '<div class="hstat"><div class="hstat-n">4</div><div class="hstat-l">فئات</div></div>'+
+          '<div class="hstat"><div class="hstat-n" style="color:#ff6b6b;" id="homeCountdown">...</div><div class="hstat-l">يوم متبقي</div></div>'+
         '</div>'+
 
         '<div style="margin-top:24px;border-top:1px solid rgba(255,255,255,.15);padding-top:20px;">'+
-          '<div style="font-size:10px;font-weight:800;color:#d4af37;letter-spacing:2px;margin-bottom:12px;">'+t('⏱ العد التنازلي لانطلاق البطولة','⏱ Tournament Countdown')+'</div>'+
+          '<div style="font-size:10px;font-weight:800;color:#d4af37;letter-spacing:2px;margin-bottom:12px;">⏱ العد التنازلي لانطلاق البطولة</div>'+
           '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">'+
             '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
               '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1;" id="cdDays">--</div>'+
-              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">'+t('يوم','Day')+'</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">يوم</div>'+
             '</div>'+
             '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
               '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1;" id="cdHours">--</div>'+
-              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">'+t('ساعة','Hour')+'</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ساعة</div>'+
             '</div>'+
             '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
               '<div style="font-size:26px;font-weight:900;color:#fff;line-height:1;" id="cdMins">--</div>'+
-              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">'+t('دقيقة','Minute')+'</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">دقيقة</div>'+
             '</div>'+
             '<div style="background:rgba(0,0,0,.25);border-radius:14px;padding:12px 6px;border:1px solid rgba(212,175,55,.25);">'+
               '<div style="font-size:26px;font-weight:900;color:#ff6b6b;line-height:1;" id="cdSecs">--</div>'+
-              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">'+t('ثانية','Second')+'</div>'+
+              '<div style="font-size:9px;color:#d4af37;font-weight:700;margin-top:4px;">ثانية</div>'+
             '</div>'+
           '</div>'+
         '</div>'+
@@ -684,29 +633,29 @@ function renderHome() {
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;"><i class="fas fa-map-marker-alt" style="color:var(--green);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">'+t('المكان','Venue')+'</div><div style="font-size:12px;font-weight:900;color:var(--dark);">'+t('صلالة، ظفار','Salalah, Dhofar')+'</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">المكان</div><div style="font-size:12px;font-weight:900;color:var(--dark);">صلالة، ظفار</div></div>'+
             '</div>'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;"><i class="fas fa-calendar-alt" style="color:var(--red);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">'+t('التواريخ','Dates')+'</div><div style="font-size:12px;font-weight:900;color:var(--dark);">6-7-8 أغسطس 2026</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">التواريخ</div><div style="font-size:12px;font-weight:900;color:var(--dark);">6-7-8 أغسطس 2026</div></div>'+
             '</div>'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt" style="color:var(--green);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">'+t('الفرق','Teams')+'</div><div style="font-size:12px;font-weight:900;color:var(--dark);">32 – 48 فريق</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">الفرق</div><div style="font-size:12px;font-weight:900;color:var(--dark);">32 – 48 فريق</div></div>'+
             '</div>'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:var(--red);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">'+t('آخر تسجيل','Registration Deadline')+'</div><div style="font-size:12px;font-weight:900;color:var(--red);">5 يوليو 2026</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">آخر تسجيل</div><div style="font-size:12px;font-weight:900;color:var(--red);">5 يوليو 2026</div></div>'+
             '</div>'+
           '</div>'+
         '</div>'+
-        '<button class="btn btn-red" onclick="go(\'acad_register\')"><i class="fas fa-plus-circle"></i> '+t('سجّل أكاديميتك الآن','Register Your Academy Now')+'</button>'+
-        '<button class="btn btn-green-main" style="margin-top:8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> '+t('دخول الأكاديميات المسجلة','Registered Academies Login')+'</button>'+
+        '<button class="btn btn-red" onclick="go(\'acad_register\')"><i class="fas fa-plus-circle"></i> سجّل أكاديميتك الآن</button>'+
+        '<button class="btn btn-green-main" style="margin-top:8px;" onclick="go(\'acad_login\')"><i class="fas fa-sign-in-alt"></i> دخول الأكاديميات المسجلة</button>'+
       '</div>'+
 
       // الفئات
       '<div class="section">'+
-        '<div class="sec-title"><i class="fas fa-layer-group" style="color:var(--green)"></i> '+t('الفئات العمرية','Age Categories')+'</div>'+
+        '<div class="sec-title"><i class="fas fa-layer-group" style="color:var(--green)"></i> الفئات العمرية</div>'+
         '<div class="cats-grid">'+
           CATEGORIES.map(function(c){
             return '<div class="cat-card">'+
@@ -724,14 +673,14 @@ function renderHome() {
       // الأكاديميات
       (total > 0 ?
       '<div class="section">'+
-        '<div class="sec-title"><i class="fas fa-shield-alt" style="color:var(--green)"></i> '+t('الأكاديميات المسجلة','Registered Academies')+'</div>'+
+        '<div class="sec-title"><i class="fas fa-shield-alt" style="color:var(--green)"></i> الأكاديميات المسجلة</div>'+
         acadList.slice(0,5).map(function(a){
           var initials = a.name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2);
           return '<div class="acad-card">'+
             '<div class="acad-avatar">'+initials+'</div>'+
             '<div class="acad-info">'+
               '<div class="acad-name">'+a.name+'</div>'+
-              '<div class="acad-meta"><i class="fas fa-map-marker-alt"></i> '+a.city+' · <i class="fas fa-users"></i> '+(a.players||0)+' '+t('لاعب','Players')+'</div>'+
+              '<div class="acad-meta"><i class="fas fa-map-marker-alt"></i> '+a.city+' · <i class="fas fa-users"></i> '+(a.players||0)+' لاعب</div>'+
               '<div class="acad-cats">'+
                 (a.cats||'').split(',').filter(Boolean).map(function(c){
                   var ci = getCatInfo(c.trim());
@@ -741,45 +690,45 @@ function renderHome() {
             '</div>'+
           '</div>';
         }).join('')+
-        (total>5?'<div style="text-align:center;padding:8px;"><button class="btn btn-light" onclick="go(\'academies\')">'+t('عرض الكل','View All')+' ('+total+')</button></div>':'')+
+        (total>5?'<div style="text-align:center;padding:8px;"><button class="btn btn-light" onclick="go(\'academies\')">عرض الكل ('+total+')</button></div>':'')+
       '</div>' : '')+
 
       // إحصائيات البطولة
       (totalMatches>0 ?
       '<div class="section">'+
-        '<div class="sec-title"><i class="fas fa-chart-bar" style="color:var(--green)"></i> '+t('إحصائيات البطولة','Tournament Statistics')+'</div>'+
+        '<div class="sec-title"><i class="fas fa-chart-bar" style="color:var(--green)"></i> إحصائيات البطولة</div>'+
         '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:4px;">'+
           '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #0d3318;">'+
             '<div style="font-size:28px;font-weight:900;color:#0d3318;">'+totalMatches+'</div>'+
-            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">'+t('مباراة مُلعبت','Matches Played')+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">مباراة مُلعبت</div>'+
           '</div>'+
           '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #1d4ed8;">'+
             '<div style="font-size:28px;font-weight:900;color:#1d4ed8;">'+totalGoals+'</div>'+
-            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">'+t('هدف مسجل','Goals Scored')+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">هدف مسجل</div>'+
           '</div>'+
           '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #f59e0b;">'+
             '<div style="font-size:28px;font-weight:900;color:#f59e0b;">'+totalYellow+'</div>'+
-            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">'+t('بطاقة صفراء','Yellow Cards')+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">بطاقة صفراء</div>'+
           '</div>'+
           '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #b81d22;">'+
             '<div style="font-size:28px;font-weight:900;color:#b81d22;">'+totalRed+'</div>'+
-            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">'+t('بطاقة حمراء','Red Cards')+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">بطاقة حمراء</div>'+
           '</div>'+
         '</div>'+
         (totalGoals>0&&totalMatches>0?
           '<div style="background:#f8fafc;border-radius:10px;padding:10px 14px;text-align:center;font-size:11px;color:#475569;font-weight:700;">'+
-            ''+t('⚽ معدل الأهداف:','⚽ Goals Average:')+' <strong style="color:#0d3318;">'+( totalGoals/totalMatches).toFixed(1)+'</strong> '+t('هدف/مباراة','goals/match')+''+
+            '⚽ معدل الأهداف: <strong style="color:#0d3318;">'+( totalGoals/totalMatches).toFixed(1)+'</strong> هدف/مباراة'+
           '</div>':'')+
       '</div>' : '')+
 
       // التواصل
       '<div class="section">'+
         '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:14px;padding:16px;color:#fff;text-align:center;">'+
-          '<div style="font-size:13px;font-weight:900;margin-bottom:12px;">'+t('📞 تواصل معنا','📞 Contact Us')+'</div>'+
+          '<div style="font-size:13px;font-weight:900;margin-bottom:12px;">📞 تواصل معنا</div>'+
           '<div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">'+
-            '<a href="tel:+96897837551" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-phone"></i> '+t('خدمة العملاء','Customer Service')+'<br><span style="font-size:12px;font-weight:900;">9783 7551</span></a>'+
-            '<a href="tel:+96872750957" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-headset"></i> '+t('الإدارة','Management')+'<br><span style="font-size:12px;font-weight:900;">7275 0957</span></a>'+
-            '<a href="mailto:official.ofal@gmail.com" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-envelope"></i> '+t('البريد','Email')+'<br><span style="font-size:10px;font-weight:800;">official.ofal@gmail.com</span></a>'+
+            '<a href="tel:+96897837551" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-phone"></i> خدمة العملاء<br><span style="font-size:12px;font-weight:900;">9783 7551</span></a>'+
+            '<a href="tel:+96872750957" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-headset"></i> الإدارة<br><span style="font-size:12px;font-weight:900;">7275 0957</span></a>'+
+            '<a href="mailto:official.ofal@gmail.com" style="background:rgba(255,255,255,.15);border-radius:10px;padding:8px 12px;color:#fff;text-decoration:none;font-size:10px;font-weight:700;text-align:center;"><i class="fas fa-envelope"></i> البريد<br><span style="font-size:10px;font-weight:800;">official.ofal@gmail.com</span></a>'+
           '</div>'+
         '</div>'+
         '<div style="height:16px;"></div>'+
@@ -822,8 +771,8 @@ function renderCategories() {
   document.getElementById('app').innerHTML =
     '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:32px 16px 24px;text-align:center;color:#fff;">'+
       '<div style="font-size:32px;margin-bottom:8px;">📋</div>'+
-      '<div style="font-size:20px;font-weight:900;">'+t('الفئات العمرية','Age Categories')+'</div>'+
-      '<div style="font-size:11px;opacity:.6;margin-top:4px;">'+t('قواعد الأهلية للمشاركة','Participation Eligibility Rules')+'</div>'+
+      '<div style="font-size:20px;font-weight:900;">الفئات العمرية</div>'+
+      '<div style="font-size:11px;opacity:.6;margin-top:4px;">قواعد الأهلية للمشاركة</div>'+
     '</div>'+
     '<div class="section">'+
     CATEGORIES.map(function(c){
@@ -849,13 +798,13 @@ function renderCategories() {
 }
 
 // ════════════════════════════════════════
-// '+t('تسجيل أكاديمية جديدة','Register New Academy')+'
+// تسجيل أكاديمية جديدة
 // ════════════════════════════════════════
 function renderAcadRegister() {
   document.getElementById('app').innerHTML =
     '<div style="background:linear-gradient(135deg,#7a0f12,var(--red));padding:28px 16px 20px;text-align:center;color:#fff;">'+
       '<div style="font-size:28px;margin-bottom:6px;">🏫</div>'+
-      '<div style="font-size:18px;font-weight:900;">'+t('تسجيل أكاديمية جديدة','Register New Academy')+'</div>'+
+      '<div style="font-size:18px;font-weight:900;">تسجيل أكاديمية جديدة</div>'+
       '<div style="font-size:11px;opacity:.65;margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
     '</div>'+
     '<div class="section">'+
@@ -867,7 +816,7 @@ function renderAcadRegister() {
       '<div style="display:flex;flex-direction:column;gap:10px;">'+
         '<div style="display:flex;align-items:center;gap:10px;">'+
           '<div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#0f172a;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>'+
-          '<div style="font-size:12px;color:#fff;font-weight:700;">أدخل بيانات أكاديميتك و'+t('الفئات العمرية','Age Categories')+' التي ستشارك فيها</div>'+
+          '<div style="font-size:12px;color:#fff;font-weight:700;">أدخل بيانات أكاديميتك والفئات العمرية التي ستشارك فيها</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:10px;">'+
           '<div style="width:28px;height:28px;border-radius:50%;background:var(--gold);color:#0f172a;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>'+
@@ -889,20 +838,20 @@ function renderAcadRegister() {
     '</div>'+
 
     '<div class="card">'+
-      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-building" style="color:var(--red)"></i> '+t('بيانات الأكاديمية','Academy Information')+'</div>'+
-      '<div class="mb"><label class="lbl">'+t('اسم الأكاديمية *','Academy Name *')+'</label><input class="inp" id="rAcadName" type="text" placeholder="مثال: أكاديمية النجوم" required></div>'+
+      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-building" style="color:var(--red)"></i> بيانات الأكاديمية</div>'+
+      '<div class="mb"><label class="lbl">اسم الأكاديمية *</label><input class="inp" id="rAcadName" type="text" placeholder="مثال: أكاديمية النجوم" required></div>'+
       '<div class="r2 mb">'+
-        '<div><label class="lbl">'+t('المدينة / الولاية *','City / State *')+'</label><input class="inp" id="rCity" type="text" placeholder="مسقط"></div>'+
-        '<div><label class="lbl">'+t('الدولة *','Country *')+'</label><input class="inp" id="rCountry" type="text" placeholder="عُمان"></div>'+
+        '<div><label class="lbl">المدينة / الولاية *</label><input class="inp" id="rCity" type="text" placeholder="مسقط"></div>'+
+        '<div><label class="lbl">الدولة *</label><input class="inp" id="rCountry" type="text" placeholder="عُمان"></div>'+
       '</div>'+
-      '<div class="mb"><label class="lbl">'+t('اسم المدرب أو المسؤول *','Head Coach / Manager Name *')+'</label><input class="inp" id="rCoach" type="text" placeholder="الاسم الكامل"></div>'+
+      '<div class="mb"><label class="lbl">اسم المدرب أو المسؤول *</label><input class="inp" id="rCoach" type="text" placeholder="الاسم الكامل"></div>'+
       '<div class="r2 mb">'+
-        '<div><label class="lbl">'+t('رقم الهاتف (واتساب) *','Phone Number (WhatsApp) *')+'</label><input class="inp" id="rPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
-        '<div><label class="lbl">'+t('البريد الإلكتروني','Email Address')+'</label><input class="inp" id="rEmail" type="email" placeholder="اختياري"></div>'+
+        '<div><label class="lbl">رقم الهاتف (واتساب) *</label><input class="inp" id="rPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
+        '<div><label class="lbl">البريد الإلكتروني</label><input class="inp" id="rEmail" type="email" placeholder="اختياري"></div>'+
       '</div>'+
     '</div>'+
     '<div class="card">'+
-      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-list-check" style="color:var(--gold)"></i> '+t('الفئات التي ستشارك فيها','Participating Categories')+'</div>'+
+      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-list-check" style="color:var(--gold)"></i> الفئات التي ستشارك فيها</div>'+
       CATEGORIES.map(function(c){
         return '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:10px;margin-bottom:8px;cursor:pointer;border:1.5px solid #e2e8f0;">'+
           '<input type="checkbox" id="rCat_'+c.id+'" value="'+c.id+'" style="width:16px;height:16px;accent-color:var(--red);">'+
@@ -914,7 +863,7 @@ function renderAcadRegister() {
       }).join('')+
     '</div>'+
     '<div class="card">'+
-      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-key" style="color:var(--red)"></i> '+t('كلمة المرور (PIN)','Password (PIN)')+'</div>'+
+      '<div style="font-size:12px;font-weight:800;color:var(--dark);margin-bottom:14px;"><i class="fas fa-key" style="color:var(--red)"></i> كلمة المرور (PIN)</div>'+
       '<div class="al al-warn" style="margin-bottom:12px;">سيُستخدم هذا الرمز لاحقاً عند إضافة لاعبين — احتفظ به</div>'+
       '<div class="r2">'+
         '<div><label class="lbl">PIN (4 أرقام) *</label><input class="inp" id="rPin" type="number" maxlength="4" placeholder="0000" max="9999" min="1000"></div>'+
@@ -922,7 +871,7 @@ function renderAcadRegister() {
       '</div>'+
       '<div id="rErr" style="display:none;" class="err"></div>'+
     '</div>'+
-    '<button class="btn btn-red" onclick="submitAcadReg()"><i class="fas fa-paper-plane"></i> '+t('إرسال طلب التسجيل','Submit Registration Request')+'</button>'+
+    '<button class="btn btn-red" onclick="submitAcadReg()"><i class="fas fa-paper-plane"></i> إرسال طلب التسجيل</button>'+
     '<div style="height:20px;"></div>'+
     '</div>';
 }
@@ -943,7 +892,7 @@ function submitAcadReg() {
   if(!name||!city||!country||!coach||!phone){errEl.textContent='الرجاء ملء جميع الحقول الإلزامية';errEl.style.display='block';return;}
   if(!cats.length){errEl.textContent='اختر فئة عمرية واحدة على الأقل';errEl.style.display='block';return;}
   if(pin.length!==4||isNaN(pin)){errEl.textContent='الرمز السري يجب أن يكون 4 أرقام';errEl.style.display='block';return;}
-  if(pin!==pin2){errEl.textContent=''+t('كلمة المرور','Password')+' غير متطابقة';errEl.style.display='block';return;}
+  if(pin!==pin2){errEl.textContent='كلمة المرور غير متطابقة';errEl.style.display='block';return;}
 
   var id = 'AC'+Date.now().toString().slice(-6);
   var btn = document.querySelector('.btn-red');
@@ -973,7 +922,7 @@ function submitAcadReg() {
           '<div style="font-size:11px;color:#78350f;">طلبك تحت المراجعة، ستُبلَّغ بقرار الإدارة.</div>'+
         '</div>'+
         '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin:16px auto;max-width:300px;">'+
-          '<div style="font-size:11px;color:#16a34a;font-weight:700;margin-bottom:6px;">'+t('رقم الأكاديمية','Academy Number')+'</div>'+
+          '<div style="font-size:11px;color:#16a34a;font-weight:700;margin-bottom:6px;">رقم الأكاديمية</div>'+
           '<div style="font-size:24px;font-weight:900;color:#0f172a;letter-spacing:2px;">'+id+'</div>'+
           '<div style="font-size:10px;color:#64748b;margin-top:4px;">احتفظ بهذا الرقم وبالـ PIN</div>'+
         '</div>'+
@@ -986,18 +935,18 @@ function submitAcadReg() {
 }
 
 // ════════════════════════════════════════
-// '+t('دخول الأكاديميات','Academy Login')+'
+// دخول الأكاديميات
 // ════════════════════════════════════════
 function renderAcadLogin() {
   document.getElementById('app').innerHTML =
     '<div style="padding:40px 16px;max-width:360px;margin:0 auto;">'+
       '<div style="text-align:center;margin-bottom:28px;">'+
         '<div style="font-size:48px;margin-bottom:8px;">🔐</div>'+
-        '<div style="font-size:18px;font-weight:900;color:var(--dark)">'+t('دخول الأكاديميات','Academy Login')+'</div>'+
+        '<div style="font-size:18px;font-weight:900;color:var(--dark)">دخول الأكاديميات</div>'+
         '<div style="font-size:11px;color:#64748b;margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
       '</div>'+
       '<div class="card">'+
-        '<div class="mb"><label class="lbl">'+t('رقم الهاتف (واتساب) *','Phone Number (WhatsApp) *')+'</label><input class="inp" id="loginPhone" type="tel" placeholder="9XXXXXXXX" style="text-align:center;font-weight:900;font-size:16px;letter-spacing:1px;"></div>'+
+        '<div class="mb"><label class="lbl">رقم الهاتف (واتساب) *</label><input class="inp" id="loginPhone" type="tel" placeholder="9XXXXXXXX" style="text-align:center;font-weight:900;font-size:16px;letter-spacing:1px;"></div>'+
         '<div class="mb"><label class="lbl">رمز الدخول (PIN) *</label><input class="inp" id="loginPin" type="password" placeholder="••••" maxlength="4" style="text-align:center;font-weight:900;font-size:20px;letter-spacing:4px;" onkeydown="if(event.key===\'Enter\')doAcadLogin()"></div>'+
         '<div id="loginErr" style="display:none;" class="err"></div>'+
         '<button class="btn btn-red" onclick="doAcadLogin()"><i class="fas fa-sign-in-alt"></i> دخول</button>'+
@@ -1097,11 +1046,11 @@ function renderAcadDashboard() {
       '</div>'+
       '<div class="section">'+
         '<button class="btn btn-gold" onclick="go(\'add_player\')"><i class="fas fa-user-plus"></i> إضافة لاعب جديد / بديل</button>'+
-        '<button class="btn" onclick="shareRegLink()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;margin-top:8px;"><i class="fas fa-link"></i> '+t('مشاركة','Share')+' رابط التسجيل للأولياء</button>'+
+        '<button class="btn" onclick="shareRegLink()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;margin-top:8px;"><i class="fas fa-link"></i> مشاركة رابط التسجيل للأولياء</button>'+
         (players.length>0?
           '<button class="btn" onclick="downloadKaasCards()" style="background:linear-gradient(135deg,#d4af37,#b8960c);color:#fff;margin-top:8px;"><i class="fas fa-download"></i> تحميل البطاقات (PNG)</button>'+
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
-            '<button class="btn" onclick="shareKaasCards()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;padding:11px;"><i class="fab fa-whatsapp"></i> '+t('مشاركة','Share')+' واتساب</button>'+
+            '<button class="btn" onclick="shareKaasCards()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;padding:11px;"><i class="fab fa-whatsapp"></i> مشاركة واتساب</button>'+
             '<button class="btn" onclick="printKaasCards()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;padding:11px;"><i class="fas fa-file-pdf"></i> طباعة / PDF</button>'+
           '</div>':'')+
         '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة / ملاحظة للإدارة</button>'+
@@ -1188,7 +1137,7 @@ function renderAddPlayer() {
 
   document.getElementById('app').innerHTML =
     '<div style="background:linear-gradient(135deg,#7a0f12,var(--red));padding:24px 16px 18px;text-align:center;color:#fff;">'+
-      '<button onclick="go(\'acad_dashboard\')" style="position:absolute;right:16px;top:16px;background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;margin-top:56px;">'+t('← رجوع','← Back')+'</button>'+
+      '<button onclick="go(\'acad_dashboard\')" style="position:absolute;right:16px;top:16px;background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;margin-top:56px;">← رجوع</button>'+
       '<div style="font-size:28px;margin-bottom:6px;">⚽</div>'+
       '<div style="font-size:16px;font-weight:900;">إضافة لاعب</div>'+
     '</div>'+
@@ -1516,7 +1465,7 @@ function showKaasCard(p) {
     '<div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:14px;">✅ تمت إضافة اللاعب بنجاح!</div>'+
     cardHtml+
     '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;">'+
-      '<button onclick="shareKaasCard()" style="padding:11px 18px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fab fa-whatsapp"></i> '+t('مشاركة','Share')+'</button>'+
+      '<button onclick="shareKaasCard()" style="padding:11px 18px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fab fa-whatsapp"></i> مشاركة</button>'+
       '<button onclick="downloadKaasCard()" style="padding:11px 18px;background:var(--red);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-download"></i> تنزيل</button>'+
     '</div>'+
     (p.phone ?
@@ -1613,14 +1562,14 @@ function shareKaasCard(){
       var file = new File([blob],'بطاقة-لاعب-KAAS.png',{type:'image/png'});
       if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
         navigator.share({title:'بطاقة لاعب - KAAS',files:[file]})
-        .then(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="fab fa-whatsapp"></i> '+t('مشاركة','Share')+' واتساب';}})
+        .then(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="fab fa-whatsapp"></i> مشاركة واتساب';}})
         .catch(function(){downloadKaasCard();});
       } else {
         var a = document.createElement('a');
         a.download = 'بطاقة-لاعب-KAAS.png';
         a.href = URL.createObjectURL(blob);
         a.click();
-        if(btn){btn.disabled=false;btn.innerHTML='<i class="fab fa-whatsapp"></i> '+t('مشاركة','Share')+' واتساب';}
+        if(btn){btn.disabled=false;btn.innerHTML='<i class="fab fa-whatsapp"></i> مشاركة واتساب';}
       }
     },'image/png');
   });
@@ -1741,12 +1690,12 @@ function renderAcademies() {
     var html =
       '<div style="background:linear-gradient(135deg,var(--dark),#1e293b);padding:28px 16px 20px;text-align:center;color:#fff;">'+
         '<div style="font-size:28px;margin-bottom:6px;">🏫</div>'+
-        '<div style="font-size:18px;font-weight:900;">'+t('الأكاديميات المشاركة','Participating Academies')+'</div>'+
-        '<div style="font-size:11px;opacity:.6;margin-top:4px;">'+list.length+' '+t('أكاديمية مسجلة','Registered Academies')+'</div>'+
+        '<div style="font-size:18px;font-weight:900;">الأكاديميات المشاركة</div>'+
+        '<div style="font-size:11px;opacity:.6;margin-top:4px;">'+list.length+' أكاديمية مسجلة</div>'+
       '</div>'+
       '<div class="section">';
     if(!list.length){
-      html+='<div style="text-align:center;padding:40px;color:#94a3b8;">'+t('لا توجد أكاديميات مسجلة بعد','No registered academies yet')+'</div>';
+      html+='<div style="text-align:center;padding:40px;color:#94a3b8;">لا توجد أكاديميات مسجلة بعد</div>';
     } else {
       list.forEach(function(a,i){
         var initials=a.name.split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2);
@@ -1800,7 +1749,7 @@ function renderAdminLogin() {
 function doAdminLogin() {
   var pass=(document.getElementById('adminPass').value||'').trim();
   var err=document.getElementById('adminErr');
-  if(pass!==CONFIG.ADMIN_PASS){err.textContent=''+t('كلمة المرور','Password')+' غير صحيحة';err.style.display='block';return;}
+  if(pass!==CONFIG.ADMIN_PASS){err.textContent='كلمة المرور غير صحيحة';err.style.display='block';return;}
   sessionStorage.setItem('kaasAdmin','1');
   go('admin_panel');
 }
@@ -1849,7 +1798,7 @@ function renderAdminPanel() {
           '<button onclick="go(\'top_scorers\')" style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-futbol"></i><br>هدافو البطولة</button>'+
           '<button onclick="go(\'admin_awards\')" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-medal"></i><br>جوائز البطولة</button>'+
         '</div>'+
-        '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> '+t('مشاركة','Share')+' رابط التسجيل</button>'+
+        '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
           '<button onclick="exportToCSV()" style="background:linear-gradient(135deg,#065f46,#047857);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-file-csv"></i><br>تصدير Excel</button>'+
           '<button onclick="sendReminderWhatsApp()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fab fa-whatsapp"></i><br>تذكير الأكاديميات</button>'+
@@ -2059,7 +2008,7 @@ function _renderMatchResultInner(schedule, results){
     });
     var selCat = window._mrSelCat||'';
     var catTabs =
-      '<button onclick="window._mrSelCat=\'\';renderMatchResult();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">'+t('الكل','All')+'</button>'+
+      '<button onclick="window._mrSelCat=\'\';renderMatchResult();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">الكل</button>'+
       CATEGORIES.map(function(c){
         return '<button onclick="window._mrSelCat=\''+c.id+'\';renderMatchResult();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
       }).join('');
@@ -2353,7 +2302,7 @@ function saveMatchResult(){
         '<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px;">'+
           '<button onclick="shareMatchResult(\''+team1+'\',\''+team2+'\',\''+score1+' - '+score2+'\',\''+date+'\',\''+time+'\',\''+venue+'\',\''+catId+'\')" '+
             'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">'+
-            '<i class="fab fa-whatsapp" style="font-size:18px;"></i> '+t('شارك النتيجة','Share Result')+' على واتساب'+
+            '<i class="fab fa-whatsapp" style="font-size:18px;"></i> شارك النتيجة على واتساب'+
           '</button>'+
           '<button onclick="this.closest(\'div[style*=fixed]\').remove();invalidateCache(\'نتائج المباريات\');window._gsSelCat=\''+catId+'\';renderGroupStandings();" '+
             'style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">'+
@@ -2394,8 +2343,8 @@ function renderAdminAwards(){
     var html=
       '<div style="background:linear-gradient(135deg,#d4af37,#92700a);padding:20px 16px 16px;color:#fff;">'+
         '<div style="display:flex;align-items:center;gap:10px;">'+
-          '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">'+t('← رجوع','← Back')+'</button>'+
-          '<div><div style="font-size:17px;font-weight:900;">'+t('🏅 جوائز البطولة','🏅 Tournament Awards')+'</div><div style="font-size:10px;opacity:.7;">أفضل مدرب · أفضل إداري · أفضل لاعب</div></div>'+
+          '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">← رجوع</button>'+
+          '<div><div style="font-size:17px;font-weight:900;">🏅 جوائز البطولة</div><div style="font-size:10px;opacity:.7;">أفضل مدرب · أفضل إداري · أفضل لاعب</div></div>'+
         '</div>'+
       '</div>'+
       '<div style="padding:14px;padding-bottom:40px;">';
@@ -2480,14 +2429,14 @@ function renderPublicAwards(){
     var html=
       '<div style="background:linear-gradient(135deg,#d4af37,#92700a);padding:20px 16px 16px;color:#fff;">'+
         '<div style="display:flex;align-items:center;gap:10px;">'+
-          '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">'+t('← رجوع','← Back')+'</button>'+
-          '<div><div style="font-size:17px;font-weight:900;">'+t('🏅 جوائز البطولة','🏅 Tournament Awards')+'</div><div style="font-size:10px;opacity:.7;">كأس العرب للأكاديميات '+CONFIG.SEASON+'</div></div>'+
+          '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">← رجوع</button>'+
+          '<div><div style="font-size:17px;font-weight:900;">🏅 جوائز البطولة</div><div style="font-size:10px;opacity:.7;">كأس العرب للأكاديميات '+CONFIG.SEASON+'</div></div>'+
         '</div>'+
       '</div>'+
       '<div style="padding:14px;padding-bottom:40px;">';
 
     if(!hasAny){
-      html+='<div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:#94a3b8;font-size:13px;">'+t('لم تُحدَّد الجوائز بعد','Awards not announced yet')+'</div>';
+      html+='<div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:#94a3b8;font-size:13px;">لم تُحدَّد الجوائز بعد</div>';
     } else {
       CATEGORIES.forEach(function(cat){
         var catAwards=awardDefs.map(function(a){
@@ -2548,7 +2497,7 @@ function renderAdminEditResults(){
     window._resultsList = filtered;
 
     var catTabs =
-      '<button onclick="window._erSelCat=\'\';renderAdminEditResults();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">'+t('الكل','All')+'</button>'+
+      '<button onclick="window._erSelCat=\'\';renderAdminEditResults();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===''?'#1d4ed8':'#f1f5f9')+';color:'+(selCat===''?'#fff':'#475569')+';">الكل</button>'+
       CATEGORIES.map(function(c){
         return '<button onclick="window._erSelCat=\''+c.id+'\';renderAdminEditResults();" style="padding:6px 12px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;margin:2px;background:'+(selCat===c.id?c.color:'#f1f5f9')+';color:'+(selCat===c.id?'#fff':'#475569')+';">'+c.name+'</button>';
       }).join('');
@@ -2993,10 +2942,10 @@ function renderAboutTournament(){
       </div>
     </div>
 
-    <!-- '+t('الفئات العمرية','Age Categories')+' -->
+    <!-- الفئات العمرية -->
     <div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;border:1px solid #e2e8f0;">
       <div style="font-size:15px;font-weight:900;color:#0d3318;margin-bottom:12px;">
-        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">'+t('الفئات العمرية','Age Categories')+'</span>
+        <span style="background:#0d3318;color:#d4af37;border-radius:8px;padding:4px 8px;font-size:11px;">الفئات العمرية</span>
       </div>
       <div style="overflow-x:auto;">
         <table style="width:100%;border-collapse:collapse;font-size:11px;">
@@ -3112,7 +3061,7 @@ function renderAboutTournament(){
 
     <!-- تواصل معنا -->
     <div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);border-radius:14px;padding:16px;margin-bottom:16px;border:1px solid rgba(212,175,55,.3);">
-      <div style="font-size:15px;font-weight:900;color:#d4af37;margin-bottom:12px;text-align:center;">'+t('📞 تواصل معنا','📞 Contact Us')+'</div>
+      <div style="font-size:15px;font-weight:900;color:#d4af37;margin-bottom:12px;text-align:center;">📞 تواصل معنا</div>
       <div style="display:flex;flex-direction:column;gap:8px;">
         <a href="tel:+96897837551" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.1);border-radius:10px;text-decoration:none;">
           <i class="fas fa-phone" style="color:#4ade80;width:18px;text-align:center;"></i>
@@ -3124,7 +3073,7 @@ function renderAboutTournament(){
         </a>
         <a href="mailto:official.ofal@gmail.com" style="display:flex;align-items:center;gap:10px;padding:10px;background:rgba(255,255,255,.1);border-radius:10px;text-decoration:none;">
           <i class="fas fa-envelope" style="color:#4ade80;width:18px;text-align:center;"></i>
-          <div><div style="font-size:10px;color:rgba(255,255,255,.6);">'+t('البريد الإلكتروني','Email Address')+'</div><div style="font-size:13px;color:#fff;font-weight:700;">official.ofal@gmail.com</div></div>
+          <div><div style="font-size:10px;color:rgba(255,255,255,.6);">البريد الإلكتروني</div><div style="font-size:13px;color:#fff;font-weight:700;">official.ofal@gmail.com</div></div>
         </a>
       </div>
     </div>
@@ -3230,7 +3179,7 @@ function approveAcad(id,nameEnc,phoneEnc){
   _saveLocalStatus(id,'معتمد');
   var phone=decodeURIComponent(phoneEnc);
   var loginUrl = window.location.origin+window.location.pathname+'?page=login';
-  var waMsg='السلام عليكم،\n\nيسعدنا إبلاغكم بأنه تم *اعتماد '+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+' ✅\n\nيمكنكم الآن الدخول للمنصة وتسجيل لاعبيكم:\n'+loginUrl+'\n\n🆔 '+t('رقم الأكاديمية','Academy Number')+': '+id;
+  var waMsg='السلام عليكم،\n\nيسعدنا إبلاغكم بأنه تم *اعتماد '+name+'* في بطولة '+CONFIG.TOURNAMENT_NAME+' ✅\n\nيمكنكم الآن الدخول للمنصة وتسجيل لاعبيكم:\n'+loginUrl+'\n\n🆔 رقم الأكاديمية: '+id;
   var waUrl='https://api.whatsapp.com/send?phone=968'+phone+'&text='+encodeURIComponent(waMsg);
   var card=document.getElementById('acadCard_'+id);
   if(card){
@@ -3496,7 +3445,7 @@ function renderMatchSchedule(){
     document.getElementById('app').innerHTML=
       '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
         '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div><div style="font-size:16px;font-weight:900;">'+t('📅 جدول المباريات','📅 Match Schedule')+'</div><div style="font-size:10px;opacity:.6;">إنشاء وإرسال قائمة المباراة</div></div>'+
+        '<div><div style="font-size:16px;font-weight:900;">📅 جدول المباريات</div><div style="font-size:10px;opacity:.6;">إنشاء وإرسال قائمة المباراة</div></div>'+
       '</div>'+
       '<div style="padding:16px;">'+
 
@@ -3540,8 +3489,8 @@ function renderMatchSchedule(){
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
             '<label class="lbl" style="margin:0;">اختر اللاعبين</label>'+
             '<div style="display:flex;gap:6px;">'+
-              '<button onclick="selectAllMatch(true)" style="background:#0f172a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">تحديد '+t('الكل','All')+'</button>'+
-              '<button onclick="selectAllMatch(false)" style="background:#64748b;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">إلغاء '+t('الكل','All')+'</button>'+
+              '<button onclick="selectAllMatch(true)" style="background:#0f172a;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">تحديد الكل</button>'+
+              '<button onclick="selectAllMatch(false)" style="background:#64748b;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">إلغاء الكل</button>'+
             '</div></div>'+
           '<div id="matchPlayerItems"></div>'+
           '<div id="matchCount" style="font-size:12px;color:var(--red);font-weight:800;margin-top:6px;display:none;"></div>'+
@@ -3839,7 +3788,7 @@ function handleAcadLink(){
   var acadId = params.get('acad');
   if(!acadId) return false;
 
-  // تحميل '+t('بيانات الأكاديمية','Academy Information')+' من الشيت
+  // تحميل بيانات الأكاديمية من الشيت
   showL();
   apiGet('الأكاديميات').then(function(list){
     var acad = (Array.isArray(list)?list:[]).find(function(a){ return String(a.id)===String(acadId); });
@@ -3915,12 +3864,12 @@ function renderPublicMatchSchedule(){
     var html=
       '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
         '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div><div style="font-size:16px;font-weight:900;">'+t('📅 جدول المباريات','📅 Match Schedule')+'</div><div style="font-size:10px;opacity:.6;">'+rows.length+' '+t('مباراة','Matches')+'</div></div>'+
+        '<div><div style="font-size:16px;font-weight:900;">📅 جدول المباريات</div><div style="font-size:10px;opacity:.6;">'+rows.length+' مباراة</div></div>'+
       '</div>'+
       '<div style="padding:14px;">';
     if(!rows.length){
       html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">'+
-        ''+t('لم يُنشر جدول المباريات بعد','Match schedule not published yet')+'<br><br>'+
+        'لم يُنشر جدول المباريات بعد<br><br>'+
         '<span style="font-size:11px;color:#cbd5e1;">إذا أضفت مباريات من الإدارة — تأكد من وجود ورقة<br>"جدول المباريات" في Google Sheets</span>'+
       '</div>';
     } else {
@@ -3967,7 +3916,7 @@ function renderPublicMatchSchedule(){
               '<div style="margin-top:10px;text-align:center;">'+
                 '<button onclick="shareMatchResult(\''+team1.replace(/'/g,"\\'")+'\',\''+team2.replace(/'/g,"\\'")+'\',\''+result+'\',\''+d+'\',\''+time+'\',\''+field.replace(/'/g,"\\'")+'\',\''+((ci&&ci.name)||catId)+'\')" '+
                   'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:10px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:inline-flex;align-items:center;gap:6px;">'+
-                  '<i class="fab fa-whatsapp" style="font-size:14px;"></i> '+t('شارك النتيجة','Share Result')+''+
+                  '<i class="fab fa-whatsapp" style="font-size:14px;"></i> شارك النتيجة'+
                 '</button>'+
               '</div>'
             :'')+
@@ -3999,11 +3948,11 @@ function renderPublicResults(){
     var html=
       '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
         '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div><div style="font-size:16px;font-weight:900;">'+t('⚽ نتائج المباريات','⚽ Match Results')+'</div><div style="font-size:10px;opacity:.6;">'+rows.length+' '+t('نتيجة','Results')+'</div></div>'+
+        '<div><div style="font-size:16px;font-weight:900;">⚽ نتائج المباريات</div><div style="font-size:10px;opacity:.6;">'+rows.length+' نتيجة</div></div>'+
       '</div>'+
       '<div style="padding:14px;">';
     if(!rows.length){
-      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">'+t('لم تُسجَّل أي نتائج بعد','No results recorded yet')+'</div>';
+      html+='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم تُسجَّل أي نتائج بعد</div>';
     } else {
       rows.slice().reverse().forEach(function(m){
         var team1=m['الفريق الأول']||m.team1||'؟';
@@ -4029,7 +3978,7 @@ function renderPublicResults(){
             '<div style="margin-top:10px;text-align:center;">'+
               '<button onclick="shareMatchResult(\''+team1.replace(/'/g,"\\'")+'\''+',\''+team2.replace(/'/g,"\\'")+'\',\''+result+'\',\''+date+'\',\''+time+'\',\''+venue+'\',\''+cat+'\')" '+
                 'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:10px;padding:7px 18px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:inline-flex;align-items:center;gap:6px;">'+
-                '<i class="fab fa-whatsapp" style="font-size:14px;"></i> '+t('شارك النتيجة','Share Result')+''+
+                '<i class="fab fa-whatsapp" style="font-size:14px;"></i> شارك النتيجة'+
               '</button>'+
             '</div>'+
           '</div>';
@@ -4473,7 +4422,7 @@ function renderTopScorers(){
     // تبويبات الفئات
     var tabsHtml =
       '<div style="display:flex;gap:6px;padding:12px 14px;overflow-x:auto;background:#fff;border-bottom:1px solid #f1f5f9;">' +
-      '<button onclick="window._tsSelCat=\'all\';renderTopScorers();" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:none;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;background:'+(selCat==='all'?'#0d3318':'#f1f5f9')+';color:'+(selCat==='all'?'#fff':'#475569')+';">'+t('الكل','All')+'</button>' +
+      '<button onclick="window._tsSelCat=\'all\';renderTopScorers();" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:none;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;background:'+(selCat==='all'?'#0d3318':'#f1f5f9')+';color:'+(selCat==='all'?'#fff':'#475569')+';">الكل</button>' +
       CATEGORIES.map(function(c){
         var active = selCat===c.id;
         return '<button onclick="window._tsSelCat=\''+c.id+'\';renderTopScorers();" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:none;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;background:'+(active?c.color:'#f1f5f9')+';color:'+(active?'#fff':'#475569')+';">'+c.name+'</button>';
@@ -4482,7 +4431,7 @@ function renderTopScorers(){
 
     var listHtml = '';
     if(!list.length){
-      listHtml = '<div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:#94a3b8;font-size:13px;">'+t('لا توجد بيانات أهداف بعد','No goal data yet')+'</div>';
+      listHtml = '<div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:#94a3b8;font-size:13px;">لا توجد بيانات أهداف بعد</div>';
     } else {
       listHtml = '<div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);">';
       list.forEach(function(s, i){
@@ -4503,7 +4452,7 @@ function renderTopScorers(){
             '</div>'+
             '<div style="text-align:center;flex-shrink:0;">'+
               '<div style="font-size:26px;font-weight:900;color:'+(i===0?'#d97706':i===1?'#64748b':i===2?'#b45309':'#0d3318')+';">'+s.goals+'</div>'+
-              '<div style="font-size:9px;color:#94a3b8;font-weight:700;">'+t('هدف','Goals')+'</div>'+
+              '<div style="font-size:9px;color:#94a3b8;font-weight:700;">هدف</div>'+
               (s.pens?'<div style="font-size:9px;color:#94a3b8;">('+s.pens+' ج)</div>':'')+
             '</div>'+
           '</div>';
@@ -4517,10 +4466,10 @@ function renderTopScorers(){
     document.getElementById('app').innerHTML =
       '<div style="background:linear-gradient(135deg,#b45309,#92400e);padding:20px 16px 16px;color:#fff;">'+
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
-          '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">'+t('← رجوع','← Back')+'</button>'+
+          '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">← رجوع</button>'+
           '<div>'+
-            '<div style="font-size:17px;font-weight:900;">'+t('⚽ هدافو البطولة','⚽ Top Scorers')+'</div>'+
-            '<div style="font-size:10px;opacity:.7;">'+list.length+' '+t('هداف','Scorers')+' · '+totalGoals+' '+t('هدف مسجل','Goals Scored')</div>'+
+            '<div style="font-size:17px;font-weight:900;">⚽ هدافو البطولة</div>'+
+            '<div style="font-size:10px;opacity:.7;">'+list.length+' هداف · '+totalGoals+' هدف مسجل</div>'+
           '</div>'+
         '</div>'+
       '</div>'+
@@ -4578,7 +4527,7 @@ function renderGroupStandings(){
 
     var groupsHtml='';
     if(!filtered.length){
-      groupsHtml='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">'+t('لم يتم إعداد المجموعات بعد','Groups not set up yet')+'</div>';
+      groupsHtml='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم يتم إعداد المجموعات بعد</div>';
     } else {
       Object.keys(groups).sort().forEach(function(g){
         var rows=computeTable(g,groups[g]);
@@ -4588,22 +4537,22 @@ function renderGroupStandings(){
             '<div style="background:'+color+';color:#fff;padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
               '<span style="width:26px;height:26px;background:rgba(255,255,255,.2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;">'+g.replace('المجموعة ','')+'</span>'+
               '<span style="font-size:13px;font-weight:900;">'+g+'</span>'+
-              '<span style="font-size:10px;opacity:.7;margin-right:auto;">'+rows.length+' '+t('فرق','Teams')+'</span>'+
-              '<button onclick="shareOneGroup(\''+g+'\')" style="background:#25d366;border:none;color:#fff;padding:5px 10px;border-radius:7px;font-size:10px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="fab fa-whatsapp"></i> '+t('مشاركة','Share')+'</button>'+
+              '<span style="font-size:10px;opacity:.7;margin-right:auto;">'+rows.length+' فرق</span>'+
+              '<button onclick="shareOneGroup(\''+g+'\')" style="background:#25d366;border:none;color:#fff;padding:5px 10px;border-radius:7px;font-size:10px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:4px;flex-shrink:0;"><i class="fab fa-whatsapp"></i> مشاركة</button>'+
             '</div>'+
             '<div style="overflow-x:auto;">'+
             '<table style="width:100%;border-collapse:collapse;font-family:Cairo,sans-serif;font-size:12px;">'+
               '<thead><tr style="background:#f8fafc;border-bottom:1px solid #e2e8f0;">'+
                 '<th style="padding:8px 10px;text-align:right;font-weight:900;color:#475569;">#</th>'+
-                '<th style="padding:8px 10px;text-align:right;font-weight:900;color:#475569;">'+t('الفريق','Team')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('ل','P')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('ف','W')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('ت','D')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('خ','L')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('له','GF')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('عليه','GA')+'</th>'+
-                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">'+t('ف.أ','GD')+'</th>'+
-                '<th style="padding:8px 10px;text-align:center;font-weight:900;color:'+color+';">'+t('نق','Pts')+'</th>'+
+                '<th style="padding:8px 10px;text-align:right;font-weight:900;color:#475569;">الفريق</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">ل</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">ف</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">ت</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">خ</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">له</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">عليه</th>'+
+                '<th style="padding:8px 6px;text-align:center;font-weight:900;color:#475569;">ف.أ</th>'+
+                '<th style="padding:8px 10px;text-align:center;font-weight:900;color:'+color+';">نق</th>'+
               '</tr></thead>'+
               '<tbody>'+
               rows.map(function(r,i){
@@ -4623,7 +4572,7 @@ function renderGroupStandings(){
               }).join('')+
               '</tbody>'+
             '</table></div>'+
-            '<div style="padding:6px 10px;background:#f8fafc;font-size:10px;color:#94a3b8;text-align:right;">'+t('+t('🔼 المتأهلون للدور القادم','🔼 Qualified for next round')+','🔼 Qualified for next round')+'</div>'+
+            '<div style="padding:6px 10px;background:#f8fafc;font-size:10px;color:#94a3b8;text-align:right;">🔼 المتأهلون للدور القادم</div>'+
           '</div>';
       });
     }
@@ -4634,14 +4583,14 @@ function renderGroupStandings(){
     document.getElementById('app').innerHTML=
       '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
         '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div style="flex:1;"><div style="font-size:16px;font-weight:900;">'+t('🏆 ترتيب المجموعات','🏆 Group Standings')+'</div><div style="font-size:10px;opacity:.6;">'+t('محدّث تلقائياً من النتائج','Auto-updated from results')+'</div></div>'+
+        '<div style="flex:1;"><div style="font-size:16px;font-weight:900;">🏆 ترتيب المجموعات</div><div style="font-size:10px;opacity:.6;">محدّث تلقائياً من النتائج</div></div>'+
         '<button onclick="printGroupStandings()" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:5px;"><i class="fas fa-print"></i> PDF</button>'+
       '</div>'+
       '<div style="padding:14px;">'+
         '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+catTabs+'</div>'+
         groupsHtml+
         '<button onclick="go(\'knockout_bracket\')" class="btn" style="background:linear-gradient(135deg,#b81d22,#7a0f12);color:#fff;width:100%;margin-top:4px;">'+
-          '<i class="fas fa-trophy"></i> '+t('الأدوار الإقصائية','Knockout Rounds')+'</button>'+
+          '<i class="fas fa-trophy"></i> الأدوار الإقصائية</button>'+
       '</div>';
   });
 }
@@ -4719,7 +4668,7 @@ function shareGroupStandingsWA(){
   wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:420px;background:#f8fafc;padding:20px;font-family:Cairo,sans-serif;direction:rtl;';
 
   var header = '<div style="background:'+color+';color:#fff;padding:14px 16px;border-radius:12px 12px 0 0;margin-bottom:0;">'
-    +'<div style="font-size:15px;font-weight:900;">'+t('🏆 ترتيب المجموعات','🏆 Group Standings')+' - '+ci.name+'</div>'
+    +'<div style="font-size:15px;font-weight:900;">🏆 ترتيب المجموعات - '+ci.name+'</div>'
     +'<div style="font-size:10px;opacity:.75;margin-top:2px;">كأس العرب للأكاديميات · KAAS '+CONFIG.SEASON+'</div>'
     +'</div>';
 
@@ -4813,15 +4762,15 @@ function printGroupStandings(){
         '<table style="width:100%;border-collapse:collapse;font-family:Cairo,sans-serif;font-size:12px;border:1px solid #e2e8f0;">'+
           '<thead><tr style="background:#f8fafc;">'+
             '<th style="padding:7px 10px;text-align:right;border-bottom:2px solid '+color+';color:#475569;">#</th>'+
-            '<th style="padding:7px 10px;text-align:right;border-bottom:2px solid '+color+';color:#475569;">'+t('الفريق','Team')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('ل','P')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('ف','W')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('ت','D')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('خ','L')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('له','GF')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('عليه','GA')+'</th>'+
-            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">'+t('ف.أ','GD')+'</th>'+
-            '<th style="padding:7px 10px;text-align:center;border-bottom:2px solid '+color+';color:'+color+';font-weight:900;">'+t('نق','Pts')+'</th>'+
+            '<th style="padding:7px 10px;text-align:right;border-bottom:2px solid '+color+';color:#475569;">الفريق</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">ل</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">ف</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">ت</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">خ</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">له</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">عليه</th>'+
+            '<th style="padding:7px 8px;text-align:center;border-bottom:2px solid '+color+';color:#475569;">ف.أ</th>'+
+            '<th style="padding:7px 10px;text-align:center;border-bottom:2px solid '+color+';color:'+color+';font-weight:900;">نق</th>'+
           '</tr></thead>'+
           '<tbody>'+
           rows.map(function(r,i){
@@ -4859,7 +4808,7 @@ function printGroupStandings(){
     '</head><body>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:3px solid '+color+';">'+
       '<div>'+
-        '<h1>'+t('🏆 ترتيب المجموعات','🏆 Group Standings')+'</h1>'+
+        '<h1>🏆 ترتيب المجموعات</h1>'+
         '<h2>'+ci.name+' · كأس العرب للأكاديميات '+CONFIG.SEASON+'</h2>'+
       '</div>'+
       '<div style="font-size:11px;color:#94a3b8;">'+new Date().toLocaleDateString('ar-SA')+'</div>'+
@@ -4901,7 +4850,7 @@ function renderKnockoutBracket(){
 
     var bracketHtml='';
     if(!filtered.length){
-      bracketHtml='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">'+t('لم تبدأ الأدوار الإقصائية بعد','Knockout rounds not started yet')+'</div>';
+      bracketHtml='<div style="background:#fff;border-radius:14px;padding:32px;text-align:center;color:#94a3b8;font-size:13px;">لم تبدأ الأدوار الإقصائية بعد</div>';
     } else {
       stages.forEach(function(stage){
         var ms=byStage[stage];
@@ -4921,21 +4870,21 @@ function renderKnockoutBracket(){
                 '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
                   '<div style="flex:1;text-align:center;">'+
                     '<div style="font-size:13px;font-weight:900;color:'+(winner===t1?color:'#0d3318')+';">'+t1+'</div>'+
-                    (winner===t1?'<div style="font-size:9px;color:'+color+';font-weight:800;">'+t('🏆 الفائز','🏆 Winner')+'</div>':'')+
+                    (winner===t1?'<div style="font-size:9px;color:'+color+';font-weight:800;">🏆 الفائز</div>':'')+
                   '</div>'+
                   '<div style="background:'+(res?color:'#e2e8f0')+';color:'+(res?'#fff':'#94a3b8')+';border-radius:10px;padding:6px 14px;font-size:'+(res?'15px':'12px')+';font-weight:900;text-align:center;min-width:60px;">'+
                     (res||'vs')+
                   '</div>'+
                   '<div style="flex:1;text-align:center;">'+
                     '<div style="font-size:13px;font-weight:900;color:'+(winner===t2?color:'#0d3318')+';">'+t2+'</div>'+
-                    (winner===t2?'<div style="font-size:9px;color:'+color+';font-weight:800;">'+t('🏆 الفائز','🏆 Winner')+'</div>':'')+
+                    (winner===t2?'<div style="font-size:9px;color:'+color+';font-weight:800;">🏆 الفائز</div>':'')+
                   '</div>'+
                 '</div>'+
                 (res?
                   '<div style="margin-top:10px;text-align:center;">'+
                     '<button onclick="shareMatchResult(\''+t1.replace(/'/g,"\\'")+'\',\''+t2.replace(/'/g,"\\'")+'\',\''+res+'\',\'\',\'\',\'\',\''+stage+'\')" '+
                       'style="background:linear-gradient(135deg,#25d366,#128c7e);border:none;color:#fff;border-radius:10px;padding:6px 16px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:inline-flex;align-items:center;gap:6px;">'+
-                      '<i class="fab fa-whatsapp" style="font-size:13px;"></i> '+t('شارك','Share')+'</button>'+
+                      '<i class="fab fa-whatsapp" style="font-size:13px;"></i> شارك</button>'+
                   '</div>'
                 :'')+
               '</div>';
@@ -4947,7 +4896,7 @@ function renderKnockoutBracket(){
     document.getElementById('app').innerHTML=
       '<div style="background:linear-gradient(135deg,#7a0f12,#b81d22);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
         '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div><div style="font-size:16px;font-weight:900;">'+t('🏆 الأدوار الإقصائية','🏆 Knockout Rounds')+'</div><div style="font-size:10px;opacity:.7;">'+t('من يصل للنهائي؟','Who reaches the final?')+'</div></div>'+
+        '<div><div style="font-size:16px;font-weight:900;">🏆 الأدوار الإقصائية</div><div style="font-size:10px;opacity:.7;">من يصل للنهائي؟</div></div>'+
       '</div>'+
       '<div style="padding:14px;">'+
         '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+catTabs+'</div>'+
@@ -4972,7 +4921,7 @@ function renderAdminKnockout(){
   document.getElementById('app').innerHTML=
     '<div style="background:linear-gradient(135deg,#7a0f12,#b81d22);padding:20px 16px 14px;display:flex;align-items:center;gap:12px;color:#fff;">'+
       '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
-      '<div><div style="font-size:15px;font-weight:900;">'+t('🏆 الأدوار الإقصائية','🏆 Knockout Rounds')+'</div><div style="font-size:10px;opacity:.8;">إدارة مباريات الإقصاء</div></div>'+
+      '<div><div style="font-size:15px;font-weight:900;">🏆 الأدوار الإقصائية</div><div style="font-size:10px;opacity:.8;">إدارة مباريات الإقصاء</div></div>'+
     '</div>'+
     '<div style="padding:14px;">'+
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+catTabs+'</div>'+
@@ -5263,8 +5212,6 @@ function showAcadCard(){
 // البدء
 // ════════════════════════════════════════
 if(!handleAcadLink()) go('home');
-// Init langBtn and static UI
-(function(){ var btn=document.getElementById('langBtn'); if(btn) btn.textContent=LANG==='en'?'عر':'EN'; updateStaticUI(); })();
 
 // تسجيل Service Worker للعمل بدون إنترنت
 if('serviceWorker' in navigator){
