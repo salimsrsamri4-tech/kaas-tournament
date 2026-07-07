@@ -568,9 +568,29 @@ function closeSidebar(){
 // الرئيسية
 // ════════════════════════════════════════
 function renderHome() {
-  apiGet('الأكاديميات').then(function(acadList){
+  Promise.all([
+    apiGet('الأكاديميات').catch(function(){return[];}),
+    apiGet('نتائج المباريات').catch(function(){return[];})
+  ]).then(function(res){
+    var acadList=Array.isArray(res[0])?res[0]:[];
+    var resultsList=Array.isArray(res[1])?res[1]:[];
     var total = acadList.length;
     var totalPlayers = acadList.reduce(function(s,a){var n=Number(a.players);return s+(isNaN(n)?0:n);},0);
+
+    // حساب الإحصائيات
+    var totalMatches=resultsList.filter(function(r){return (r['النتيجة']||'').indexOf('-')>-1;}).length;
+    var totalGoals=0, totalYellow=0, totalRed=0, totalMOM=0;
+    resultsList.forEach(function(r){
+      totalGoals += (Number(r['أهداف الأول'])||0) + (Number(r['أهداف الثاني'])||0);
+      try{
+        var cards=JSON.parse(r['البطاقات']||'[]');
+        cards.forEach(function(c){
+          if((c.type||'')==='صفراء') totalYellow++;
+          else if((c.type||'')==='حمراء') totalRed++;
+        });
+      }catch(e){}
+      if(r['أفضل لاعب']) totalMOM++;
+    });
     document.getElementById('app').innerHTML =
       '<div class="hero">'+
         '<h1>كأس العرب للأكاديميات</h1>'+
@@ -671,6 +691,34 @@ function renderHome() {
           '</div>';
         }).join('')+
         (total>5?'<div style="text-align:center;padding:8px;"><button class="btn btn-light" onclick="go(\'academies\')">عرض الكل ('+total+')</button></div>':'')+
+      '</div>' : '')+
+
+      // إحصائيات البطولة
+      (totalMatches>0 ?
+      '<div class="section">'+
+        '<div class="sec-title"><i class="fas fa-chart-bar" style="color:var(--green)"></i> إحصائيات البطولة</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:4px;">'+
+          '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #0d3318;">'+
+            '<div style="font-size:28px;font-weight:900;color:#0d3318;">'+totalMatches+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">مباراة مُلعبت</div>'+
+          '</div>'+
+          '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #1d4ed8;">'+
+            '<div style="font-size:28px;font-weight:900;color:#1d4ed8;">'+totalGoals+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">هدف مسجل</div>'+
+          '</div>'+
+          '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #f59e0b;">'+
+            '<div style="font-size:28px;font-weight:900;color:#f59e0b;">'+totalYellow+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">بطاقة صفراء</div>'+
+          '</div>'+
+          '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid #b81d22;">'+
+            '<div style="font-size:28px;font-weight:900;color:#b81d22;">'+totalRed+'</div>'+
+            '<div style="font-size:10px;color:#64748b;font-weight:700;margin-top:2px;">بطاقة حمراء</div>'+
+          '</div>'+
+        '</div>'+
+        (totalGoals>0&&totalMatches>0?
+          '<div style="background:#f8fafc;border-radius:10px;padding:10px 14px;text-align:center;font-size:11px;color:#475569;font-weight:700;">'+
+            '⚽ معدل الأهداف: <strong style="color:#0d3318;">'+( totalGoals/totalMatches).toFixed(1)+'</strong> هدف/مباراة'+
+          '</div>':'')+
       '</div>' : '')+
 
       // التواصل
