@@ -210,6 +210,9 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('top_scorers')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-futbol" style="width:18px;text-align:center;color:#f59e0b;"></i> هدافو البطولة
     </button>
+    <button onclick="closeSidebar();go('public_awards')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-medal" style="width:18px;text-align:center;color:#d4af37;"></i> جوائز البطولة
+    </button>
     <button onclick="closeSidebar();go('knockout_bracket')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.2);border:1px solid rgba(184,29,34,.35);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-trophy" style="width:18px;text-align:center;color:#d4af37;"></i> الأدوار الإقصائية
     </button>
@@ -508,6 +511,8 @@ function go(page) {
     match_schedule_editor: renderMatchScheduleEditor,
     admin_edit_results: renderAdminEditResults,
     top_scorers: renderTopScorers,
+    admin_awards: renderAdminAwards,
+    public_awards: renderPublicAwards,
   };
   if(pages[page]) pages[page]();
 }
@@ -1743,6 +1748,7 @@ function renderAdminPanel() {
           '<button onclick="go(\'group_standings\')" style="background:linear-gradient(135deg,#0369a1,#075985);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-table"></i><br>ترتيب المجموعات</button>'+
           '<button onclick="go(\'admin_edit_results\')" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-edit"></i><br>تعديل النتائج</button>'+
           '<button onclick="go(\'top_scorers\')" style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-futbol"></i><br>هدافو البطولة</button>'+
+          '<button onclick="go(\'admin_awards\')" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-medal"></i><br>جوائز البطولة</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
@@ -2271,6 +2277,153 @@ function saveMatchResult(){
 // ════════════════════════════════════════
 // أفضل لاعب
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// جوائز البطولة - إدارة
+// ════════════════════════════════════════
+function renderAdminAwards(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('جوائز البطولة').then(function(rows){
+    if(!Array.isArray(rows)) rows=[];
+    // آخر إدخال لكل فئة+جائزة
+    var saved={};
+    rows.forEach(function(r){
+      var k=(r['الفئة']||'')+'|'+(r['الجائزة']||'');
+      saved[k]=r;
+    });
+
+    var html=
+      '<div style="background:linear-gradient(135deg,#d4af37,#92700a);padding:20px 16px 16px;color:#fff;">'+
+        '<div style="display:flex;align-items:center;gap:10px;">'+
+          '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">← رجوع</button>'+
+          '<div><div style="font-size:17px;font-weight:900;">🏅 جوائز البطولة</div><div style="font-size:10px;opacity:.7;">أفضل مدرب · أفضل إداري · أفضل لاعب</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="padding:14px;padding-bottom:40px;">';
+
+    CATEGORIES.forEach(function(cat){
+      var awards=[
+        {key:'أفضل مدرب',   icon:'👨‍🏫', color:'#0369a1'},
+        {key:'أفضل إداري',  icon:'👔',   color:'#7c3aed'},
+        {key:'أفضل لاعب',   icon:'⭐',   color:'#b45309'},
+      ];
+      html+=
+        '<div style="background:#fff;border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);">'+
+          '<div style="background:'+cat.color+';padding:10px 14px;color:#fff;font-size:13px;font-weight:900;">'+cat.name+'</div>'+
+          '<div style="padding:14px;">';
+
+      awards.forEach(function(a){
+        var k=cat.id+'|'+a.key;
+        var cur=saved[k]||{};
+        html+=
+          '<div style="margin-bottom:14px;">'+
+            '<div style="font-size:11px;font-weight:900;color:'+a.color+';margin-bottom:6px;">'+a.icon+' '+a.key+'</div>'+
+            '<input id="aw_name_'+cat.id+'_'+a.key.replace(/ /g,'_')+'" placeholder="الاسم الكامل" value="'+(cur['الاسم']||'')+'" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:Cairo,sans-serif;margin-bottom:6px;">'+
+            '<input id="aw_acad_'+cat.id+'_'+a.key.replace(/ /g,'_')+'" placeholder="الأكاديمية" value="'+(cur['الأكاديمية']||'')+'" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:13px;font-family:Cairo,sans-serif;">'+
+          '</div>';
+      });
+
+      html+=
+          '<button onclick="saveAwards(\''+cat.id+'\')" style="width:100%;background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">💾 حفظ '+cat.name+'</button>'+
+        '</div>'+
+      '</div>';
+    });
+
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  });
+}
+
+function saveAwards(catId){
+  var awards=[
+    {key:'أفضل مدرب',   keyId:'أفضل_مدرب'},
+    {key:'أفضل إداري',  keyId:'أفضل_إداري'},
+    {key:'أفضل لاعب',   keyId:'أفضل_لاعب'},
+  ];
+  var saved=0;
+  awards.forEach(function(a){
+    var name=(document.getElementById('aw_name_'+catId+'_'+a.keyId)||{}).value||'';
+    var acad=(document.getElementById('aw_acad_'+catId+'_'+a.keyId)||{}).value||'';
+    if(!name.trim()) return;
+    apiAppend('جوائز البطولة',{
+      'الفئة':catId, 'الجائزة':a.key,
+      'الاسم':name.trim(), 'الأكاديمية':acad.trim(),
+      'وقت الحفظ':new Date().toISOString()
+    });
+    saved++;
+  });
+  invalidateCache('جوائز البطولة');
+  var cat=CATEGORIES.find(function(c){return c.id===catId;})||{name:catId};
+  alert('✅ تم حفظ جوائز '+cat.name);
+}
+
+// ════════════════════════════════════════
+// جوائز البطولة - عرض عام
+// ════════════════════════════════════════
+function renderPublicAwards(){
+  showL();
+  apiGet('جوائز البطولة').then(function(rows){
+    if(!Array.isArray(rows)) rows=[];
+    // آخر إدخال لكل فئة+جائزة
+    var saved={};
+    rows.forEach(function(r){
+      var k=(r['الفئة']||'')+'|'+(r['الجائزة']||'');
+      saved[k]=r;
+    });
+
+    var awardDefs=[
+      {key:'أفضل لاعب',  icon:'⭐', color:'#b45309', bg:'linear-gradient(135deg,#fef9c3,#fef08a)'},
+      {key:'أفضل مدرب',  icon:'👨‍🏫', color:'#0369a1', bg:'linear-gradient(135deg,#eff6ff,#dbeafe)'},
+      {key:'أفضل إداري', icon:'👔',  color:'#7c3aed', bg:'linear-gradient(135deg,#faf5ff,#ede9fe)'},
+    ];
+
+    var hasAny=Object.keys(saved).length>0;
+    var html=
+      '<div style="background:linear-gradient(135deg,#d4af37,#92700a);padding:20px 16px 16px;color:#fff;">'+
+        '<div style="display:flex;align-items:center;gap:10px;">'+
+          '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">← رجوع</button>'+
+          '<div><div style="font-size:17px;font-weight:900;">🏅 جوائز البطولة</div><div style="font-size:10px;opacity:.7;">كأس العرب للأكاديميات '+CONFIG.SEASON+'</div></div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="padding:14px;padding-bottom:40px;">';
+
+    if(!hasAny){
+      html+='<div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:#94a3b8;font-size:13px;">لم تُحدَّد الجوائز بعد</div>';
+    } else {
+      CATEGORIES.forEach(function(cat){
+        var catAwards=awardDefs.map(function(a){
+          return {def:a, data:saved[cat.id+'|'+a.key]||null};
+        }).filter(function(x){return x.data;});
+        if(!catAwards.length) return;
+
+        html+=
+          '<div style="margin-bottom:20px;">'+
+            '<div style="font-size:12px;font-weight:900;color:'+cat.color+';letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:8px;">'+
+              '<span style="width:8px;height:8px;border-radius:50%;background:'+cat.color+';display:inline-block;"></span>'+
+              cat.name+
+            '</div>';
+
+        catAwards.forEach(function(x){
+          html+=
+            '<div style="background:'+x.def.bg+';border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+              '<div style="font-size:32px;flex-shrink:0;">'+x.def.icon+'</div>'+
+              '<div style="flex:1;">'+
+                '<div style="font-size:10px;font-weight:900;color:'+x.def.color+';letter-spacing:.5px;margin-bottom:3px;">'+x.def.key+'</div>'+
+                '<div style="font-size:16px;font-weight:900;color:#0f172a;">'+x.data['الاسم']+'</div>'+
+                (x.data['الأكاديمية']?'<div style="font-size:11px;color:#64748b;font-weight:700;margin-top:2px;">🏫 '+x.data['الأكاديمية']+'</div>':'')+
+              '</div>'+
+            '</div>';
+        });
+
+        html+='</div>';
+      });
+    }
+
+    html+='</div>';
+    document.getElementById('app').innerHTML=html;
+  });
+}
+
 // ════════════════════════════════════════
 // تعديل النتائج
 // ════════════════════════════════════════
