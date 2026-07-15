@@ -1251,9 +1251,15 @@ function renderAddPlayer() {
 function openPhotoCropper(input){
   var file = input.files[0];
   if(!file) return;
-  var reader = new FileReader();
-  reader.onload = function(e){ showPhotoCropper(e.target.result); };
-  reader.readAsDataURL(file);
+  var url = URL.createObjectURL(file);
+  _showCropper(url, function(res){
+    URL.revokeObjectURL(url);
+    window._playerPhoto = res;
+    var box = document.getElementById('photoPreview');
+    if(box){ box.style.border='3px solid #d4af37'; box.innerHTML='<img src="'+res+'" style="width:100%;height:100%;object-fit:cover;">'; }
+    var eb = document.getElementById('photoEditBtn');
+    if(eb) eb.style.display='block';
+  });
 }
 
 /* ─── محرر قص الصورة الموحّد ─── */
