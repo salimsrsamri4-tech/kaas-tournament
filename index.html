@@ -3869,15 +3869,18 @@ function sharePlayerWhatsapp(pid){
 function deleteKaasPlayer(pid, pname){
   if(!confirm('حذف اللاعب "'+pname+'" ؟\nلا يمكن التراجع عن هذا الإجراء.')) return;
   var acadId = sessionStorage.getItem('kaasAcadId');
-  apiAppend('حذف اللاعبين', {
-    player_id: pid, academy_id: acadId,
-    date: new Date().toLocaleDateString('ar')
-  });
   // إزالة فورية من الواجهة
   window._kaasPlayers = (window._kaasPlayers||[]).filter(function(p){ return p.id!==pid; });
   try{ localStorage.removeItem('kaasEdit_'+pid); localStorage.removeItem('kaasPhoto_'+pid); }catch(x){}
   invalidateCache('اللاعبون');
   go('acad_dashboard');
+  // حذف حقيقي من Google Sheets
+  fetch(CONFIG.GAS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type': 'text/plain'},
+    body: JSON.stringify({action:'deletePlayer', player_id: pid, academy_id: acadId})
+  });
 }
 
 function shareRegLink(){
