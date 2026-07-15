@@ -1285,9 +1285,12 @@ function _showCropper(src, onConfirm){
     ty = (SZ - img.naturalHeight*sc)/2;
     applyT();
   }
-  img.onload = init;
-  if(img.complete && img.naturalWidth){ init(); }
-  else { setTimeout(function(){ if(img.naturalWidth) init(); }, 300); }
+  function tryInit(){
+    if(img.naturalWidth && img.naturalHeight){ init(); }
+    else { setTimeout(tryInit, 100); }
+  }
+  img.onload = tryInit;
+  setTimeout(tryInit, 50);
 
   function applyT(){ img.style.transform='translate('+tx+'px,'+ty+'px) scale('+sc+')'; }
 
