@@ -1190,6 +1190,13 @@ function renderAddPlayer() {
   window._playerPhoto = null;
   window._playerDoc   = null;
 
+  // تحميل لاعبي الأكاديمية للتحقق من التكرار
+  if(!window._kaasPlayers || window._kaasPlayers.length === 0){
+    apiGet('اللاعبون').then(function(all){
+      window._kaasPlayers = all.filter(function(p){ return p.academy_id === id; });
+    });
+  }
+
   document.getElementById('app').innerHTML =
     '<div style="background:linear-gradient(135deg,#7a0f12,var(--red));padding:24px 16px 18px;text-align:center;color:#fff;">'+
       '<button onclick="go(\'acad_dashboard\')" style="position:absolute;right:16px;top:16px;background:rgba(255,255,255,.15);border:none;color:#fff;padding:6px 12px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;margin-top:56px;">← رجوع</button>'+
