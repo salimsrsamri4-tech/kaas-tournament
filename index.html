@@ -1410,6 +1410,18 @@ function submitPlayer() {
   var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
   if(cats.indexOf(catId)===-1){errEl.textContent='أكاديميتك غير مسجلة في فئة هذا اللاعب';errEl.style.display='block';return;}
 
+  /* ── التحقق من رقم القميص المكرر في نفس الأكاديمية والفئة ── */
+  if(jersey){
+    var existing = (window._kaasPlayers||[]).find(function(p){
+      return p.academy_id===acadId && p.cat_id===catId && String(p.jersey)===String(jersey);
+    });
+    if(existing){
+      errEl.textContent='⚠️ رقم القميص '+jersey+' مسجل مسبقاً للاعب "'+existing.name+'" في نفس الفئة';
+      errEl.style.display='block';
+      return;
+    }
+  }
+
   /* ── معاينة البطاقة قبل الحفظ ── */
   var previewData = {
     id:'PL-PREVIEW', name:name, birth:birth, nationality:nat,
