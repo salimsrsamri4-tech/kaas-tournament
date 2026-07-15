@@ -1227,7 +1227,7 @@ function renderAddPlayer() {
       '</div>'+
       '<div id="catResult" style="display:none;margin-bottom:12px;"></div>'+
       '<div class="r2 mb">'+
-        '<div><label class="lbl"><i class="fas fa-tshirt" style="color:var(--green)"></i> رقم القميص</label><input class="inp" id="pJersey" type="number" min="1" max="99" placeholder="٩"></div>'+
+        '<div><label class="lbl"><i class="fas fa-tshirt" style="color:var(--green)"></i> رقم القميص *</label><input class="inp" id="pJersey" type="number" min="1" max="99" placeholder="٩"></div>'+
         '<div><label class="lbl">رقم الهاتف (اختياري)</label><input class="inp" id="pPhone" type="tel" placeholder="9XXXXXXXX"></div>'+
       '</div>'+
       '<div class="mb"><label class="lbl">ملاحظات صحية</label><input class="inp" id="pHealth" type="text" placeholder="لا يوجد"></div>'+
@@ -1411,7 +1411,7 @@ function submitPlayer() {
   var errEl  = document.getElementById('pErr');
   errEl.style.display='none';
 
-  if(!name||!birth||!nat){errEl.textContent='الرجاء ملء الحقول الإلزامية';errEl.style.display='block';return;}
+  if(!name||!birth||!nat||!jersey){errEl.textContent='الرجاء ملء الحقول الإلزامية (الاسم، تاريخ الميلاد، الجنسية، رقم القميص)';errEl.style.display='block';return;}
   var catId = getCategory(birth);
   if(!catId){errEl.textContent='تاريخ الميلاد لا ينتمي لأي فئة في البطولة';errEl.style.display='block';return;}
   var cats = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
