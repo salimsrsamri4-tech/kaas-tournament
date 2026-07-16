@@ -625,12 +625,14 @@ function closeSidebar(){
 function renderHome() {
   Promise.all([
     apiGet('الأكاديميات').catch(function(){return[];}),
-    apiGet('نتائج المباريات').catch(function(){return[];})
+    apiGet('نتائج المباريات').catch(function(){return[];}),
+    apiGet('اللاعبون').catch(function(){return[];})
   ]).then(function(res){
     var acadList=Array.isArray(res[0])?res[0]:[];
     var resultsList=Array.isArray(res[1])?res[1]:[];
+    var playersList=Array.isArray(res[2])?res[2]:[];
     var total = acadList.length;
-    var totalPlayers = acadList.reduce(function(s,a){var n=Number(a.players);return s+(isNaN(n)?0:n);},0);
+    var totalPlayers = playersList.length;
 
     // حساب الإحصائيات
     var totalMatches=resultsList.filter(function(r){return (r['النتيجة']||'').indexOf('-')>-1;}).length;
