@@ -221,6 +221,9 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('public_awards')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-medal" style="width:18px;text-align:center;color:#d4af37;"></i> جوائز البطولة
     </button>
+    <button onclick="closeSidebar();go('public_gallery')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(109,40,217,.25);border:1px solid rgba(109,40,217,.4);border-radius:12px;color:rgba(255,255,255,.85);font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-images" style="width:18px;text-align:center;color:#a78bfa;"></i> معرض البطولة
+    </button>
     <button onclick="closeSidebar();go('knockout_bracket')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.2);border:1px solid rgba(184,29,34,.35);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-trophy" style="width:18px;text-align:center;color:#d4af37;"></i> الأدوار الإقصائية
     </button>
@@ -629,6 +632,8 @@ function go(page) {
     admin_awards: renderAdminAwards,
     admin_reports: renderAdminReports,
     public_awards: renderPublicAwards,
+    admin_gallery: renderAdminGallery,
+    public_gallery: renderPublicGallery,
   };
   if(pages[page]) pages[page]();
 }
@@ -1947,6 +1952,7 @@ function renderAdminPanel() {
           '<button onclick="go(\'top_scorers\')" style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-futbol"></i><br>هدافو البطولة</button>'+
           '<button onclick="go(\'admin_awards\')" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-medal"></i><br>جوائز البطولة</button>'+
           '<button onclick="go(\'admin_reports\')" style="background:linear-gradient(135deg,#0f4c75,#1b6ca8);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;grid-column:span 2;"><i class="fas fa-chart-bar"></i><br>📊 التقارير اليومية والنهائية</button>'+
+          '<button onclick="go(\'admin_gallery\')" style="background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;grid-column:span 2;"><i class="fas fa-images"></i><br>🖼️ معرض الصور والفيديوهات</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
@@ -3017,6 +3023,255 @@ function renderPublicAwards(){
     html+='</div>'+buildSponsorsSection();
     document.getElementById('app').innerHTML=html;
   });
+}
+
+// ════════════════════════════════════════
+// معرض الصور والفيديوهات - إدارة
+// ════════════════════════════════════════
+function renderAdminGallery(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+  apiGet('المعرض').then(function(items){
+    if(!Array.isArray(items)) items=[];
+    items = items.slice().reverse(); // الأحدث أولاً
+
+    var listHtml = '';
+    if(!items.length){
+      listHtml = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">لا توجد وسائط بعد — أضف أول صورة أو فيديو</div>';
+    } else {
+      listHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+      items.forEach(function(it){
+        var isVideo = (it['النوع']||'') === 'video';
+        var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (it['الرابط']||'');
+        var typeIcon = isVideo ? '🎬' : '📸';
+        listHtml +=
+          '<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;position:relative;">'+
+            '<div style="position:relative;height:100px;background:#0f172a;overflow:hidden;">'+
+              (thumb
+                ? '<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">'
+                : '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:32px;">'+typeIcon+'</div>')+
+              (isVideo ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,.6);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:14px;margin-right:-2px;"></i></div></div>' : '')+
+            '</div>'+
+            '<div style="padding:8px;">'+
+              '<div style="font-size:11px;font-weight:800;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+typeIcon+' '+(it['العنوان']||'بدون عنوان')+'</div>'+
+              '<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+(it['التاريخ']||'')+'</div>'+
+            '</div>'+
+            '<button onclick="deleteGalleryItem(\''+( it['id']||it['_rowIndex']||'' )+'\',\''+( it['العنوان']||'' ).replace(/'/g,'')+'\',\''+( it['الرابط']||'' )+'\')" '+
+              'style="position:absolute;top:6px;left:6px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
+              '<i class="fas fa-trash"></i>'+
+            '</button>'+
+          '</div>';
+      });
+      listHtml += '</div>';
+    }
+
+    document.getElementById('app').innerHTML =
+      '<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:16px;font-weight:900;">🖼️ معرض البطولة</div><div style="font-size:10px;opacity:.7;">'+items.length+' عنصر</div></div>'+
+        '<button onclick="showAddMedia()" style="margin-right:auto;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-plus"></i> إضافة</button>'+
+      '</div>'+
+
+      // نموذج الإضافة (مخفي افتراضياً)
+      '<div id="addMediaForm" style="display:none;background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:16px;">'+
+        '<div style="font-size:13px;font-weight:900;color:#1e293b;margin-bottom:12px;">➕ إضافة وسائط جديدة</div>'+
+        '<div style="display:flex;gap:8px;margin-bottom:10px;">'+
+          '<button id="typeBtnPhoto" onclick="setMediaType(\'photo\')" style="flex:1;padding:9px;border:2px solid #6d28d9;border-radius:8px;background:#6d28d9;color:#fff;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">📸 صورة</button>'+
+          '<button id="typeBtnVideo" onclick="setMediaType(\'video\')" style="flex:1;padding:9px;border:2px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">🎬 فيديو يوتيوب</button>'+
+        '</div>'+
+        '<input id="mediaTitle" placeholder="العنوان (مثال: أهداف اليوم الأول)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;margin-bottom:8px;direction:rtl;">'+
+        '<input id="mediaUrl" placeholder="الرابط (صورة: رابط Google Drive / يوتيوب: رابط الفيديو)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:12px;margin-bottom:8px;direction:rtl;">'+
+        '<div id="mediaHint" style="font-size:10px;color:#64748b;margin-bottom:10px;line-height:1.6;">'+
+          '📸 <b>صورة:</b> افتح Google Drive → انقر يمين على الصورة → الحصول على رابط → نسخ الرابط<br>'+
+          '🎬 <b>يوتيوب:</b> افتح الفيديو → مشاركة → نسخ الرابط (مثال: https://youtu.be/xxxxx)'+
+        '</div>'+
+        '<input id="mediaDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;margin-bottom:10px;">'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button onclick="submitMedia()" style="flex:1;background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;border:none;border-radius:8px;padding:11px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">💾 حفظ</button>'+
+          '<button onclick="document.getElementById(\'addMediaForm\').style.display=\'none\'" style="background:#f1f5f9;border:none;border-radius:8px;padding:11px 14px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;color:#475569;">إلغاء</button>'+
+        '</div>'+
+      '</div>'+
+
+      '<div style="padding:14px;">'+listHtml+'</div>';
+
+    // تهيئة النموذج
+    window._mediaType = 'photo';
+    var dateEl = document.getElementById('mediaDate');
+    if(dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+  });
+}
+
+window._mediaType = 'photo';
+
+function showAddMedia(){
+  var f = document.getElementById('addMediaForm');
+  if(f) f.style.display = f.style.display==='none' ? 'block' : 'none';
+}
+
+function setMediaType(t){
+  window._mediaType = t;
+  var pb = document.getElementById('typeBtnPhoto');
+  var vb = document.getElementById('typeBtnVideo');
+  if(pb && vb){
+    pb.style.background = t==='photo'?'#6d28d9':'#fff';
+    pb.style.color       = t==='photo'?'#fff':'#475569';
+    pb.style.border      = '2px solid '+(t==='photo'?'#6d28d9':'#e2e8f0');
+    vb.style.background  = t==='video'?'#6d28d9':'#fff';
+    vb.style.color       = t==='video'?'#fff':'#475569';
+    vb.style.border      = '2px solid '+(t==='video'?'#6d28d9':'#e2e8f0');
+  }
+  var url = document.getElementById('mediaUrl');
+  if(url) url.placeholder = t==='photo'
+    ? 'رابط الصورة (Google Drive أو Imgur)'
+    : 'رابط يوتيوب (مثال: https://youtu.be/xxxxx)';
+}
+
+function submitMedia(){
+  var title = (document.getElementById('mediaTitle')||{}).value||'';
+  var url   = (document.getElementById('mediaUrl')||{}).value||'';
+  var date  = (document.getElementById('mediaDate')||{}).value||'';
+  var type  = window._mediaType||'photo';
+
+  if(!url.trim()){ alert('الرجاء إدخال الرابط'); return; }
+
+  // تحويل رابط Google Drive إلى رابط مباشر
+  if(type==='photo' && url.indexOf('drive.google.com')>-1){
+    var m = url.match(/\/d\/([^/]+)/);
+    if(m) url = 'https://drive.google.com/uc?export=view&id='+m[1];
+  }
+  // تطبيع رابط يوتيوب
+  if(type==='video'){
+    var vid = extractYtId(url);
+    if(vid) url = 'https://www.youtube.com/watch?v='+vid;
+  }
+
+  apiAppend('المعرض',{
+    'النوع': type,
+    'العنوان': title.trim()||'بدون عنوان',
+    'الرابط': url.trim(),
+    'التاريخ': date,
+    'وقت الإضافة': new Date().toISOString()
+  });
+  invalidateCache('المعرض');
+
+  // إغلاق النموذج وتحديث الصفحة
+  document.getElementById('addMediaForm').style.display='none';
+  document.getElementById('mediaTitle').value='';
+  document.getElementById('mediaUrl').value='';
+  setTimeout(function(){ renderAdminGallery(); }, 1200);
+}
+
+function deleteGalleryItem(id, title, url){
+  if(!confirm('حذف "'+title+'" من المعرض؟')) return;
+  invalidateCache('المعرض');
+  fetch(CONFIG.GAS_URL,{
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({action:'deleteGalleryItem', item_id:id, item_url:url})
+  });
+  setTimeout(function(){ renderAdminGallery(); }, 1200);
+}
+
+function extractYtId(url){
+  var m = url.match(/(?:youtu\.be\/|v=|\/embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
+function getYtThumb(url){
+  var id = extractYtId(url);
+  return id ? 'https://img.youtube.com/vi/'+id+'/mqdefault.jpg' : '';
+}
+
+// ════════════════════════════════════════
+// معرض الصور والفيديوهات - عام
+// ════════════════════════════════════════
+function renderPublicGallery(){
+  showL();
+  apiGet('المعرض').then(function(items){
+    if(!Array.isArray(items)) items=[];
+    items = items.slice().reverse();
+
+    var photos  = items.filter(function(it){return (it['النوع']||'')!=='video';});
+    var videos  = items.filter(function(it){return (it['النوع']||'')==='video';});
+
+    var sel = window._galleryTab || (videos.length ? 'videos' : 'photos');
+
+    function buildGrid(list, isVideo){
+      if(!list.length) return '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">'+(isVideo?'لا توجد فيديوهات بعد':'لا توجد صور بعد')+'</div>';
+      var g = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+      list.forEach(function(it){
+        var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (it['الرابط']||'');
+        var onclick = isVideo
+          ? 'openMediaModal(\'video\',\''+it['الرابط']+'\',\''+( it['العنوان']||'' ).replace(/'/g,'')+'\',\''+( it['التاريخ']||'' )+'\')'
+          : 'openMediaModal(\'photo\',\''+it['الرابط']+'\',\''+( it['العنوان']||'' ).replace(/'/g,'')+'\',\''+( it['التاريخ']||'' )+'\')';
+        g +=
+          '<div onclick="'+onclick+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
+            (thumb
+              ? '<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background=\'#1e293b\'">'
+              : '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;">'+(isVideo?'🎬':'📸')+'</div>')+
+            (isVideo ? '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>' : '')+
+            '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 8px 6px;">'+
+              '<div style="font-size:10px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(it['العنوان']||'')+'</div>'+
+              (it['التاريخ']?'<div style="font-size:9px;color:rgba(255,255,255,.6);">'+it['التاريخ']+'</div>':'')+
+            '</div>'+
+          '</div>';
+      });
+      g += '</div>';
+      return g;
+    }
+
+    document.getElementById('app').innerHTML =
+      '<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:17px;font-weight:900;">🖼️ معرض البطولة</div><div style="font-size:10px;opacity:.7;">'+photos.length+' صورة · '+videos.length+' فيديو</div></div>'+
+      '</div>'+
+      '<div style="display:flex;background:#3b0764;padding:8px 16px;gap:8px;">'+
+        '<button onclick="window._galleryTab=\'photos\';renderPublicGallery();" style="flex:1;padding:9px;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;background:'+(sel==='photos'?'#fff':'rgba(255,255,255,.15)')+';color:'+(sel==='photos'?'#4c1d95':'#fff')+';">📸 الصور ('+photos.length+')</button>'+
+        '<button onclick="window._galleryTab=\'videos\';renderPublicGallery();" style="flex:1;padding:9px;border:none;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;background:'+(sel==='videos'?'#fff':'rgba(255,255,255,.15)')+';color:'+(sel==='videos'?'#4c1d95':'#fff')+';">🎬 الفيديوهات ('+videos.length+')</button>'+
+      '</div>'+
+      '<div style="padding:14px;">'+
+        (sel==='photos' ? buildGrid(photos,false) : buildGrid(videos,true))+
+      '</div>'+
+      buildSponsorsSection()+
+
+      // مودال عرض الوسائط
+      '<div id="mediaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;flex-direction:column;align-items:center;justify-content:center;" onclick="closeMediaModal(event)">'+
+        '<button onclick="closeMediaModal()" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2;">✕</button>'+
+        '<div id="mediaModalContent" style="width:100%;max-width:480px;padding:0 12px;"></div>'+
+        '<div id="mediaModalTitle" style="color:#fff;font-size:13px;font-weight:700;margin-top:12px;text-align:center;opacity:.8;"></div>'+
+        '<div id="mediaModalDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;"></div>'+
+      '</div>';
+  });
+}
+
+function openMediaModal(type, url, title, date){
+  var modal   = document.getElementById('mediaModal');
+  var content = document.getElementById('mediaModalContent');
+  var titleEl = document.getElementById('mediaModalTitle');
+  var dateEl  = document.getElementById('mediaModalDate');
+  if(!modal||!content) return;
+
+  if(type==='video'){
+    var vid = extractYtId(url);
+    content.innerHTML = vid
+      ? '<div style="position:relative;width:100%;padding-bottom:56.25%;"><iframe src="https://www.youtube.com/embed/'+vid+'?autoplay=1" style="position:absolute;inset:0;width:100%;height:100%;border:none;border-radius:10px;" allowfullscreen allow="autoplay"></iframe></div>'
+      : '<div style="color:#fff;text-align:center;padding:20px;">تعذّر تحميل الفيديو</div>';
+  } else {
+    content.innerHTML = '<img src="'+url+'" style="width:100%;border-radius:10px;max-height:70vh;object-fit:contain;" onerror="this.src=\'\';this.parentElement.innerHTML=\'<div style=color:#fff;text-align:center;padding:20px>تعذّر تحميل الصورة</div>\'">';
+  }
+  if(titleEl) titleEl.textContent = title||'';
+  if(dateEl)  dateEl.textContent  = date||'';
+  modal.style.display = 'flex';
+}
+
+function closeMediaModal(e){
+  if(e && e.target && e.target.id!=='mediaModal') return;
+  var modal = document.getElementById('mediaModal');
+  if(modal){
+    modal.style.display='none';
+    var c=document.getElementById('mediaModalContent');
+    if(c) c.innerHTML=''; // إيقاف الفيديو
+  }
 }
 
 // ════════════════════════════════════════
