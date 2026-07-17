@@ -3520,6 +3520,7 @@ function openGalleryCard(el){
   var type  = el.getAttribute('data-type')  ||'photo';
   var title = decodeURIComponent(el.getAttribute('data-title')||'');
   var date  = decodeURIComponent(el.getAttribute('data-date') ||'');
+  showToast('جاري الفتح: '+type);
   window._mediaView = {url:url, type:type, title:title, date:date};
   go('media_view');
 }
