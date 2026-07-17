@@ -3377,7 +3377,7 @@ function deleteGalleryItem(id, title, url){
   fetch(CONFIG.GAS_URL,{
     method:'POST', mode:'no-cors',
     headers:{'Content-Type':'text/plain'},
-    body: JSON.stringify({action:'deleteGalleryItem', item_id:id, item_url:url})
+    body: JSON.stringify({action:'deleteGalleryItem', item_id:id, item_url:url, item_title:title})
   });
   setTimeout(function(){
     if(sessionStorage.getItem('kaasMedia') && !sessionStorage.getItem('kaasAdmin')){
