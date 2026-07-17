@@ -559,6 +559,26 @@ function apiGet(sheet, forceRefresh) {
 
 function invalidateCache(sheet){ delete _cache[sheet]; }
 
+// تتبع العناصر المحذوفة في sessionStorage
+function markGalleryDeleted(url, title){
+  try{
+    var d = JSON.parse(sessionStorage.getItem('_kaasDeleted')||'[]');
+    d.push({url:url, title:title});
+    sessionStorage.setItem('_kaasDeleted', JSON.stringify(d));
+  }catch(e){}
+}
+function filterGalleryDeleted(items){
+  try{
+    var d = JSON.parse(sessionStorage.getItem('_kaasDeleted')||'[]');
+    if(!d.length) return items;
+    return items.filter(function(it){
+      return !d.some(function(x){
+        return x.url && x.url===(it['الرابط']||'');
+      });
+    });
+  }catch(e){ return items; }
+}
+
 function fmtDate(v){
   if(!v) return '';
   var s=String(v);
@@ -3101,6 +3121,7 @@ function renderMediaPanel(){
   showL();
   apiGet('المعرض').then(function(items){
     if(!Array.isArray(items)) items=[];
+    items = filterGalleryDeleted(items);
     var totalRows = items.length;
     items = items.slice().reverse();
     window._mediaPanelItems = items;
@@ -3245,6 +3266,7 @@ function renderAdminGallery(){
   showL();
   apiGet('المعرض').then(function(items){
     if(!Array.isArray(items)) items=[];
+    items = filterGalleryDeleted(items);
     var totalRows = items.length;
     items = items.slice().reverse(); // الأحدث أولاً
     window._mediaPanelItems = items;
@@ -3436,6 +3458,7 @@ function renderPublicGallery(){
   showL();
   apiGet('المعرض').then(function(items){
     if(!Array.isArray(items)) items=[];
+    items = filterGalleryDeleted(items);
     items = items.slice().reverse();
 
     // خزّن عالمياً لتجنب مشاكل الاقتباس في onclick
@@ -3557,15 +3580,17 @@ function renderMediaView(){
 
 function deleteGalleryCard(btn){
   var sheetRow = parseInt(btn.getAttribute('data-row')||'0');
-  var card = btn.closest('div[style*="position:relative"]') || btn.parentElement;
+  var itemUrl   = decodeURIComponent(btn.getAttribute('data-url')||'');
+  var itemTitle = decodeURIComponent(btn.getAttribute('data-title')||'');
+  var card = btn.parentElement;
   if(card && card.parentElement) card.parentElement.removeChild(card);
-  // حذف العنصر من الكاش مباشرة (بدون مسح الكاش) حتى لا يرجع عند التنقل
+  // حفظ العنصر المحذوف في sessionStorage حتى لا يرجع
+  markGalleryDeleted(itemUrl, itemTitle);
+  // تحديث الكاش إن وُجد
   if(_cache['المعرض'] && Array.isArray(_cache['المعرض'].d)){
-    var origIdx = sheetRow - 2; // الصف 2 = index 0
-    if(origIdx >= 0 && origIdx < _cache['المعرض'].d.length){
-      _cache['المعرض'].d.splice(origIdx, 1);
-      _cache['المعرض'].t = Date.now(); // تجديد التوقيت
-    }
+    _cache['المعرض'].d = _cache['المعرض'].d.filter(function(it){
+      return (it['الرابط']||'') !== itemUrl;
+    });
   }
   showToast('جاري الحذف...');
   fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&sheet_row='+sheetRow+'&t='+Date.now())
