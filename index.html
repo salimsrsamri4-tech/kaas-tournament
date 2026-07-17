@@ -3091,13 +3091,14 @@ function renderMediaPanel(){
   apiGet('المعرض').then(function(items){
     if(!Array.isArray(items)) items=[];
     items = items.slice().reverse();
+    window._mediaPanelItems = items;
 
     var listHtml = '';
     if(!items.length){
       listHtml = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">لا توجد وسائط بعد<br>ابدأ بإضافة أول صورة أو فيديو</div>';
     } else {
       listHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
-      items.forEach(function(it){
+      items.forEach(function(it, idx){
         var type = it['النوع']||'photo';
         var isVideo = type==='video', isAlbum = type==='album';
         var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (!isAlbum ? it['الرابط']||'' : '');
@@ -3113,7 +3114,7 @@ function renderMediaPanel(){
               '<div style="font-size:10px;font-weight:800;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+icon+' '+(it['العنوان']||'بدون عنوان')+'</div>'+
               '<div style="font-size:9px;color:#94a3b8;">'+(it['التاريخ']||'')+'</div>'+
             '</div>'+
-            '<button onclick="deleteGalleryItem(\''+( it['id']||it['_rowIndex']||'' )+'\',\''+(it['العنوان']||'').replace(/'/g,'')+'\',\''+( it['الرابط']||'' )+'\')" '+
+            '<button onclick="deleteGalleryByIdx('+idx+')" '+
               'style="position:absolute;top:5px;left:5px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
               '<i class="fas fa-trash"></i></button>'+
           '</div>';
@@ -3230,13 +3231,14 @@ function renderAdminGallery(){
   apiGet('المعرض').then(function(items){
     if(!Array.isArray(items)) items=[];
     items = items.slice().reverse(); // الأحدث أولاً
+    window._mediaPanelItems = items;
 
     var listHtml = '';
     if(!items.length){
       listHtml = '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">لا توجد وسائط بعد — أضف أول صورة أو فيديو</div>';
     } else {
       listHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
-      items.forEach(function(it){
+      items.forEach(function(it, idx){
         var type = it['النوع']||'photo';
         var isVideo = type==='video';
         var isAlbum = type==='album';
@@ -3257,7 +3259,7 @@ function renderAdminGallery(){
               (isAlbum && it['العدد'] ? '<div style="font-size:10px;color:#6d28d9;font-weight:700;">'+it['العدد']+' صورة</div>' : '')+
               '<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+(it['التاريخ']||'')+'</div>'+
             '</div>'+
-            '<button onclick="deleteGalleryItem(\''+( it['id']||it['_rowIndex']||'' )+'\',\''+( it['العنوان']||'' ).replace(/'/g,'')+'\',\''+( it['الرابط']||'' )+'\')" '+
+            '<button onclick="deleteGalleryByIdx('+idx+')" '+
               'style="position:absolute;top:6px;left:6px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
               '<i class="fas fa-trash"></i>'+
             '</button>'+
@@ -3371,6 +3373,12 @@ function submitMedia(){
   setTimeout(function(){ renderAdminGallery(); }, 1200);
 }
 
+function deleteGalleryByIdx(idx){
+  var it = (window._mediaPanelItems||[])[idx];
+  if(!it) return;
+  deleteGalleryItem('', it['العنوان']||'', it['الرابط']||'');
+}
+
 function deleteGalleryItem(id, title, url){
   if(!confirm('حذف "'+title+'" من المعرض؟')) return;
   invalidateCache('المعرض');
@@ -3407,6 +3415,9 @@ function renderPublicGallery(){
     if(!Array.isArray(items)) items=[];
     items = items.slice().reverse();
 
+    // خزّن عالمياً لتجنب مشاكل الاقتباس في onclick
+    window._pubGalleryItems = items;
+
     var albums = items.filter(function(it){return (it['النوع']||'')==='album';});
     var photos = items.filter(function(it){return (it['النوع']||'')==='photo';});
     var videos = items.filter(function(it){return (it['النوع']||'')==='video';});
@@ -3418,10 +3429,9 @@ function renderPublicGallery(){
       if(!list.length) return '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">'+(isVideo?'لا توجد فيديوهات بعد':'لا توجد صور بعد')+'</div>';
       var g = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
       list.forEach(function(it){
+        var globalIdx = items.indexOf(it);
         var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (it['الرابط']||'');
-        var onclick = isVideo
-          ? 'openMediaModal(\'video\',\''+it['الرابط']+'\',\''+(it['العنوان']||'').replace(/'/g,'')+'\',\''+(it['التاريخ']||'')+'\')'
-          : 'openMediaModal(\'photo\',\''+it['الرابط']+'\',\''+(it['العنوان']||'').replace(/'/g,'')+'\',\''+(it['التاريخ']||'')+'\')';
+        var onclick = 'openMediaModalByIdx('+globalIdx+')';
         g += '<div onclick="'+onclick+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
           (thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background=\'#1e293b\'">':'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;">'+(isVideo?'🎬':'📸')+'</div>')+
           (isVideo?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>':'')+
@@ -3485,6 +3495,12 @@ function renderPublicGallery(){
         '<div id="mediaModalDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;"></div>'+
       '</div>';
   });
+}
+
+function openMediaModalByIdx(idx){
+  var it = (window._pubGalleryItems||[])[idx];
+  if(!it) return;
+  openMediaModal(it['النوع']||'photo', it['الرابط']||'', it['العنوان']||'', it['التاريخ']||'');
 }
 
 function openMediaModal(type, url, title, date){
