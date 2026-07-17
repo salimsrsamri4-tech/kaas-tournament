@@ -3457,13 +3457,13 @@ function renderPublicGallery(){
         var et = encodeURIComponent(it['العنوان']||'');
         var ed = encodeURIComponent(it['التاريخ']||'');
         var tp = isVideo?'video':'photo';
-        g += '<div onclick="openGalleryCard(this)" data-url="'+eu+'" data-type="'+tp+'" data-title="'+et+'" data-date="'+ed+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
+        g += '<button onclick="openGalleryCard(this)" data-url="'+eu+'" data-type="'+tp+'" data-title="'+et+'" data-date="'+ed+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;border:none;padding:0;width:100%;display:block;text-align:right;">'+
           (thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" onerror="this.parentElement.style.background=\'#1e293b\'">':'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;pointer-events:none;">'+(isVideo?'🎬':'📸')+'</div>')+
           (isVideo?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>':'')+
           '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 8px;pointer-events:none;">'+
             '<div style="font-size:10px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(it['العنوان']||'')+'</div>'+
             (it['التاريخ']?'<div style="font-size:9px;color:rgba(255,255,255,.6);">'+it['التاريخ']+'</div>':'')+
-          '</div></div>';
+          '</div></button>';
       });
       return g+'</div>';
     }
@@ -3564,12 +3564,9 @@ function deleteGalleryCard(btn){
   var card = btn.parentElement;
   if(card && card.parentElement) card.parentElement.removeChild(card);
   invalidateCache('المعرض');
-  // أرسل للـGAS برقم الصف مباشرة — أدق وأسرع
-  fetch(CONFIG.GAS_URL, {
-    method:'POST', mode:'no-cors',
-    headers:{'Content-Type':'text/plain'},
-    body: JSON.stringify({action:'deleteGalleryItem', sheet_row: sheetRow})
-  }).catch(function(){});
+  // GET أكثر موثوقية من POST في هذه البيئة
+  fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&sheet_row='+sheetRow+'&t='+Date.now())
+    .catch(function(){});
 }
 
 function openMediaModalByIdx(idx){
