@@ -1422,7 +1422,7 @@ function _showCropper(src, onConfirm){
       onConfirm(res);
     };
   };
-  image.onerror=function(){ alert('تعذّر تحميل الصورة، حاول مرة أخرى'); };
+  image.onerror=function(){ ov.remove(); showToast('تعذّر تحميل الصورة'); };
   image.src = src;
 }
 
