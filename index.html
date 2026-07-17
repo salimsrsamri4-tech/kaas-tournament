@@ -241,6 +241,9 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
     <button onclick="closeSidebar();go('admin_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(184,29,34,.25);border:1px solid rgba(184,29,34,.4);border-radius:12px;color:#fca5a5;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
       <i class="fas fa-lock" style="width:18px;text-align:center;"></i> لوحة تحكم الإدارة
     </button>
+    <button onclick="closeSidebar();go('media_login')" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(109,40,217,.25);border:1px solid rgba(109,40,217,.4);border-radius:12px;color:#c4b5fd;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:8px;">
+      <i class="fas fa-camera" style="width:18px;text-align:center;"></i> دخول المصور
+    </button>
     <button onclick="closeSidebar();go('admin_players')" style="width:100%;display:flex;align-items:center;gap:12px;padding:11px 14px;background:none;border:none;border-radius:10px;color:rgba(255,255,255,.8);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;margin-bottom:4px;text-align:right;">
       <i class="fas fa-users" style="width:18px;text-align:center;color:rgba(255,255,255,.4);"></i> قائمة اللاعبين
     </button>
@@ -383,6 +386,9 @@ var CONFIG = {
   PKG_TEAM_PRICE: '350 ر.ع',
   PKG_PLAYER_PRICE: '250 ر.ع',
   PKG_COMPANION_PRICE: '160-200 ر.ع',
+
+  // ── كلمة مرور المصور (أدمن المعرض فقط) ──
+  MEDIA_PASS: '2026media',
 
   // ── الرعاة ── (أضف أو عدّل هنا)
   SPONSORS: [
@@ -634,6 +640,8 @@ function go(page) {
     public_awards: renderPublicAwards,
     admin_gallery: renderAdminGallery,
     public_gallery: renderPublicGallery,
+    media_login: renderMediaLogin,
+    media_panel: renderMediaPanel,
   };
   if(pages[page]) pages[page]();
 }
@@ -3026,6 +3034,194 @@ function renderPublicAwards(){
 }
 
 // ════════════════════════════════════════
+// دخول المصور
+// ════════════════════════════════════════
+function renderMediaLogin(){
+  if(sessionStorage.getItem('kaasMedia')){ go('media_panel'); return; }
+  document.getElementById('app').innerHTML =
+    '<div style="min-height:100vh;background:linear-gradient(135deg,#1e0a3c,#4c1d95);display:flex;align-items:center;justify-content:center;padding:24px;">'+
+      '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:32px 24px;width:100%;max-width:340px;">'+
+        '<div style="text-align:center;margin-bottom:28px;">'+
+          '<div style="font-size:48px;margin-bottom:10px;">📸</div>'+
+          '<div style="font-size:18px;font-weight:900;color:#fff;">بوابة المصور</div>'+
+          '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:4px;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+        '</div>'+
+        '<input id="mediaPassInput" type="password" placeholder="كلمة المرور" '+
+          'style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:13px 14px;color:#fff;font-family:Cairo,sans-serif;font-size:14px;text-align:center;margin-bottom:12px;" '+
+          'onkeydown="if(event.key===\'Enter\') checkMediaPass()">'+
+        '<div id="mediaPassErr" style="color:#f87171;font-size:12px;text-align:center;margin-bottom:10px;display:none;">كلمة المرور غير صحيحة</div>'+
+        '<button onclick="checkMediaPass()" '+
+          'style="width:100%;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '🔓 دخول'+
+        '</button>'+
+        '<button onclick="go(\'home\')" '+
+          'style="width:100%;background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;margin-top:14px;">'+
+          '← العودة للرئيسية'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+
+  setTimeout(function(){
+    var inp = document.getElementById('mediaPassInput');
+    if(inp) inp.focus();
+  }, 100);
+}
+
+function checkMediaPass(){
+  var val = (document.getElementById('mediaPassInput')||{}).value||'';
+  var err = document.getElementById('mediaPassErr');
+  if(val === CONFIG.MEDIA_PASS){
+    sessionStorage.setItem('kaasMedia','1');
+    go('media_panel');
+  } else {
+    if(err){ err.style.display='block'; }
+    var inp = document.getElementById('mediaPassInput');
+    if(inp){ inp.value=''; inp.focus(); }
+  }
+}
+
+// ════════════════════════════════════════
+// لوحة المصور
+// ════════════════════════════════════════
+function renderMediaPanel(){
+  if(!sessionStorage.getItem('kaasMedia') && !sessionStorage.getItem('kaasAdmin')){
+    go('media_login'); return;
+  }
+  showL();
+  apiGet('المعرض').then(function(items){
+    if(!Array.isArray(items)) items=[];
+    items = items.slice().reverse();
+
+    var listHtml = '';
+    if(!items.length){
+      listHtml = '<div style="text-align:center;padding:40px;color:#94a3b8;font-size:13px;">لا توجد وسائط بعد<br>ابدأ بإضافة أول صورة أو فيديو</div>';
+    } else {
+      listHtml = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
+      items.forEach(function(it){
+        var type = it['النوع']||'photo';
+        var isVideo = type==='video', isAlbum = type==='album';
+        var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (!isAlbum ? it['الرابط']||'' : '');
+        var icon  = isVideo?'🎬':isAlbum?'🗂️':'📸';
+        listHtml +=
+          '<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;position:relative;'+(isAlbum?'grid-column:span 2;':'')+'">'+
+            '<div style="position:relative;height:90px;background:'+(isAlbum?'linear-gradient(135deg,#4c1d95,#6d28d9)':'#0f172a')+';overflow:hidden;">'+
+              (thumb ? '<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">' :
+                isAlbum ? '<div style="height:100%;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="fas fa-images" style="font-size:24px;color:rgba(255,255,255,.8);"></i></div>' :
+                '<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;">'+icon+'</div>')+
+            '</div>'+
+            '<div style="padding:7px 8px;">'+
+              '<div style="font-size:10px;font-weight:800;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+icon+' '+(it['العنوان']||'بدون عنوان')+'</div>'+
+              '<div style="font-size:9px;color:#94a3b8;">'+(it['التاريخ']||'')+'</div>'+
+            '</div>'+
+            '<button onclick="deleteGalleryItem(\''+( it['id']||it['_rowIndex']||'' )+'\',\''+(it['العنوان']||'').replace(/'/g,'')+'\',\''+( it['الرابط']||'' )+'\')" '+
+              'style="position:absolute;top:5px;left:5px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
+              '<i class="fas fa-trash"></i></button>'+
+          '</div>';
+      });
+      listHtml += '</div>';
+    }
+
+    document.getElementById('app').innerHTML =
+      '<div style="background:linear-gradient(135deg,#4c1d95,#6d28d9);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'public_gallery\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-eye"></i></button>'+
+        '<div style="flex:1;">'+
+          '<div style="font-size:15px;font-weight:900;">📸 لوحة المصور</div>'+
+          '<div style="font-size:10px;opacity:.7;">'+items.length+' عنصر مرفوع</div>'+
+        '</div>'+
+        '<button onclick="showAddMediaPanel()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-plus"></i> إضافة</button>'+
+        '<button onclick="sessionStorage.removeItem(\'kaasMedia\');go(\'home\')" style="background:rgba(255,255,255,.1);border:none;color:rgba(255,255,255,.6);padding:7px 10px;border-radius:8px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">خروج</button>'+
+      '</div>'+
+
+      // نموذج الإضافة
+      '<div id="addMediaFormPanel" style="display:none;background:#f8fafc;border-bottom:2px solid #6d28d9;padding:16px;">'+
+        '<div style="font-size:13px;font-weight:900;color:#4c1d95;margin-bottom:12px;">➕ رفع وسائط جديدة</div>'+
+        '<div style="display:flex;gap:6px;margin-bottom:10px;">'+
+          '<button id="mpBtnPhoto" onclick="setMediaTypePanel(\'photo\')" style="flex:1;padding:8px 4px;border:2px solid #6d28d9;border-radius:8px;background:#6d28d9;color:#fff;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">📸 صورة</button>'+
+          '<button id="mpBtnVideo" onclick="setMediaTypePanel(\'video\')" style="flex:1;padding:8px 4px;border:2px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🎬 يوتيوب</button>'+
+          '<button id="mpBtnAlbum" onclick="setMediaTypePanel(\'album\')" style="flex:1;padding:8px 4px;border:2px solid #e2e8f0;border-radius:8px;background:#fff;color:#475569;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;">🗂️ ألبوم</button>'+
+        '</div>'+
+        '<input id="mpTitle" placeholder="العنوان" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;margin-bottom:8px;direction:rtl;">'+
+        '<input id="mpUrl" placeholder="الرابط" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:12px;margin-bottom:8px;direction:rtl;">'+
+        '<div id="mpAlbumExtras" style="display:none;"><input id="mpCount" type="number" placeholder="عدد الصور (اختياري)" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;margin-bottom:8px;direction:rtl;"></div>'+
+        '<div id="mpHint" style="font-size:10px;color:#64748b;background:#ede9fe;border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.8;">'+
+          '📸 صورة: رابط Google Drive أو Imgur<br>'+
+          '🎬 يوتيوب: رابط الفيديو<br>'+
+          '🗂️ ألبوم: رابط ألبوم Google Photos'+
+        '</div>'+
+        '<input id="mpDate" type="date" style="width:100%;box-sizing:border-box;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;margin-bottom:10px;">'+
+        '<div style="display:flex;gap:8px;">'+
+          '<button onclick="submitMediaPanel()" style="flex:1;background:linear-gradient(135deg,#6d28d9,#4c1d95);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">💾 رفع</button>'+
+          '<button onclick="document.getElementById(\'addMediaFormPanel\').style.display=\'none\'" style="background:#f1f5f9;border:none;border-radius:8px;padding:12px 14px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;color:#475569;">إلغاء</button>'+
+        '</div>'+
+      '</div>'+
+
+      '<div style="padding:14px;">'+listHtml+'</div>';
+
+    window._mediaPanelType = 'photo';
+    var d = document.getElementById('mpDate');
+    if(d) d.value = new Date().toISOString().split('T')[0];
+  });
+}
+
+function showAddMediaPanel(){
+  var f = document.getElementById('addMediaFormPanel');
+  if(f) f.style.display = f.style.display==='none'?'block':'none';
+}
+
+function setMediaTypePanel(t){
+  window._mediaPanelType = t;
+  ['Photo','Video','Album'].forEach(function(n){
+    var btn = document.getElementById('mpBtn'+n);
+    if(!btn) return;
+    var active = t===n.toLowerCase();
+    btn.style.background = active?'#6d28d9':'#fff';
+    btn.style.color      = active?'#fff':'#475569';
+    btn.style.border     = '2px solid '+(active?'#6d28d9':'#e2e8f0');
+  });
+  var urlEl = document.getElementById('mpUrl');
+  var extras = document.getElementById('mpAlbumExtras');
+  if(urlEl) urlEl.placeholder =
+    t==='photo' ? 'رابط الصورة (Google Drive أو Imgur)' :
+    t==='video' ? 'رابط يوتيوب (https://youtu.be/xxxxx)' :
+                  'رابط ألبوم Google Photos';
+  if(extras) extras.style.display = t==='album'?'block':'none';
+}
+
+function submitMediaPanel(){
+  var title = (document.getElementById('mpTitle')||{}).value||'';
+  var url   = (document.getElementById('mpUrl')||{}).value||'';
+  var date  = (document.getElementById('mpDate')||{}).value||'';
+  var count = (document.getElementById('mpCount')||{}).value||'';
+  var type  = window._mediaPanelType||'photo';
+
+  if(!url.trim()){ alert('الرجاء إدخال الرابط'); return; }
+
+  if(type==='photo' && url.indexOf('drive.google.com')>-1){
+    var m = url.match(/\/d\/([^/]+)/);
+    if(m) url = 'https://drive.google.com/uc?export=view&id='+m[1];
+  }
+  if(type==='video'){
+    var vid = extractYtId(url);
+    if(vid) url = 'https://www.youtube.com/watch?v='+vid;
+  }
+
+  apiAppend('المعرض',{
+    'النوع': type,
+    'العنوان': title.trim()||'بدون عنوان',
+    'الرابط': url.trim(),
+    'العدد': count||'',
+    'التاريخ': date,
+    'وقت الإضافة': new Date().toISOString()
+  });
+  invalidateCache('المعرض');
+
+  document.getElementById('addMediaFormPanel').style.display='none';
+  var els = ['mpTitle','mpUrl','mpCount'];
+  els.forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  setTimeout(function(){ renderMediaPanel(); }, 1200);
+}
+
+// ════════════════════════════════════════
 // معرض الصور والفيديوهات - إدارة
 // ════════════════════════════════════════
 function renderAdminGallery(){
@@ -3183,7 +3379,13 @@ function deleteGalleryItem(id, title, url){
     headers:{'Content-Type':'text/plain'},
     body: JSON.stringify({action:'deleteGalleryItem', item_id:id, item_url:url})
   });
-  setTimeout(function(){ renderAdminGallery(); }, 1200);
+  setTimeout(function(){
+    if(sessionStorage.getItem('kaasMedia') && !sessionStorage.getItem('kaasAdmin')){
+      renderMediaPanel();
+    } else {
+      renderAdminGallery();
+    }
+  }, 1200);
 }
 
 function extractYtId(url){
