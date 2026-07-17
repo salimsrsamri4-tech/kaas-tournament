@@ -3443,9 +3443,9 @@ function renderPublicGallery(){
         var ed = encodeURIComponent(it['التاريخ']||'');
         var tp = isVideo?'video':'photo';
         g += '<div onclick="openGalleryCard(this)" data-url="'+eu+'" data-type="'+tp+'" data-title="'+et+'" data-date="'+ed+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
-          (thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background=\'#1e293b\'">':'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;">'+(isVideo?'🎬':'📸')+'</div>')+
-          (isVideo?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>':'')+
-          '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 8px;">'+
+          (thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;pointer-events:none;" onerror="this.parentElement.style.background=\'#1e293b\'">':'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;pointer-events:none;">'+(isVideo?'🎬':'📸')+'</div>')+
+          (isVideo?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>':'')+
+          '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 8px;pointer-events:none;">'+
             '<div style="font-size:10px;color:#fff;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+(it['العنوان']||'')+'</div>'+
             (it['التاريخ']?'<div style="font-size:9px;color:rgba(255,255,255,.6);">'+it['التاريخ']+'</div>':'')+
           '</div></div>';
@@ -3509,21 +3509,23 @@ function renderPublicGallery(){
 }
 
 function openGalleryCard(el){
-  var url   = decodeURIComponent(el.dataset.url  ||'');
-  var type  = el.dataset.type  ||'photo';
-  var title = decodeURIComponent(el.dataset.title||'');
-  var date  = decodeURIComponent(el.dataset.date ||'');
+  var url   = decodeURIComponent(el.getAttribute('data-url')  ||'');
+  var type  = el.getAttribute('data-type')  ||'photo';
+  var title = decodeURIComponent(el.getAttribute('data-title')||'');
+  var date  = decodeURIComponent(el.getAttribute('data-date') ||'');
   openMediaModal(type, url, title, date);
 }
 
 function deleteGalleryCard(btn){
-  var url   = decodeURIComponent(btn.dataset.url  ||'');
-  var title = decodeURIComponent(btn.dataset.title||'') || 'هذا العنصر';
+  btn.stopPropagation && btn.stopPropagation();
+  var url   = decodeURIComponent(btn.getAttribute('data-url')  ||'');
+  var title = decodeURIComponent(btn.getAttribute('data-title')||'') || 'هذا العنصر';
   if(!confirm('حذف "'+title+'" من المعرض؟')) return;
   var card = btn.parentElement;
-  if(card) card.parentElement.removeChild(card);
+  if(card && card.parentElement) card.parentElement.removeChild(card);
   invalidateCache('المعرض');
-  fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&item_url='+encodeURIComponent(url)+'&item_title='+encodeURIComponent(title)).catch(function(){});
+  // &t= يكسر cache الـGAS لضمان تنفيذ الحذف
+  fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&item_url='+encodeURIComponent(url)+'&item_title='+encodeURIComponent(title)+'&t='+Date.now()).catch(function(){});
 }
 
 function openMediaModalByIdx(idx){
