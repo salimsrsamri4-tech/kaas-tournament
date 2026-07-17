@@ -627,6 +627,7 @@ function go(page) {
     admin_edit_results: renderAdminEditResults,
     top_scorers: renderTopScorers,
     admin_awards: renderAdminAwards,
+    admin_reports: renderAdminReports,
     public_awards: renderPublicAwards,
   };
   if(pages[page]) pages[page]();
@@ -1945,6 +1946,7 @@ function renderAdminPanel() {
           '<button onclick="go(\'admin_edit_results\')" style="background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-edit"></i><br>تعديل النتائج</button>'+
           '<button onclick="go(\'top_scorers\')" style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-futbol"></i><br>هدافو البطولة</button>'+
           '<button onclick="go(\'admin_awards\')" style="background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-medal"></i><br>جوائز البطولة</button>'+
+          '<button onclick="go(\'admin_reports\')" style="background:linear-gradient(135deg,#0f4c75,#1b6ca8);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;grid-column:span 2;"><i class="fas fa-chart-bar"></i><br>📊 التقارير اليومية والنهائية</button>'+
         '</div>'+
         '<button class="btn btn-green" style="margin-top:8px;" onclick="exportWA()"><i class="fab fa-whatsapp"></i> مشاركة رابط التسجيل</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
@@ -2551,6 +2553,287 @@ function saveAwards(catId){
   invalidateCache('جوائز البطولة');
   var cat=CATEGORIES.find(function(c){return c.id===catId;})||{name:catId};
   alert('✅ تم حفظ جوائز '+cat.name);
+}
+
+// ════════════════════════════════════════
+// التقارير اليومية والنهائية
+// ════════════════════════════════════════
+function renderAdminReports(){
+  if(!sessionStorage.getItem('kaasAdmin')){go('admin_login');return;}
+  showL();
+
+  Promise.all([
+    apiGet('نتائج المباريات').catch(function(){return[];}),
+    apiGet('الأكاديميات').catch(function(){return[];}),
+    apiGet('اللاعبون').catch(function(){return[];}),
+    apiGet('جوائز البطولة').catch(function(){return[];})
+  ]).then(function(res){
+    var results  = Array.isArray(res[0]) ? res[0] : [];
+    var acadList = Array.isArray(res[1]) ? res[1] : [];
+    var players  = Array.isArray(res[2]) ? res[2] : [];
+    var awards   = Array.isArray(res[3]) ? res[3] : [];
+
+    // تجميع التواريخ المتاحة من المباريات المنتهية
+    var datesSet = {};
+    results.forEach(function(r){
+      var d = (r['التاريخ']||'').trim();
+      var score = (r['النتيجة']||'').trim();
+      if(d && score && score.indexOf('-') > -1) datesSet[d] = true;
+    });
+    var dates = Object.keys(datesSet).sort();
+
+    // اليوم المختار
+    var selDate = window._reportSelDate || (dates.length ? dates[dates.length-1] : '');
+
+    // ─── بناء تقرير يوم ─────────────────────────
+    function buildDailyReport(date){
+      var dayResults = results.filter(function(r){
+        return (r['التاريخ']||'').trim() === date && (r['النتيجة']||'').indexOf('-') > -1;
+      });
+
+      if(!dayResults.length) return '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">لا توجد مباريات منتهية في هذا اليوم</div>';
+
+      var totalGoals=0, totalYellow=0, totalRed=0, momList=[];
+      var scorerMap = {};
+
+      dayResults.forEach(function(r){
+        var m = (r['النتيجة']||'').match(/(\d+)\s*[-–]\s*(\d+)/);
+        if(m){ totalGoals += parseInt(m[1]) + parseInt(m[2]); }
+        try{
+          var cards = JSON.parse(r['البطاقات']||'[]');
+          cards.forEach(function(c){
+            if((c.type||'') === 'صفراء') totalYellow++;
+            else if((c.type||'') === 'حمراء') totalRed++;
+          });
+        }catch(e){}
+        try{
+          var goals = JSON.parse(r['الأهداف']||'[]');
+          goals.forEach(function(g){
+            if(!g.player || (g.type||'')==='مرمى ذاتي') return;
+            var k = g.player.trim();
+            if(!scorerMap[k]) scorerMap[k]={name:k, team:g.team||'', goals:0};
+            scorerMap[k].goals++;
+          });
+        }catch(e){}
+        if(r['أفضل لاعب'] && r['أفضل لاعب'].trim()) momList.push({name:r['أفضل لاعب'].trim(), match:(r['الفريق الأول']||'') + ' vs ' + (r['الفريق الثاني']||'')});
+      });
+
+      var topScorers = Object.values(scorerMap).sort(function(a,b){return b.goals-a.goals;}).slice(0,5);
+
+      var matchRows = dayResults.map(function(r){
+        var cat = CATEGORIES.find(function(c){return c.id===(r['الفئة']||'');});
+        return '<tr style="border-bottom:1px solid #f1f5f9;">'+
+          '<td style="padding:8px 10px;font-weight:800;font-size:12px;">'+
+            (cat?'<span style="background:'+cat.color+'22;color:'+cat.color+';padding:2px 6px;border-radius:6px;font-size:10px;font-weight:900;margin-left:4px;">'+cat.name+'</span>':'')+
+            (r['الفريق الأول']||'-')+
+          '</td>'+
+          '<td style="padding:8px 6px;text-align:center;font-weight:900;font-size:15px;color:#0d3318;">'+r['النتيجة']+'</td>'+
+          '<td style="padding:8px 10px;font-weight:800;font-size:12px;">'+r['الفريق الثاني']+'</td>'+
+          (r['الملعب']?'<td style="padding:8px 6px;font-size:10px;color:#94a3b8;">'+r['الملعب']+'</td>':'<td></td>')+
+        '</tr>';
+      }).join('');
+
+      var html =
+        '<div style="background:#0d3318;color:#fff;padding:12px 14px;border-radius:10px 10px 0 0;display:flex;justify-content:space-between;align-items:center;">'+
+          '<div style="font-size:13px;font-weight:900;">📅 '+date+'</div>'+
+          '<div style="font-size:11px;opacity:.7;">'+dayResults.length+' مباريات</div>'+
+        '</div>'+
+        // إحصائيات سريعة
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);background:#f8fafc;border:1px solid #e2e8f0;border-top:none;">'+
+          '<div style="text-align:center;padding:10px 4px;border-left:1px solid #e2e8f0;"><div style="font-size:18px;font-weight:900;color:#0d3318;">'+dayResults.length+'</div><div style="font-size:9px;color:#94a3b8;">مباراة</div></div>'+
+          '<div style="text-align:center;padding:10px 4px;border-left:1px solid #e2e8f0;"><div style="font-size:18px;font-weight:900;color:#b81d22;">'+totalGoals+'</div><div style="font-size:9px;color:#94a3b8;">هدف</div></div>'+
+          '<div style="text-align:center;padding:10px 4px;border-left:1px solid #e2e8f0;"><div style="font-size:18px;font-weight:900;color:#d97706;">'+totalYellow+'</div><div style="font-size:9px;color:#94a3b8;">صفراء</div></div>'+
+          '<div style="text-align:center;padding:10px 4px;"><div style="font-size:18px;font-weight:900;color:#dc2626;">'+totalRed+'</div><div style="font-size:9px;color:#94a3b8;">حمراء</div></div>'+
+        '</div>'+
+        // جدول المباريات
+        '<div style="overflow-x:auto;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;">'+
+          '<table style="width:100%;border-collapse:collapse;font-family:Cairo,sans-serif;">'+
+            '<thead><tr style="background:#f1f5f9;"><th style="padding:8px 10px;font-size:10px;font-weight:900;color:#475569;text-align:right;">الفريق الأول</th><th style="padding:8px 6px;font-size:10px;font-weight:900;color:#475569;text-align:center;">النتيجة</th><th style="padding:8px 10px;font-size:10px;font-weight:900;color:#475569;text-align:right;">الفريق الثاني</th><th style="padding:8px 6px;font-size:10px;font-weight:900;color:#475569;text-align:right;">الملعب</th></tr></thead>'+
+            '<tbody>'+matchRows+'</tbody>'+
+          '</table>'+
+        '</div>';
+
+      if(topScorers.length){
+        html += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-top:10px;overflow:hidden;">'+
+          '<div style="background:#b45309;color:#fff;padding:8px 12px;font-size:11px;font-weight:900;">⚽ هدافو اليوم</div>';
+        topScorers.forEach(function(s,i){
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #f8fafc;">'+
+            '<div><span style="font-weight:800;font-size:12px;">'+(i+1)+'. '+s.name+'</span> <span style="font-size:10px;color:#64748b;">· '+s.team+'</span></div>'+
+            '<span style="background:#b45309;color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:900;">'+s.goals+' ⚽</span>'+
+          '</div>';
+        });
+        html += '</div>';
+      }
+
+      if(momList.length){
+        html += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-top:10px;overflow:hidden;">'+
+          '<div style="background:#d4af37;color:#fff;padding:8px 12px;font-size:11px;font-weight:900;">🌟 أفضل لاعبي اليوم</div>';
+        momList.forEach(function(m){
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid #f8fafc;">'+
+            '<div style="font-weight:800;font-size:12px;">'+m.name+'</div>'+
+            '<div style="font-size:10px;color:#64748b;">'+m.match+'</div>'+
+          '</div>';
+        });
+        html += '</div>';
+      }
+
+      return html;
+    }
+
+    // ─── تقرير نهائي ────────────────────────────
+    function buildFinalReport(){
+      var finishedResults = results.filter(function(r){ return (r['النتيجة']||'').indexOf('-') > -1; });
+      var totalGoals=0, totalYellow=0, totalRed=0, totalMOM=0;
+      var scorerMap = {};
+
+      finishedResults.forEach(function(r){
+        var m = (r['النتيجة']||'').match(/(\d+)\s*[-–]\s*(\d+)/);
+        if(m){ totalGoals += parseInt(m[1]) + parseInt(m[2]); }
+        try{
+          var cards = JSON.parse(r['البطاقات']||'[]');
+          cards.forEach(function(c){
+            if((c.type||'') === 'صفراء') totalYellow++;
+            else if((c.type||'') === 'حمراء') totalRed++;
+          });
+        }catch(e){}
+        try{
+          var goals = JSON.parse(r['الأهداف']||'[]');
+          goals.forEach(function(g){
+            if(!g.player || (g.type||'')==='مرمى ذاتي') return;
+            var k = g.player.trim();
+            if(!scorerMap[k]) scorerMap[k]={name:k, team:g.team||'', goals:0};
+            scorerMap[k].goals++;
+          });
+        }catch(e){}
+        if(r['أفضل لاعب'] && r['أفضل لاعب'].trim()) totalMOM++;
+      });
+
+      var topScorers = Object.values(scorerMap).sort(function(a,b){return b.goals-a.goals;}).slice(0,10);
+
+      // آخر جائزة لكل نوع
+      var awardsMap = {};
+      awards.forEach(function(a){ awardsMap[(a['الفئة']||'')+'|'+(a['الجائزة']||'')] = a; });
+
+      var html =
+        // رأس التقرير
+        '<div style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;padding:16px;border-radius:10px;text-align:center;margin-bottom:12px;">'+
+          '<div style="font-size:22px;margin-bottom:4px;">🏆</div>'+
+          '<div style="font-size:15px;font-weight:900;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+          '<div style="font-size:11px;opacity:.7;margin-top:2px;">التقرير الختامي · '+CONFIG.SEASON+'</div>'+
+          '<div style="font-size:10px;opacity:.6;">'+CONFIG.LOCATION+' · '+CONFIG.EVENT_DATE_DISPLAY+'</div>'+
+        '</div>'+
+        // الإحصائيات الإجمالية
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'+
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;padding:12px 6px;"><div style="font-size:22px;font-weight:900;color:#0d3318;">'+acadList.length+'</div><div style="font-size:9px;color:#94a3b8;font-weight:700;">أكاديمية</div></div>'+
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;padding:12px 6px;"><div style="font-size:22px;font-weight:900;color:#d4af37;">'+players.length+'</div><div style="font-size:9px;color:#94a3b8;font-weight:700;">لاعب</div></div>'+
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;padding:12px 6px;"><div style="font-size:22px;font-weight:900;color:#b81d22;">'+finishedResults.length+'</div><div style="font-size:9px;color:#94a3b8;font-weight:700;">مباراة</div></div>'+
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;padding:12px 6px;"><div style="font-size:22px;font-weight:900;color:#b45309;">'+totalGoals+'</div><div style="font-size:9px;color:#94a3b8;font-weight:700;">هدف</div></div>'+
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;padding:12px 6px;"><div style="font-size:22px;font-weight:900;color:#d97706;">'+totalYellow+'</div><div style="font-size:9px;color:#94a3b8;font-weight:700;">بطاقة صفراء</div></div>'+
+          '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;text-align:center;padding:12px 6px;"><div style="font-size:22px;font-weight:900;color:#dc2626;">'+totalRed+'</div><div style="font-size:9px;color:#94a3b8;font-weight:700;">بطاقة حمراء</div></div>'+
+        '</div>';
+
+      // أفضل هدافين
+      if(topScorers.length){
+        html += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:12px;overflow:hidden;">'+
+          '<div style="background:#b45309;color:#fff;padding:10px 14px;font-size:12px;font-weight:900;">⚽ هدافو البطولة</div>';
+        topScorers.forEach(function(s,i){
+          var medals = ['🥇','🥈','🥉'];
+          html += '<div style="display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid #f8fafc;background:'+(i<3?'#fffbf0':'#fff')+';">'+
+            '<span style="font-size:14px;">'+(medals[i]||'  '+(i+1))+'</span>'+
+            '<div style="flex:1;"><div style="font-weight:800;font-size:12px;">'+s.name+'</div><div style="font-size:10px;color:#64748b;">'+s.team+'</div></div>'+
+            '<span style="background:#b45309;color:#fff;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:900;">'+s.goals+' ⚽</span>'+
+          '</div>';
+        });
+        html += '</div>';
+      }
+
+      // الجوائز حسب الفئة
+      var AWARD_KEYS = ['أفضل لاعب','الهداف','حارس المرمى الأفضل','أفضل فريق','بطل البطولة','وصيف البطولة'];
+      CATEGORIES.forEach(function(cat){
+        var catAwards = AWARD_KEYS.map(function(key){
+          var entry = awardsMap[cat.id+'|'+key];
+          return entry ? {key:key, name:entry['الاسم']||'', acad:entry['الأكاديمية']||''} : null;
+        }).filter(Boolean);
+        if(!catAwards.length) return;
+        html += '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:10px;overflow:hidden;">'+
+          '<div style="background:'+cat.color+';color:#fff;padding:10px 14px;font-size:12px;font-weight:900;">🏅 جوائز '+cat.name+'</div>';
+        catAwards.forEach(function(a){
+          html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 14px;border-bottom:1px solid #f8fafc;">'+
+            '<div style="font-size:11px;color:#64748b;font-weight:700;">'+a.key+'</div>'+
+            '<div style="text-align:left;"><div style="font-weight:900;font-size:12px;">'+a.name+'</div><div style="font-size:10px;color:#94a3b8;">'+a.acad+'</div></div>'+
+          '</div>';
+        });
+        html += '</div>';
+      });
+
+      return html;
+    }
+
+    // ─── واجهة التقارير ──────────────────────────
+    var reportType = window._reportType || 'daily';
+
+    var dailyContent = (reportType === 'daily')
+      ? (selDate ? buildDailyReport(selDate) : '<div style="text-align:center;padding:24px;color:#94a3b8;font-size:13px;">لا توجد مباريات منتهية بعد</div>')
+      : '';
+    var finalContent = (reportType === 'final') ? buildFinalReport() : '';
+
+    document.getElementById('app').innerHTML =
+      '<div style="background:linear-gradient(135deg,#0f4c75,#1b6ca8);padding:20px 16px;color:#fff;display:flex;align-items:center;gap:10px;">'+
+        '<button onclick="go(\'admin_panel\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-arrow-right"></i></button>'+
+        '<div><div style="font-size:16px;font-weight:900;">📊 التقارير</div><div style="font-size:10px;opacity:.7;">يومية · نهائية</div></div>'+
+        (reportType === 'daily' && selDate
+          ? '<button onclick="printReport(\'daily\')" style="margin-right:auto;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:5px;"><i class="fas fa-share-alt"></i> مشاركة</button>'
+          : (reportType === 'final'
+            ? '<button onclick="printReport(\'final\')" style="margin-right:auto;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:7px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;display:flex;align-items:center;gap:5px;"><i class="fas fa-share-alt"></i> مشاركة</button>'
+            : ''))+
+      '</div>'+
+      '<div style="display:flex;gap:8px;padding:12px 16px;background:#0d3c66;">'+
+        '<button onclick="window._reportType=\'daily\';renderAdminReports();" style="flex:1;padding:10px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;background:'+(reportType==='daily'?'#fff':'rgba(255,255,255,.15)')+';color:'+(reportType==='daily'?'#0f4c75':'#fff')+';">📅 تقرير يومي</button>'+
+        '<button onclick="window._reportType=\'final\';renderAdminReports();" style="flex:1;padding:10px;border:none;border-radius:10px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;background:'+(reportType==='final'?'#fff':'rgba(255,255,255,.15)')+';color:'+(reportType==='final'?'#0f4c75':'#fff')+';">🏆 التقرير النهائي</button>'+
+      '</div>'+
+      '<div style="padding:14px;">'+
+        (reportType === 'daily'
+          ? (dates.length
+            ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">'+
+                dates.map(function(d){
+                  return '<button onclick="window._reportSelDate=\''+d+'\';renderAdminReports();" style="padding:6px 14px;border-radius:20px;border:none;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;cursor:pointer;background:'+(selDate===d?'#0f4c75':'#f1f5f9')+';color:'+(selDate===d?'#fff':'#475569')+';">'+d+'</button>';
+                }).join('')+
+              '</div>'
+            : '')+
+            dailyContent
+          : finalContent)+
+      '</div>';
+  });
+}
+
+// ─── دوال طباعة/مشاركة التقارير ─────────────────
+function printReport(type) {
+  var content = document.querySelector('#app > div:last-child');
+  if(!content) return;
+
+  // فتح نافذة طباعة
+  var win = window.open('','_blank','width=420,height=700');
+  win.document.write('<!DOCTYPE html><html dir="rtl"><head>'+
+    '<meta charset="UTF-8">'+
+    '<title>تقرير - '+CONFIG.TOURNAMENT_NAME+'</title>'+
+    '<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">'+
+    '<style>'+
+      'body{font-family:Cairo,sans-serif;direction:rtl;margin:0;padding:16px;background:#fff;color:#1e293b;}'+
+      'table{width:100%;border-collapse:collapse;}'+
+      'th,td{border:1px solid #e2e8f0;padding:6px 8px;font-size:11px;}'+
+      'th{background:#f8fafc;font-weight:900;}'+
+      '@media print{body{padding:8px;} button{display:none!important;}}'+
+    '</style>'+
+    '</head><body>'+
+    '<div style="text-align:center;margin-bottom:12px;">'+
+      '<div style="font-size:18px;font-weight:900;color:#0d3318;">'+CONFIG.TOURNAMENT_NAME+'</div>'+
+      '<div style="font-size:11px;color:#64748b;">'+CONFIG.EVENT_DATE_DISPLAY+' · '+CONFIG.LOCATION+'</div>'+
+    '</div>'+
+    content.innerHTML+
+    '<div style="margin-top:16px;text-align:center;font-size:10px;color:#94a3b8;">acadcup.com</div>'+
+    '<script>window.onload=function(){window.print();}<\/script>'+
+    '</body></html>');
+  win.document.close();
 }
 
 // ════════════════════════════════════════
