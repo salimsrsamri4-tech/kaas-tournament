@@ -3150,7 +3150,7 @@ function renderMediaPanel(){
               '<div style="font-size:10px;font-weight:800;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+icon+' '+(it['العنوان']||'بدون عنوان')+'</div>'+
               '<div style="font-size:9px;color:#94a3b8;">'+(it['التاريخ']||'')+'</div>'+
             '</div>'+
-            '<button onclick="deleteGalleryCard(this)" data-title="'+et+'" data-row="'+sr+'" '+
+            '<button onclick="deleteGalleryCard(this)" data-title="'+et+'" data-url="'+eu+'" data-row="'+sr+'" '+
               'style="position:absolute;top:5px;left:5px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
               '<i class="fas fa-trash"></i></button>'+
           '</div>';
@@ -3300,7 +3300,7 @@ function renderAdminGallery(){
               (isAlbum && it['العدد'] ? '<div style="font-size:10px;color:#6d28d9;font-weight:700;">'+it['العدد']+' صورة</div>' : '')+
               '<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+(it['التاريخ']||'')+'</div>'+
             '</div>'+
-            '<button onclick="deleteGalleryCard(this)" data-title="'+et+'" data-row="'+sr+'" '+
+            '<button onclick="deleteGalleryCard(this)" data-title="'+et+'" data-url="'+eu+'" data-row="'+sr+'" '+
               'style="position:absolute;top:6px;left:6px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
               '<i class="fas fa-trash"></i>'+
             '</button>'+
