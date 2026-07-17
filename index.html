@@ -3559,8 +3559,15 @@ function deleteGalleryCard(btn){
   var sheetRow = parseInt(btn.getAttribute('data-row')||'0');
   var card = btn.closest('div[style*="position:relative"]') || btn.parentElement;
   if(card && card.parentElement) card.parentElement.removeChild(card);
-  invalidateCache('المعرض');
-  showToast('جاري الحذف من الصف '+sheetRow+'...');
+  // حذف العنصر من الكاش مباشرة (بدون مسح الكاش) حتى لا يرجع عند التنقل
+  if(_cache['المعرض'] && Array.isArray(_cache['المعرض'].d)){
+    var origIdx = sheetRow - 2; // الصف 2 = index 0
+    if(origIdx >= 0 && origIdx < _cache['المعرض'].d.length){
+      _cache['المعرض'].d.splice(origIdx, 1);
+      _cache['المعرض'].t = Date.now(); // تجديد التوقيت
+    }
+  }
+  showToast('جاري الحذف...');
   fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&sheet_row='+sheetRow+'&t='+Date.now())
     .then(function(r){return r.json();})
     .then(function(d){ showToast(d.ok?'✓ تم الحذف':'فشل: '+JSON.stringify(d)); })
