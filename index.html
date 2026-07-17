@@ -4299,12 +4299,35 @@ function renderAboutTournament(){
 }
 function renderAcademiesApproval(){
   var app=document.getElementById('app');
-  app.innerHTML='<div style="padding:16px;max-width:600px;margin:0 auto;"><div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><button onclick="go(\'admin_panel\')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--red);">&#8594;</button><div style="font-size:17px;font-weight:900;">اعتماد الأكاديميات</div></div><div id="acadApprovalList"><div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i></div></div></div>';
+  app.innerHTML='<div style="padding:16px;max-width:600px;margin:0 auto;">'+
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'+
+      '<button onclick="go(\'admin_panel\')" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--red);">&#8594;</button>'+
+      '<div style="font-size:17px;font-weight:900;">اعتماد الأكاديميات</div>'+
+    '</div>'+
+    '<div style="position:relative;margin-bottom:14px;">'+
+      '<i class="fas fa-search" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;"></i>'+
+      '<input id="acadSearchInput" type="text" placeholder="ابحث عن أكاديمية..." oninput="filterApprovalList(this.value)" '+
+        'style="width:100%;box-sizing:border-box;padding:10px 36px 10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;outline:none;">'+
+    '</div>'+
+    '<div id="acadApprovalList"><div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:28px;"></i></div></div>'+
+  '</div>';
   apiGet('الأكاديميات').then(function(rows){
     var list=rows||[];
     window._allAcadsApproval=list;
     _renderApprovalList(list);
   });
+}
+
+function filterApprovalList(q){
+  var list = window._allAcadsApproval || [];
+  if(!q.trim()){ _renderApprovalList(list); return; }
+  var qLower = q.trim().toLowerCase();
+  var filtered = list.filter(function(a){
+    return (a.name||'').toLowerCase().indexOf(qLower)>-1 ||
+           (a.city||'').toLowerCase().indexOf(qLower)>-1 ||
+           (a.id||'').toLowerCase().indexOf(qLower)>-1;
+  });
+  _renderApprovalList(filtered);
 }
 
 function _renderApprovalList(list){
