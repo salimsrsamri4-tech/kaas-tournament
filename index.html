@@ -3556,37 +3556,15 @@ function renderMediaView(){
 }
 
 function deleteGalleryCard(btn){
-  // ضغطة أولى: تأكيد
-  if(btn.getAttribute('data-confirm')!=='1'){
-    btn.setAttribute('data-confirm','1');
-    btn.style.background='#dc2626';
-    btn.style.width='60px';
-    btn.style.borderRadius='12px';
-    btn.style.fontSize='10px';
-    btn.innerHTML='تأكيد';
-    setTimeout(function(){
-      if(btn.getAttribute('data-confirm')==='1'){
-        btn.setAttribute('data-confirm','0');
-        btn.style.background='rgba(185,28,28,.85)';
-        btn.style.width='24px';
-        btn.style.borderRadius='50%';
-        btn.style.fontSize='11px';
-        btn.innerHTML='<i class="fas fa-trash"></i>';
-      }
-    },3000);
-    return;
-  }
-  // ضغطة ثانية: حذف فعلي
-  var title    = decodeURIComponent(btn.getAttribute('data-title')||'');
   var sheetRow = parseInt(btn.getAttribute('data-row')||'0');
-  showToast('جاري الحذف...');
-  var card = btn.parentElement;
+  var card = btn.closest('div[style*="position:relative"]') || btn.parentElement;
   if(card && card.parentElement) card.parentElement.removeChild(card);
   invalidateCache('المعرض');
+  showToast('جاري الحذف من الصف '+sheetRow+'...');
   fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&sheet_row='+sheetRow+'&t='+Date.now())
     .then(function(r){return r.json();})
-    .then(function(d){ showToast(d.ok?'تم الحذف ✓':'فشل: '+JSON.stringify(d)); })
-    .catch(function(err){ showToast('خطأ في الاتصال'); });
+    .then(function(d){ showToast(d.ok?'✓ تم الحذف':'فشل: '+JSON.stringify(d)); })
+    .catch(function(){ showToast('خطأ في الاتصال بـ GAS'); });
 }
 
 function openMediaModalByIdx(idx){
