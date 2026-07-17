@@ -380,7 +380,67 @@ var CONFIG = {
   PKG_TEAM_PRICE: '350 ر.ع',
   PKG_PLAYER_PRICE: '250 ر.ع',
   PKG_COMPANION_PRICE: '160-200 ر.ع',
+
+  // ── الرعاة ── (أضف أو عدّل هنا)
+  SPONSORS: [
+    // { tier: 'platinum', name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
+    // { tier: 'gold',     name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
+    // { tier: 'silver',   name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
+    // { tier: 'bronze',   name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
+    // { tier: 'tech',     name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
+  ],
 };
+
+// ══════════════════════════════════════
+// قسم الرعاة
+// ══════════════════════════════════════
+var SPONSOR_TIERS = {
+  platinum: { label: 'الراعي البلاتيني', color: '#e5e4e2', bg: 'linear-gradient(135deg,#2d2d2d,#1a1a1a)', size: '90px', order: 1 },
+  gold:     { label: 'الراعي الذهبي',    color: '#d4af37', bg: 'linear-gradient(135deg,#3a2e00,#1a1500)', size: '70px', order: 2 },
+  silver:   { label: 'الراعي الفضي',     color: '#c0c0c0', bg: 'linear-gradient(135deg,#2a2a2a,#111)',    size: '55px', order: 3 },
+  bronze:   { label: 'الراعي البرونزي',  color: '#cd7f32', bg: 'linear-gradient(135deg,#2a1500,#110a00)', size: '45px', order: 4 },
+  tech:     { label: 'الراعي التقني',    color: '#60a5fa', bg: 'linear-gradient(135deg,#0a1628,#0f2044)', size: '45px', order: 5 },
+};
+
+function buildSponsorsSection() {
+  var sponsors = CONFIG.SPONSORS || [];
+  if (!sponsors.length) return '';
+
+  // تجميع حسب المستوى
+  var byTier = {};
+  sponsors.forEach(function(s) {
+    if (!byTier[s.tier]) byTier[s.tier] = [];
+    byTier[s.tier].push(s);
+  });
+
+  var tierOrder = ['platinum','gold','silver','bronze','tech'];
+  var html = '<div class="section"><div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border-radius:14px;padding:16px;margin-bottom:8px;">' +
+    '<div style="text-align:center;font-size:11px;font-weight:900;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:16px;">🤝 الرعاة الرسميون</div>';
+
+  tierOrder.forEach(function(tier) {
+    if (!byTier[tier] || !byTier[tier].length) return;
+    var t = SPONSOR_TIERS[tier];
+    html += '<div style="margin-bottom:14px;">' +
+      '<div style="text-align:center;font-size:9px;font-weight:900;color:' + t.color + ';letter-spacing:1.5px;margin-bottom:10px;">' + t.label.toUpperCase() + '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;">';
+
+    byTier[tier].forEach(function(s) {
+      html += '<a href="' + (s.url || '#') + '" target="_blank" rel="noopener" ' +
+        'style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;' +
+        'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;min-width:80px;">' +
+        (s.logo
+          ? '<img src="' + s.logo + '" alt="' + s.name + '" style="height:' + t.size + ';width:auto;max-width:120px;object-fit:contain;filter:brightness(1.1);">'
+          : '<div style="height:' + t.size + ';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:' + t.color + ';">' + s.name + '</div>') +
+        '<div style="font-size:9px;color:rgba(255,255,255,.5);font-weight:700;text-align:center;">' + s.name + '</div>' +
+        '</a>';
+    });
+
+    html += '</div></div>';
+  });
+
+  html += '</div></div>';
+  return html;
+}
 
 // الفئات العمرية
 var CATEGORIES = [
@@ -789,10 +849,12 @@ function renderHome() {
           '</div>'+
         '</div>'+
         '<div style="height:16px;"></div>'+
+      '</div>'+
 
+      // قسم الرعاة
+      buildSponsorsSection()+
 
-        '<div style="height:16px;"></div>'+
-      '</div>';
+      '<div style="height:16px;"></div>';
 
     // العد التنازلي الكامل - يتحدث كل ثانية
     function updateCountdown(){
@@ -851,7 +913,8 @@ function renderCategories() {
     '<div class="al al-warn">'+
       '<i class="fas fa-info-circle"></i> يتحقق النظام تلقائياً من تاريخ الميلاد عند إضافة كل لاعب'+
     '</div>'+
-    '</div>';
+    '</div>'+
+    buildSponsorsSection();
 }
 
 // ════════════════════════════════════════
@@ -1805,7 +1868,7 @@ function renderAcademies() {
         '</div>';
       });
     }
-    html+='</div>';
+    html+='</div>'+buildSponsorsSection();
     document.getElementById('app').innerHTML=html;
   });
 }
@@ -2552,7 +2615,7 @@ function renderPublicAwards(){
       });
     }
 
-    html+='</div>';
+    html+='</div>'+buildSponsorsSection();
     document.getElementById('app').innerHTML=html;
   });
 }
@@ -4051,7 +4114,7 @@ function renderPublicMatchSchedule(){
         });
       });
     }
-    html+='</div>';
+    html+='</div>'+buildSponsorsSection();
     document.getElementById('app').innerHTML=html;
   }).catch(function(){
     document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل الجدول</div>';
@@ -4111,7 +4174,7 @@ function renderPublicResults(){
           '</div>';
       });
     }
-    html+='</div>';
+    html+='</div>'+buildSponsorsSection();
     document.getElementById('app').innerHTML=html;
   }).catch(function(){
     document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل النتائج</div>';
@@ -4603,7 +4666,8 @@ function renderTopScorers(){
       tabsHtml+
       '<div style="padding:14px;padding-bottom:40px;">'+
         listHtml+
-      '</div>';
+      '</div>'+
+      buildSponsorsSection();
   });
 }
 
@@ -4718,7 +4782,8 @@ function renderGroupStandings(){
         groupsHtml+
         '<button onclick="go(\'knockout_bracket\')" class="btn" style="background:linear-gradient(135deg,#b81d22,#7a0f12);color:#fff;width:100%;margin-top:4px;">'+
           '<i class="fas fa-trophy"></i> الأدوار الإقصائية</button>'+
-      '</div>';
+      '</div>'+
+      buildSponsorsSection();
   });
 }
 
@@ -5030,7 +5095,8 @@ function renderKnockoutBracket(){
         bracketHtml+
         '<button onclick="go(\'group_standings\')" class="btn" style="background:linear-gradient(135deg,#0d3318,#1b5e2e);color:#fff;width:100%;margin-top:4px;">'+
           '<i class="fas fa-table"></i> ترتيب المجموعات</button>'+
-      '</div>';
+      '</div>'+
+      buildSponsorsSection();
   });
 }
 
@@ -5165,7 +5231,7 @@ function renderStandings(){
             '</tbody></table></div></div>';
       });
     }
-    html+='</div>';
+    html+='</div>'+buildSponsorsSection();
     document.getElementById('app').innerHTML=html;
   }).catch(function(){
     document.getElementById('app').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;">تعذّر تحميل الترتيب</div>';
