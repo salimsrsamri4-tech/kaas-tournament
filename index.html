@@ -3103,6 +3103,8 @@ function renderMediaPanel(){
         var isVideo = type==='video', isAlbum = type==='album';
         var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (!isAlbum ? it['الرابط']||'' : '');
         var icon  = isVideo?'🎬':isAlbum?'🗂️':'📸';
+        var eu = encodeURIComponent(it['الرابط']||'');
+        var et = encodeURIComponent(it['العنوان']||'');
         listHtml +=
           '<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;position:relative;'+(isAlbum?'grid-column:span 2;':'')+'">'+
             '<div style="position:relative;height:90px;background:'+(isAlbum?'linear-gradient(135deg,#4c1d95,#6d28d9)':'#0f172a')+';overflow:hidden;">'+
@@ -3114,7 +3116,7 @@ function renderMediaPanel(){
               '<div style="font-size:10px;font-weight:800;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+icon+' '+(it['العنوان']||'بدون عنوان')+'</div>'+
               '<div style="font-size:9px;color:#94a3b8;">'+(it['التاريخ']||'')+'</div>'+
             '</div>'+
-            '<button onclick="deleteGalleryByIdx('+idx+')" '+
+            '<button onclick="deleteGalleryCard(this)" data-url="'+eu+'" data-title="'+et+'" '+
               'style="position:absolute;top:5px;left:5px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:24px;height:24px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
               '<i class="fas fa-trash"></i></button>'+
           '</div>';
@@ -3244,6 +3246,8 @@ function renderAdminGallery(){
         var isAlbum = type==='album';
         var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (it['الغلاف']||it['الرابط']||'');
         var typeIcon = isVideo ? '🎬' : isAlbum ? '🗂️' : '📸';
+        var eu = encodeURIComponent(it['الرابط']||'');
+        var et = encodeURIComponent(it['العنوان']||'');
         listHtml +=
           '<div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;position:relative;'+(isAlbum?'grid-column:span 2;':'')+'">'+
             '<div style="position:relative;height:'+(isAlbum?'110':'100')+'px;background:'+(isAlbum?'linear-gradient(135deg,#4c1d95,#6d28d9)':'#0f172a')+';overflow:hidden;">'+
@@ -3259,7 +3263,7 @@ function renderAdminGallery(){
               (isAlbum && it['العدد'] ? '<div style="font-size:10px;color:#6d28d9;font-weight:700;">'+it['العدد']+' صورة</div>' : '')+
               '<div style="font-size:10px;color:#94a3b8;margin-top:2px;">'+(it['التاريخ']||'')+'</div>'+
             '</div>'+
-            '<button onclick="deleteGalleryByIdx('+idx+')" '+
+            '<button onclick="deleteGalleryCard(this)" data-url="'+eu+'" data-title="'+et+'" '+
               'style="position:absolute;top:6px;left:6px;background:rgba(185,28,28,.85);border:none;color:#fff;border-radius:50%;width:26px;height:26px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">'+
               '<i class="fas fa-trash"></i>'+
             '</button>'+
@@ -3381,28 +3385,24 @@ function deleteGalleryByIdx(idx){
   var url   = it['الرابط']||'';
   if(!confirm('حذف "'+title+'" من المعرض؟')) return;
 
-  // احذف من الذاكرة فوراً وأعد الرسم
+  // احذف الكرت من DOM فوراً
+  var card = document.querySelector('[data-didx="'+idx+'"]');
+  if(card) card.parentElement.removeChild(card);
+
+  // احذف من المصفوفة
   items.splice(idx, 1);
   window._mediaPanelItems = items;
   invalidateCache('المعرض');
 
-  // أرسل للـGAS عبر GET (أكثر موثوقية)
+  // أرسل للـGAS عبر GET
   var delUrl = CONFIG.GAS_URL
     + '?action=deleteGalleryItem'
     + '&item_url='   + encodeURIComponent(url)
     + '&item_title=' + encodeURIComponent(title);
   fetch(delUrl).catch(function(){});
-
-  if(sessionStorage.getItem('kaasMedia') && !sessionStorage.getItem('kaasAdmin')){
-    renderMediaPanel();
-  } else {
-    renderAdminGallery();
-  }
 }
 
-function deleteGalleryItem(id, title, url){
-  deleteGalleryByIdx(-99); // غير مستخدمة — الحذف عبر deleteGalleryByIdx
-}
+function deleteGalleryItem(id, title, url){}
 
 function extractYtId(url){
   var m = url.match(/(?:youtu\.be\/|v=|\/embed\/)([A-Za-z0-9_-]{11})/);
@@ -3437,9 +3437,12 @@ function renderPublicGallery(){
       if(!list.length) return '<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px;">'+(isVideo?'لا توجد فيديوهات بعد':'لا توجد صور بعد')+'</div>';
       var g = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">';
       list.forEach(function(it){
-        var globalIdx = items.indexOf(it);
         var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (it['الرابط']||'');
-        g += '<div data-gidx="'+globalIdx+'" class="gallery-card" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
+        var eu = encodeURIComponent(it['الرابط']||'');
+        var et = encodeURIComponent(it['العنوان']||'');
+        var ed = encodeURIComponent(it['التاريخ']||'');
+        var tp = isVideo?'video':'photo';
+        g += '<div onclick="openGalleryCard(this)" data-url="'+eu+'" data-type="'+tp+'" data-title="'+et+'" data-date="'+ed+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
           (thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background=\'#1e293b\'">':'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;">'+(isVideo?'🎬':'📸')+'</div>')+
           (isVideo?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>':'')+
           '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 8px;">'+
@@ -3502,19 +3505,25 @@ function renderPublicGallery(){
         '<div id="mediaModalDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;"></div>'+
       '</div>';
 
-    // event delegation لكروت المعرض
-    setTimeout(function(){
-      var app = document.getElementById('app');
-      if(!app) return;
-      app.addEventListener('click', function(e){
-        var card = e.target.closest('.gallery-card');
-        if(!card) return;
-        var idx = parseInt(card.getAttribute('data-gidx'));
-        if(isNaN(idx)) return;
-        openMediaModalByIdx(idx);
-      });
-    }, 100);
   });
+}
+
+function openGalleryCard(el){
+  var url   = decodeURIComponent(el.dataset.url  ||'');
+  var type  = el.dataset.type  ||'photo';
+  var title = decodeURIComponent(el.dataset.title||'');
+  var date  = decodeURIComponent(el.dataset.date ||'');
+  openMediaModal(type, url, title, date);
+}
+
+function deleteGalleryCard(btn){
+  var url   = decodeURIComponent(btn.dataset.url  ||'');
+  var title = decodeURIComponent(btn.dataset.title||'') || 'هذا العنصر';
+  if(!confirm('حذف "'+title+'" من المعرض؟')) return;
+  var card = btn.parentElement;
+  if(card) card.parentElement.removeChild(card);
+  invalidateCache('المعرض');
+  fetch(CONFIG.GAS_URL+'?action=deleteGalleryItem&item_url='+encodeURIComponent(url)+'&item_title='+encodeURIComponent(title)).catch(function(){});
 }
 
 function openMediaModalByIdx(idx){
