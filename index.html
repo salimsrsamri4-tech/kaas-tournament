@@ -330,6 +330,16 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
 
 <div id="app"></div>
 
+<!-- مودال الوسائط - ثابت خارج #app دائماً في DOM -->
+<div id="mediaModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:99999;overflow-y:auto;" onclick="closeMediaModal(event)">
+  <button onclick="closeMediaModal()" style="position:fixed;top:14px;left:14px;background:rgba(255,255,255,.2);border:none;color:#fff;width:40px;height:40px;border-radius:50%;font-size:20px;cursor:pointer;z-index:2;line-height:1;">✕</button>
+  <div style="min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 16px 30px;">
+    <div id="mediaModalContent" style="width:100%;max-width:480px;"></div>
+    <div id="mediaModalTitle" style="color:#fff;font-size:13px;font-weight:700;margin-top:14px;text-align:center;opacity:.85;max-width:480px;"></div>
+    <div id="mediaModalDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;"></div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════
 // الإعداد
@@ -3495,15 +3505,7 @@ function renderPublicGallery(){
       '</div>'+
       (!total?'<div style="text-align:center;padding:48px 20px;color:#94a3b8;"><div style="font-size:40px;margin-bottom:12px;">🖼️</div><div style="font-size:13px;">سيتم إضافة الصور والفيديوهات خلال البطولة</div></div>':
         '<div style="padding:14px;">'+(sel==='albums'?buildAlbums(albums):sel==='videos'?buildGrid(videos,true):buildGrid(photos,false))+'</div>')+
-      buildSponsorsSection()+
-
-      // مودال عرض الوسائط
-      '<div id="mediaModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:99999;align-items:center;justify-content:center;flex-direction:column;" onclick="closeMediaModal(event)">'+
-        '<button onclick="closeMediaModal()" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2;">✕</button>'+
-        '<div id="mediaModalContent" style="width:100%;max-width:480px;padding:0 12px;"></div>'+
-        '<div id="mediaModalTitle" style="color:#fff;font-size:13px;font-weight:700;margin-top:12px;text-align:center;opacity:.8;"></div>'+
-        '<div id="mediaModalDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;"></div>'+
-      '</div>';
+      buildSponsorsSection();
 
   });
 }
@@ -3566,7 +3568,7 @@ function openMediaModal(type, url, title, date){
   }
   if(titleEl) titleEl.textContent = title||'';
   if(dateEl)  dateEl.textContent  = date||'';
-  modal.style.display = 'flex';
+  modal.style.display = 'block';
 }
 
 function closeMediaModal(e){
