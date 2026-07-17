@@ -3374,26 +3374,34 @@ function submitMedia(){
 }
 
 function deleteGalleryByIdx(idx){
-  var it = (window._mediaPanelItems||[])[idx];
+  var items = window._mediaPanelItems||[];
+  var it = items[idx];
   if(!it) return;
-  deleteGalleryItem('', it['العنوان']||'', it['الرابط']||'');
+  var title = it['العنوان']||'هذا العنصر';
+  var url   = it['الرابط']||'';
+  if(!confirm('حذف "'+title+'" من المعرض؟')) return;
+
+  // احذف من الذاكرة فوراً وأعد الرسم
+  items.splice(idx, 1);
+  window._mediaPanelItems = items;
+  invalidateCache('المعرض');
+
+  // أرسل للـGAS عبر GET (أكثر موثوقية)
+  var delUrl = CONFIG.GAS_URL
+    + '?action=deleteGalleryItem'
+    + '&item_url='   + encodeURIComponent(url)
+    + '&item_title=' + encodeURIComponent(title);
+  fetch(delUrl).catch(function(){});
+
+  if(sessionStorage.getItem('kaasMedia') && !sessionStorage.getItem('kaasAdmin')){
+    renderMediaPanel();
+  } else {
+    renderAdminGallery();
+  }
 }
 
 function deleteGalleryItem(id, title, url){
-  if(!confirm('حذف "'+title+'" من المعرض؟')) return;
-  invalidateCache('المعرض');
-  fetch(CONFIG.GAS_URL,{
-    method:'POST', mode:'no-cors',
-    headers:{'Content-Type':'text/plain'},
-    body: JSON.stringify({action:'deleteGalleryItem', item_id:id, item_url:url, item_title:title})
-  });
-  setTimeout(function(){
-    if(sessionStorage.getItem('kaasMedia') && !sessionStorage.getItem('kaasAdmin')){
-      renderMediaPanel();
-    } else {
-      renderAdminGallery();
-    }
-  }, 1200);
+  deleteGalleryByIdx(-99); // غير مستخدمة — الحذف عبر deleteGalleryByIdx
 }
 
 function extractYtId(url){
@@ -3431,8 +3439,7 @@ function renderPublicGallery(){
       list.forEach(function(it){
         var globalIdx = items.indexOf(it);
         var thumb = isVideo ? getYtThumb(it['الرابط']||'') : (it['الرابط']||'');
-        var onclick = 'openMediaModalByIdx('+globalIdx+')';
-        g += '<div onclick="'+onclick+'" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
+        g += '<div data-gidx="'+globalIdx+'" class="gallery-card" style="cursor:pointer;background:#0f172a;border-radius:12px;overflow:hidden;position:relative;aspect-ratio:16/9;">'+
           (thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.style.background=\'#1e293b\'">':'<div style="height:100%;display:flex;align-items:center;justify-content:center;font-size:28px;">'+(isVideo?'🎬':'📸')+'</div>')+
           (isVideo?'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,.55);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-play" style="color:#fff;font-size:16px;margin-right:-2px;"></i></div></div>':'')+
           '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:6px 8px;">'+
@@ -3488,12 +3495,25 @@ function renderPublicGallery(){
       buildSponsorsSection()+
 
       // مودال عرض الوسائط
-      '<div id="mediaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:99999;flex-direction:column;align-items:center;justify-content:center;" onclick="closeMediaModal(event)">'+
+      '<div id="mediaModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:99999;align-items:center;justify-content:center;flex-direction:column;" onclick="closeMediaModal(event)">'+
         '<button onclick="closeMediaModal()" style="position:absolute;top:16px;left:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:18px;cursor:pointer;z-index:2;">✕</button>'+
         '<div id="mediaModalContent" style="width:100%;max-width:480px;padding:0 12px;"></div>'+
         '<div id="mediaModalTitle" style="color:#fff;font-size:13px;font-weight:700;margin-top:12px;text-align:center;opacity:.8;"></div>'+
         '<div id="mediaModalDate" style="color:rgba(255,255,255,.5);font-size:11px;margin-top:4px;"></div>'+
       '</div>';
+
+    // event delegation لكروت المعرض
+    setTimeout(function(){
+      var app = document.getElementById('app');
+      if(!app) return;
+      app.addEventListener('click', function(e){
+        var card = e.target.closest('.gallery-card');
+        if(!card) return;
+        var idx = parseInt(card.getAttribute('data-gidx'));
+        if(isNaN(idx)) return;
+        openMediaModalByIdx(idx);
+      });
+    }, 100);
   });
 }
 
