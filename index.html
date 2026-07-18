@@ -674,6 +674,8 @@ function go(page) {
     media_panel: renderMediaPanel,
     media_view: renderMediaView,
     match_lineup: renderMatchLineup,
+    match_report: renderMatchReport,
+    acad_reports: renderAcadReports,
   };
   if(pages[page]) pages[page]();
 }
@@ -1397,6 +1399,356 @@ function sendLineupWhatsApp(){
 }
 
 // ════════════════════════════════════════
+// تقرير المباراة
+// ════════════════════════════════════════
+function renderMatchReport(){
+  var acadId   = sessionStorage.getItem('kaasAcadId');
+  var acadName = sessionStorage.getItem('kaasAcadName');
+  var cats     = (sessionStorage.getItem('kaasAcadCats')||'').split(',').filter(Boolean);
+  if(!acadId){ go('acad_login'); return; }
+
+  var today = new Date().toISOString().split('T')[0];
+  var catOptions = cats.map(function(cid){
+    var ci = getCatInfo(cid);
+    return ci ? '<option value="'+cid+'">'+ci.name+' ('+ci.label+')</option>' : '';
+  }).join('');
+
+  showL();
+  apiGet('اللاعبون').then(function(all){
+    window._reportPlayers = all.filter(function(p){ return p.academy_id === acadId; });
+    window._reportAcadName = acadName;
+
+    document.getElementById('app').innerHTML =
+      '<div style="max-width:600px;margin:0 auto;">'+
+        '<div style="background:linear-gradient(135deg,#0f766e,#0d9488);padding:20px 16px;display:flex;align-items:center;gap:12px;">'+
+          '<button onclick="go(\'acad_dashboard\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;">←</button>'+
+          '<div>'+
+            '<div style="font-size:16px;font-weight:900;color:#fff;">تقرير المباراة</div>'+
+            '<div style="font-size:10px;color:rgba(255,255,255,.6);">'+acadName+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="padding:16px;">'+
+          '<div style="background:#fff;border-radius:12px;padding:14px;border:1px solid #e2e8f0;margin-bottom:14px;">'+
+            '<div style="font-size:12px;font-weight:800;color:#475569;margin-bottom:10px;"><i class="fas fa-futbol" style="color:#0d9488;"></i> تفاصيل المباراة</div>'+
+            '<input id="rpOpponent" placeholder="اسم الفريق المنافس *" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;margin-bottom:8px;">'+
+            '<input id="rpVenue" placeholder="الملعب" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;margin-bottom:8px;">'+
+            '<input id="rpDate" type="date" value="'+today+'" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;margin-bottom:8px;">'+
+            '<select id="rpCat" onchange="buildReportPlayers()" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:9px 12px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;background:#fff;">'+
+              '<option value="">-- اختر الفئة --</option>'+catOptions+
+            '</select>'+
+          '</div>'+
+          '<div id="rpPlayersList"></div>'+
+          '<div id="rpSaveBtn"></div>'+
+          '<div style="height:80px;"></div>'+
+        '</div>'+
+      '</div>';
+  });
+}
+
+function buildReportPlayers(){
+  var cid = document.getElementById('rpCat').value;
+  var listDiv = document.getElementById('rpPlayersList');
+  var saveDiv = document.getElementById('rpSaveBtn');
+  if(!cid){ listDiv.innerHTML=''; saveDiv.innerHTML=''; return; }
+
+  var ci = getCatInfo(cid);
+  var players = (window._reportPlayers||[]).filter(function(p){ return p.cat_id===cid; });
+
+  if(!players.length){
+    listDiv.innerHTML='<div style="text-align:center;padding:24px;color:#94a3b8;font-size:12px;">لا يوجد لاعبون في هذه الفئة</div>';
+    saveDiv.innerHTML=''; return;
+  }
+
+  var html = '';
+  players.forEach(function(p, i){
+    var pid = 'rp_'+p.id;
+    html +=
+      '<div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:10px;overflow:hidden;">'+
+        '<div onclick="toggleRpPlayer(\''+pid+'\')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none;">'+
+          '<div style="width:32px;height:32px;background:#0d9488;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;flex-shrink:0;">'+(i+1)+'</div>'+
+          '<div style="flex:1;">'+
+            '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+p.name+'</div>'+
+            '<div style="font-size:10px;color:#64748b;">'+(p.birth||'').toString().split('T')[0]+(p.jersey?' · #'+p.jersey:'')+'</div>'+
+          '</div>'+
+          '<div id="'+pid+'_star" style="font-size:13px;color:#f59e0b;margin-left:4px;">★ —</div>'+
+          '<div style="font-size:18px;color:#94a3b8;" id="'+pid+'_arr">▼</div>'+
+        '</div>'+
+        '<div id="'+pid+'" style="display:none;padding:14px;border-top:1px solid #f1f5f9;background:#fafafa;">'+
+          /* التقييمات */
+          '<div style="font-size:11px;font-weight:800;color:#0f766e;margin-bottom:8px;">التقييمات</div>'+
+          _rpRatingRow(pid,'overall','التقييم العام','⭐')+
+          _rpRatingRow(pid,'tech','الأداء الفني','🎯')+
+          _rpRatingRow(pid,'physical','الأداء البدني','💪')+
+          _rpRatingRow(pid,'mental','العمل الجماعي والذهني','🧠')+
+          /* الإحصاءات */
+          '<div style="font-size:11px;font-weight:800;color:#0f766e;margin:12px 0 8px;">إحصاءات المباراة</div>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">'+
+            _rpNumField(pid,'goals','الأهداف','⚽')+
+            _rpNumField(pid,'assists','التمريرات الحاسمة','🎯')+
+            _rpNumField(pid,'minutes','دقائق اللعب','⏱️')+
+          '</div>'+
+          '<div style="display:flex;gap:12px;margin-bottom:12px;">'+
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;">'+
+              '<input type="checkbox" id="'+pid+'_yellow" style="width:16px;height:16px;accent-color:#f59e0b;"> 🟡 صفراء'+
+            '</label>'+
+            '<label style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer;">'+
+              '<input type="checkbox" id="'+pid+'_red" style="width:16px;height:16px;accent-color:#b81d22;"> 🔴 حمراء'+
+            '</label>'+
+          '</div>'+
+          /* الملاحظات */
+          '<div style="font-size:11px;font-weight:800;color:#0f766e;margin-bottom:8px;">الملاحظات</div>'+
+          '<textarea id="'+pid+'_strengths" placeholder="✅ نقاط القوة" rows="2" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:Cairo,sans-serif;font-size:12px;direction:rtl;resize:none;margin-bottom:8px;"></textarea>'+
+          '<textarea id="'+pid+'_weaknesses" placeholder="⚠️ نقاط الضعف" rows="2" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:Cairo,sans-serif;font-size:12px;direction:rtl;resize:none;margin-bottom:8px;"></textarea>'+
+          '<textarea id="'+pid+'_notes" placeholder="📝 ملاحظات المدرب" rows="2" style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:Cairo,sans-serif;font-size:12px;direction:rtl;resize:none;"></textarea>'+
+        '</div>'+
+      '</div>';
+  });
+  listDiv.innerHTML = html;
+
+  saveDiv.innerHTML =
+    '<button onclick="saveMatchReport()" style="width:100%;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;border:none;border-radius:12px;padding:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:8px;">'+
+      '<i class="fas fa-save"></i> حفظ التقرير'+
+    '</button>';
+
+  // تخزين اللاعبين للحفظ
+  window._reportCatPlayers = players;
+}
+
+function _rpRatingRow(pid, key, label, icon){
+  return '<div style="margin-bottom:10px;">'+
+    '<div style="font-size:11px;color:#475569;margin-bottom:4px;">'+icon+' '+label+'</div>'+
+    '<div style="display:flex;gap:6px;" id="'+pid+'_'+key+'_stars">'+
+      [1,2,3,4,5].map(function(n){
+        return '<button onclick="setRpRating(\''+pid+'\',\''+key+'\','+n+')" '+
+          'id="'+pid+'_'+key+'_s'+n+'" '+
+          'style="flex:1;height:32px;border:1.5px solid #e2e8f0;border-radius:6px;background:#fff;font-size:16px;cursor:pointer;transition:all .15s;">'+n+'</button>';
+      }).join('')+
+    '</div>'+
+  '</div>';
+}
+
+function _rpNumField(pid, key, label, icon){
+  return '<div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;">'+
+    '<div style="font-size:10px;color:#64748b;margin-bottom:4px;">'+icon+' '+label+'</div>'+
+    '<input type="number" id="'+pid+'_'+key+'" value="0" min="0" max="90" '+
+      'style="width:100%;border:none;outline:none;font-size:16px;font-weight:900;color:#0f172a;font-family:Cairo,sans-serif;text-align:center;">'+
+  '</div>';
+}
+
+function setRpRating(pid, key, val){
+  for(var n=1; n<=5; n++){
+    var btn = document.getElementById(pid+'_'+key+'_s'+n);
+    if(btn){
+      if(n<=val){
+        btn.style.background = '#0d9488';
+        btn.style.color = '#fff';
+        btn.style.borderColor = '#0d9488';
+      } else {
+        btn.style.background = '#fff';
+        btn.style.color = '#0f172a';
+        btn.style.borderColor = '#e2e8f0';
+      }
+    }
+  }
+  // حفظ القيمة في data attribute
+  var starsDiv = document.getElementById(pid+'_'+key+'_stars');
+  if(starsDiv) starsDiv.setAttribute('data-val', val);
+  // تحديث نجمة الملخص إذا كان overall
+  if(key==='overall'){
+    var star = document.getElementById(pid+'_star');
+    if(star) star.textContent = '★ '+val+'/5';
+  }
+}
+
+function toggleRpPlayer(pid){
+  var el = document.getElementById(pid);
+  var arr = document.getElementById(pid+'_arr');
+  if(!el) return;
+  var hidden = el.style.display==='none';
+  el.style.display = hidden ? 'block' : 'none';
+  if(arr) arr.textContent = hidden ? '▲' : '▼';
+}
+
+function saveMatchReport(){
+  var opponent = (document.getElementById('rpOpponent').value||'').trim();
+  var venue    = (document.getElementById('rpVenue').value||'').trim();
+  var date     = (document.getElementById('rpDate').value||'').trim();
+  var catEl    = document.getElementById('rpCat');
+  var ci       = getCatInfo(catEl ? catEl.value : '');
+  var players  = window._reportCatPlayers || [];
+  var acadId   = sessionStorage.getItem('kaasAcadId');
+  var acadName = window._reportAcadName || '';
+
+  if(!opponent){ showToast('أدخل اسم الفريق المنافس'); return; }
+  if(!players.length){ showToast('اختر فئة أولاً'); return; }
+
+  var saveTime = new Date().toISOString();
+  var rows = players.map(function(p){
+    var pid = 'rp_'+p.id;
+    function getRat(key){
+      var d = document.getElementById(pid+'_'+key+'_stars');
+      return d ? (d.getAttribute('data-val')||'0') : '0';
+    }
+    function getNum(key){
+      var el = document.getElementById(pid+'_'+key);
+      return el ? (el.value||'0') : '0';
+    }
+    function getTxt(key){
+      var el = document.getElementById(pid+'_'+key);
+      return el ? el.value.trim() : '';
+    }
+    return {
+      'تاريخ_الحفظ': saveTime,
+      'academy_id': acadId,
+      'اسم_الأكاديمية': acadName,
+      'تاريخ_المباراة': date,
+      'المنافس': opponent,
+      'الملعب': venue,
+      'الفئة': ci ? ci.name+' ('+ci.label+')' : '',
+      'player_id': p.id,
+      'اسم_اللاعب': p.name,
+      'رقم_القميص': p.jersey||'',
+      'التقييم_العام': getRat('overall'),
+      'الأداء_الفني': getRat('tech'),
+      'الأداء_البدني': getRat('physical'),
+      'العمل_الجماعي': getRat('mental'),
+      'الأهداف': getNum('goals'),
+      'التمريرات_الحاسمة': getNum('assists'),
+      'دقائق_اللعب': getNum('minutes'),
+      'بطاقة_صفراء': document.getElementById(pid+'_yellow')&&document.getElementById(pid+'_yellow').checked?'نعم':'لا',
+      'بطاقة_حمراء': document.getElementById(pid+'_red')&&document.getElementById(pid+'_red').checked?'نعم':'لا',
+      'نقاط_القوة': getTxt('strengths'),
+      'نقاط_الضعف': getTxt('weaknesses'),
+      'ملاحظات': getTxt('notes')
+    };
+  });
+
+  showToast('جاري الحفظ...');
+  var pending = rows.length;
+  var failed = 0;
+  rows.forEach(function(row){
+    apiAppend('تقارير', row).then(function(){
+      pending--;
+      if(pending===0){
+        if(failed===0) { showToast('✓ تم حفظ التقرير بنجاح'); setTimeout(function(){ go('acad_dashboard'); }, 1500); }
+        else showToast('تم الحفظ مع '+failed+' خطأ');
+      }
+    }).catch(function(){
+      failed++; pending--;
+      if(pending===0) showToast('خطأ في الحفظ');
+    });
+  });
+}
+
+// ════════════════════════════════════════
+// عرض تقارير الأكاديمية
+// ════════════════════════════════════════
+function renderAcadReports(){
+  var acadId   = sessionStorage.getItem('kaasAcadId');
+  var acadName = sessionStorage.getItem('kaasAcadName');
+  if(!acadId){ go('acad_login'); return; }
+
+  showL();
+  apiGet('تقارير').then(function(all){
+    var myReports = all.filter(function(r){ return r['academy_id']===acadId; });
+
+    // تجميع حسب المباراة (المنافس + التاريخ)
+    var matches = {};
+    myReports.forEach(function(r){
+      var key = (r['تاريخ_المباراة']||'')+'|'+(r['المنافس']||'')+'|'+(r['الفئة']||'');
+      if(!matches[key]) matches[key] = {date:r['تاريخ_المباراة'],opponent:r['المنافس'],cat:r['الفئة'],venue:r['الملعب']||'',players:[]};
+      matches[key].players.push(r);
+    });
+
+    var keys = Object.keys(matches).sort().reverse();
+
+    var html =
+      '<div style="max-width:600px;margin:0 auto;">'+
+        '<div style="background:linear-gradient(135deg,#1d4ed8,#1e40af);padding:20px 16px;display:flex;align-items:center;gap:12px;">'+
+          '<button onclick="go(\'acad_dashboard\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;">←</button>'+
+          '<div>'+
+            '<div style="font-size:16px;font-weight:900;color:#fff;">تقارير المباريات</div>'+
+            '<div style="font-size:10px;color:rgba(255,255,255,.6);">'+acadName+' · '+keys.length+' مباراة</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="padding:16px;">';
+
+    if(!keys.length){
+      html += '<div style="text-align:center;padding:48px 16px;color:#94a3b8;">'+
+        '<div style="font-size:48px;margin-bottom:12px;">📋</div>'+
+        '<div style="font-size:14px;font-weight:700;">لا توجد تقارير بعد</div>'+
+        '<div style="font-size:12px;margin-top:6px;">أضف تقرير مباراة من لوحة التحكم</div>'+
+      '</div>';
+    } else {
+      keys.forEach(function(key, ki){
+        var m = matches[key];
+        var mid = 'mrpt_'+ki;
+        html +=
+          '<div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:12px;overflow:hidden;">'+
+            '<div onclick="toggleRpMatch(\''+mid+'\')" style="padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;">'+
+              '<div style="width:44px;height:44px;background:linear-gradient(135deg,#1d4ed8,#1e40af);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⚽</div>'+
+              '<div style="flex:1;">'+
+                '<div style="font-size:14px;font-weight:900;color:#0f172a;">ضد '+m.opponent+'</div>'+
+                '<div style="font-size:11px;color:#64748b;">'+m.date+(m.cat?' · '+m.cat:'')+(m.venue?' · '+m.venue:'')+'</div>'+
+                '<div style="font-size:11px;color:#0d9488;margin-top:2px;font-weight:700;">'+m.players.length+' لاعب</div>'+
+              '</div>'+
+              '<div style="font-size:18px;color:#94a3b8;" id="'+mid+'_arr">▼</div>'+
+            '</div>'+
+            '<div id="'+mid+'" style="display:none;border-top:1px solid #f1f5f9;">';
+
+        m.players.sort(function(a,b){ return parseInt(b['التقييم_العام']||0)-parseInt(a['التقييم_العام']||0); });
+        m.players.forEach(function(r){
+          var ov = parseInt(r['التقييم_العام']||0);
+          var stars = '★'.repeat(ov)+'☆'.repeat(5-ov);
+          html +=
+            '<div style="padding:12px 14px;border-bottom:1px solid #f8fafc;">'+
+              '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'+
+                '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+r['اسم_اللاعب']+(r['رقم_القميص']?' #'+r['رقم_القميص']:'')+'</div>'+
+                '<div style="font-size:14px;color:#f59e0b;font-weight:900;">'+stars+'</div>'+
+              '</div>'+
+              '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-bottom:6px;">'+
+                _rpMiniStat('فني',r['الأداء_الفني']||'0','#0d9488')+
+                _rpMiniStat('بدني',r['الأداء_البدني']||'0','#0d9488')+
+                _rpMiniStat('ذهني',r['العمل_الجماعي']||'0','#0d9488')+
+                _rpMiniStat('أهداف',r['الأهداف']||'0','#b81d22')+
+              '</div>'+
+              '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;">'+
+                _rpMiniStat('تمريرات',r['التمريرات_الحاسمة']||'0','#1d4ed8')+
+                _rpMiniStat('دقائق',r['دقائق_اللعب']||'0','#475569')+
+                (r['بطاقة_صفراء']==='نعم'?'<div style="background:#fef9c3;border-radius:6px;padding:4px;text-align:center;font-size:10px;font-weight:700;">🟡 صفراء</div>':'')+
+                (r['بطاقة_حمراء']==='نعم'?'<div style="background:#fee2e2;border-radius:6px;padding:4px;text-align:center;font-size:10px;font-weight:700;">🔴 حمراء</div>':'')+
+              '</div>'+
+              (r['نقاط_القوة']?'<div style="font-size:11px;color:#16a34a;margin-bottom:3px;"><b>✅ قوة:</b> '+r['نقاط_القوة']+'</div>':'')+
+              (r['نقاط_الضعف']?'<div style="font-size:11px;color:#b45309;margin-bottom:3px;"><b>⚠️ ضعف:</b> '+r['نقاط_الضعف']+'</div>':'')+
+              (r['ملاحظات']?'<div style="font-size:11px;color:#475569;"><b>📝</b> '+r['ملاحظات']+'</div>':'')+
+            '</div>';
+        });
+        html += '</div></div>';
+      });
+    }
+
+    html += '<div style="height:80px;"></div></div></div>';
+    document.getElementById('app').innerHTML = html;
+  });
+}
+
+function _rpMiniStat(label, val, color){
+  return '<div style="background:#f8fafc;border-radius:6px;padding:5px;text-align:center;">'+
+    '<div style="font-size:13px;font-weight:900;color:'+color+';">'+val+'</div>'+
+    '<div style="font-size:9px;color:#94a3b8;">'+label+'</div>'+
+  '</div>';
+}
+
+function toggleRpMatch(mid){
+  var el = document.getElementById(mid);
+  var arr = document.getElementById(mid+'_arr');
+  if(!el) return;
+  var hidden = el.style.display==='none';
+  el.style.display = hidden ? 'block' : 'none';
+  if(arr) arr.textContent = hidden ? '▲' : '▼';
+}
+
+// ════════════════════════════════════════
 function renderAcadLogin() {
   document.getElementById('app').innerHTML =
     '<div style="padding:40px 16px;max-width:360px;margin:0 auto;">'+
@@ -1514,6 +1866,10 @@ function renderAcadDashboard() {
             '<button class="btn" onclick="printKaasCards()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;padding:11px;"><i class="fas fa-file-pdf"></i> طباعة / PDF</button>'+
           '</div>':'')+
         '<button class="btn" onclick="go(\'match_lineup\')" style="background:linear-gradient(135deg,#b45309,#92400e);color:#fff;margin-top:8px;"><i class="fas fa-clipboard-list"></i> قائمة المباراة وإرسالها للإدارة</button>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
+          '<button class="btn" onclick="go(\'match_report\')" style="background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;padding:11px;"><i class="fas fa-file-alt"></i> تقرير مباراة</button>'+
+          '<button class="btn" onclick="go(\'acad_reports\')" style="background:linear-gradient(135deg,#1d4ed8,#1e40af);color:#fff;padding:11px;"><i class="fas fa-chart-bar"></i> عرض التقارير</button>'+
+        '</div>'+
         '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة / ملاحظة للإدارة</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
           '<button class="btn" onclick="printPlayersList()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;padding:11px;"><i class="fas fa-print"></i> طباعة القائمة</button>'+
