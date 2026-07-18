@@ -1145,12 +1145,15 @@ function renderMatchLineup(){
             '<button onclick="sendLineupWhatsApp()" style="width:100%;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-bottom:8px;">'+
               '<i class="fab fa-whatsapp"></i> إرسال للإدارة عبر واتساب'+
             '</button>'+
-            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
-              '<button onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">'+
-                '<i class="fas fa-print"></i> طباعة'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">'+
+              '<button onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
+                '<i class="fas fa-print"></i><br>طباعة'+
               '</button>'+
-              '<button onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">'+
-                '<i class="fas fa-file-pdf"></i> PDF'+
+              '<button onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
+                '<i class="fas fa-file-pdf"></i><br>PDF'+
+              '</button>'+
+              '<button onclick="shareLineupImage()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
+                '<i class="fas fa-share-alt"></i><br>مشاركة'+
               '</button>'+
             '</div>'+
           '</div>'+
@@ -1283,6 +1286,67 @@ function pdfLineup(){
   w.focus();
   showToast('افتح قائمة الطباعة واختر "حفظ كـ PDF"');
   setTimeout(function(){ w.print(); }, 600);
+}
+
+function shareLineupImage(){
+  var d = _buildLineupContent(); if(!d) return;
+
+  // بناء القائمة داخل div مخفي ثم تصويره
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:480px;background:#fff;font-family:Cairo,Arial,sans-serif;direction:rtl;padding:20px;box-sizing:border-box;';
+
+  var rows = d.chks.map(function(c,i){
+    var name   = decodeURIComponent(c.getAttribute('data-name')||'');
+    var jersey = c.getAttribute('data-jersey')||'';
+    var birth  = c.getAttribute('data-birth')||'';
+    return '<div style="display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;">'+
+      '<div style="width:26px;height:26px;background:#b45309;border-radius:50%;color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(i+1)+'</div>'+
+      '<div style="flex:1;margin-right:10px;">'+
+        '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+name+'</div>'+
+        '<div style="font-size:10px;color:#64748b;">'+(jersey?'#'+jersey+' · ':'')+birth+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  wrap.innerHTML =
+    '<div style="text-align:center;background:linear-gradient(135deg,#92400e,#b45309);padding:16px;border-radius:12px 12px 0 0;margin:-20px -20px 14px;">'+
+      '<div style="font-size:18px;font-weight:900;color:#fff;">📋 قائمة المباراة</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px;">'+d.acadName+'</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;font-size:11px;">'+
+      '<div style="background:#fef9c3;border-radius:8px;padding:7px 10px;">⚔️ <b>'+d.opponent+'</b></div>'+
+      '<div style="background:#f0fdf4;border-radius:8px;padding:7px 10px;">📅 '+d.date+'</div>'+
+      (d.venue?'<div style="background:#f0f9ff;border-radius:8px;padding:7px 10px;">🏟️ '+d.venue+'</div>':'')+
+      (d.ci?'<div style="background:#faf5ff;border-radius:8px;padding:7px 10px;">🏷️ '+d.ci.name+'</div>':'')+
+      (d.coach?'<div style="background:#f8fafc;border-radius:8px;padding:7px 10px;">👨‍🏫 '+d.coach+'</div>':'')+
+      (d.manager?'<div style="background:#f8fafc;border-radius:8px;padding:7px 10px;">👔 '+d.manager+'</div>':'')+
+    '</div>'+
+    '<div style="font-size:12px;font-weight:900;color:#b45309;margin-bottom:6px;">👥 اللاعبون ('+d.chks.length+')</div>'+
+    rows+
+    '<div style="text-align:center;font-size:10px;color:#94a3b8;margin-top:12px;">'+CONFIG.TOURNAMENT_NAME+'</div>';
+
+  document.body.appendChild(wrap);
+  showToast('جاري إنشاء الصورة...');
+
+  html2canvas(wrap, {scale:2, useCORS:true, backgroundColor:'#fff'}).then(function(canvas){
+    document.body.removeChild(wrap);
+    canvas.toBlob(function(blob){
+      var file = new File([blob], 'قائمة-المباراة.png', {type:'image/png'});
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({
+          title: 'قائمة المباراة - '+d.acadName,
+          files: [file]
+        }).catch(function(){});
+      } else {
+        // fallback: تنزيل الصورة
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'قائمة-المباراة.png';
+        a.click();
+        showToast('تم حفظ الصورة — شاركها من المعرض');
+      }
+    },'image/png');
+  }).catch(function(){ showToast('تعذّر إنشاء الصورة'); });
 }
 
 function toggleAllLineup(){
