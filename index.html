@@ -1627,7 +1627,7 @@ function saveMatchReport(){
   var pending = rows.length;
   var failed = 0;
   rows.forEach(function(row){
-    apiAppend('تقارير', row).then(function(){
+    apiAppend('تقرير اللاعبين', row).then(function(){
       pending--;
       if(pending===0){
         if(failed===0) { showToast('✓ تم حفظ التقرير بنجاح'); setTimeout(function(){ go('acad_dashboard'); }, 1500); }
@@ -1649,7 +1649,7 @@ function renderAcadReports(){
   if(!acadId){ go('acad_login'); return; }
 
   showL();
-  apiGet('تقارير').then(function(all){
+  apiGet('تقرير اللاعبين').then(function(all){
     var myReports = all.filter(function(r){ return r['academy_id']===acadId; });
 
     // تجميع حسب المباراة (المنافس + التاريخ)
