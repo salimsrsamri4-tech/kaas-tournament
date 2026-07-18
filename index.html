@@ -1289,6 +1289,7 @@ function pdfLineup(){
 }
 
 function shareLineupImage(){
+  showToast('جاري التحضير...');
   var d = _buildLineupContent(); if(!d) return;
 
   // بناء القائمة داخل div مخفي ثم تصويره
