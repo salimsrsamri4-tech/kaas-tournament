@@ -680,6 +680,21 @@ function go(page) {
 
 function showL(){document.getElementById('app').innerHTML='<div class="ldg"><span class="sp"></span></div>';}
 
+var _toastTimer;
+function showToast(msg){
+  var t=document.getElementById('_kaasToast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='_kaasToast';
+    t.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.9);color:#fff;padding:10px 20px;border-radius:20px;font-family:Cairo,sans-serif;font-size:13px;font-weight:700;z-index:9999;white-space:nowrap;pointer-events:none;transition:opacity .3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.style.opacity='1';
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.style.opacity='0';},3000);
+}
+
 function shareMatchResult(team1,team2,result,date,time,field,cat){
   var msg =
     '🏆 *'+CONFIG.TOURNAMENT_NAME+' - '+CONFIG.TOURNAMENT_SHORT+' '+CONFIG.SEASON+'*\n'+
