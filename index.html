@@ -1141,9 +1141,19 @@ function renderMatchLineup(){
             '</select>'+
           '</div>'+
           '<div id="lineupPlayersList"></div>'+
-          '<button onclick="sendLineupWhatsApp()" style="width:100%;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:14px;font-family:Cairo,sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-top:4px;display:none;" id="lineupSendBtn">'+
-            '<i class="fab fa-whatsapp"></i> إرسال القائمة للإدارة عبر واتساب'+
-          '</button>'+
+          '<div id="lineupSendBtn" style="display:none;">'+
+            '<button onclick="sendLineupWhatsApp()" style="width:100%;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-bottom:8px;">'+
+              '<i class="fab fa-whatsapp"></i> إرسال للإدارة عبر واتساب'+
+            '</button>'+
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+              '<button onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">'+
+                '<i class="fas fa-print"></i> طباعة'+
+              '</button>'+
+              '<button onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;">'+
+                '<i class="fas fa-file-pdf"></i> PDF'+
+              '</button>'+
+            '</div>'+
+          '</div>'+
         '</div>'+
       '</div>';
 
@@ -1199,16 +1209,8 @@ function buildLineupPlayers(){
   sendBtn.style.display = 'block';
 }
 
-function toggleAllLineup(){
-  var chks = document.querySelectorAll('.lineup-chk');
-  var allChecked = Array.from(chks).every(function(c){ return c.checked; });
-  chks.forEach(function(c){ c.checked = !allChecked; });
-}
-
-function sendLineupWhatsApp(){
-  var chks = Array.from(document.querySelectorAll('.lineup-chk:checked'));
-  if(!chks.length){ showToast('اختر لاعباً واحداً على الأقل'); return; }
-
+function _buildLineupContent(){
+  var chks     = Array.from(document.querySelectorAll('.lineup-chk:checked'));
   var acadName = window._lineupAcadName || '';
   var opponent = (document.getElementById('lineupOpponent').value||'').trim();
   var venue    = (document.getElementById('lineupVenue').value||'').trim();
@@ -1217,21 +1219,93 @@ function sendLineupWhatsApp(){
   var date     = window._lineupDate || '';
   var catEl    = document.getElementById('lineupCat');
   var ci       = getCatInfo(catEl.value);
+  if(!opponent){ showToast('أدخل اسم الفريق المنافس'); return null; }
+  if(!chks.length){ showToast('اختر لاعباً واحداً على الأقل'); return null; }
+  return {chks:chks, acadName:acadName, opponent:opponent, venue:venue, coach:coach, manager:manager, date:date, ci:ci};
+}
 
-  if(!opponent){ showToast('أدخل اسم الفريق المنافس'); return; }
+function _lineupHtmlDoc(d){
+  var rows = d.chks.map(function(c,i){
+    var name   = decodeURIComponent(c.getAttribute('data-name')||'');
+    var jersey = c.getAttribute('data-jersey')||'';
+    var birth  = c.getAttribute('data-birth')||'';
+    return '<tr style="border-bottom:1px solid #e2e8f0;">'+
+      '<td style="padding:7px 10px;text-align:center;font-weight:900;color:#b45309;">'+(i+1)+'</td>'+
+      '<td style="padding:7px 10px;font-weight:700;">'+name+'</td>'+
+      '<td style="padding:7px 10px;text-align:center;">'+(jersey?'#'+jersey:'—')+'</td>'+
+      '<td style="padding:7px 10px;text-align:center;color:#64748b;font-size:11px;">'+birth+'</td>'+
+    '</tr>';
+  }).join('');
+  return '<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8">'+
+    '<title>قائمة المباراة</title>'+
+    '<style>body{font-family:Cairo,Arial,sans-serif;margin:0;padding:20px;color:#0f172a;}'+
+    'h1{font-size:20px;margin:0;}h2{font-size:14px;color:#64748b;margin:4px 0 0;}'+
+    '.info{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 0;font-size:12px;}'+
+    '.info div{background:#f8fafc;border-radius:6px;padding:8px 12px;}'+
+    '.info span{font-weight:900;color:#b45309;}'+
+    'table{width:100%;border-collapse:collapse;font-size:13px;}'+
+    'th{background:#1e293b;color:#fff;padding:9px 10px;font-size:12px;}'+
+    'tr:nth-child(even){background:#f8fafc;}'+
+    '.foot{margin-top:16px;font-size:11px;color:#94a3b8;text-align:center;}'+
+    '@media print{body{padding:10px}}</style></head><body>'+
+    '<div style="text-align:center;border-bottom:3px solid #b45309;padding-bottom:12px;margin-bottom:14px;">'+
+      '<h1>📋 قائمة المباراة</h1>'+
+      '<h2>'+d.acadName+'</h2>'+
+    '</div>'+
+    '<div class="info">'+
+      '<div>⚔️ المنافس: <span>'+d.opponent+'</span></div>'+
+      '<div>📅 التاريخ: <span>'+d.date+'</span></div>'+
+      (d.venue?'<div>🏟️ الملعب: <span>'+d.venue+'</span></div>':'')+
+      (d.ci?'<div>🏷️ الفئة: <span>'+d.ci.name+' ('+d.ci.label+')</span></div>':'')+
+      (d.coach?'<div>👨‍🏫 المدرب: <span>'+d.coach+'</span></div>':'')+
+      (d.manager?'<div>👔 الإداري: <span>'+d.manager+'</span></div>':'')+
+    '</div>'+
+    '<table><thead><tr><th>#</th><th>اسم اللاعب</th><th>الرقم</th><th>تاريخ الميلاد</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>'+
+    '<div class="foot">إجمالي اللاعبين: '+d.chks.length+' · '+CONFIG.TOURNAMENT_NAME+'</div>'+
+    '</body></html>';
+}
+
+function printLineup(){
+  var d = _buildLineupContent(); if(!d) return;
+  var w = window.open('','_blank');
+  w.document.write(_lineupHtmlDoc(d));
+  w.document.close();
+  w.focus();
+  setTimeout(function(){ w.print(); }, 500);
+}
+
+function pdfLineup(){
+  var d = _buildLineupContent(); if(!d) return;
+  var w = window.open('','_blank');
+  w.document.write(_lineupHtmlDoc(d));
+  w.document.close();
+  w.focus();
+  showToast('افتح قائمة الطباعة واختر "حفظ كـ PDF"');
+  setTimeout(function(){ w.print(); }, 600);
+}
+
+function toggleAllLineup(){
+  var chks = document.querySelectorAll('.lineup-chk');
+  var allChecked = Array.from(chks).every(function(c){ return c.checked; });
+  chks.forEach(function(c){ c.checked = !allChecked; });
+}
+
+function sendLineupWhatsApp(){
+  var d = _buildLineupContent(); if(!d) return;
 
   var msg = '📋 *قائمة المباراة*\n';
   msg += '━━━━━━━━━━━━━━\n';
-  msg += '🏫 *'+acadName+'*\n';
-  if(ci)       msg += '🏷️ الفئة: '+ci.name+' ('+ci.label+')\n';
-  msg += '⚔️ المنافس: *'+opponent+'*\n';
-  if(venue)    msg += '🏟️ الملعب: '+venue+'\n';
-  msg += '📅 التاريخ: '+date+'\n';
-  if(coach)    msg += '👨‍🏫 المدرب: '+coach+'\n';
-  if(manager)  msg += '👔 الإداري: '+manager+'\n';
+  msg += '🏫 *'+d.acadName+'*\n';
+  if(d.ci)      msg += '🏷️ الفئة: '+d.ci.name+' ('+d.ci.label+')\n';
+  msg += '⚔️ المنافس: *'+d.opponent+'*\n';
+  if(d.venue)   msg += '🏟️ الملعب: '+d.venue+'\n';
+  msg += '📅 التاريخ: '+d.date+'\n';
+  if(d.coach)   msg += '👨‍🏫 المدرب: '+d.coach+'\n';
+  if(d.manager) msg += '👔 الإداري: '+d.manager+'\n';
   msg += '━━━━━━━━━━━━━━\n';
-  msg += '👥 *اللاعبون ('+chks.length+')*\n';
-  chks.forEach(function(c, i){
+  msg += '👥 *اللاعبون ('+d.chks.length+')*\n';
+  d.chks.forEach(function(c, i){
     var name   = decodeURIComponent(c.getAttribute('data-name')||'');
     var jersey = c.getAttribute('data-jersey')||'';
     msg += (i+1)+'. '+name+(jersey?' 👕#'+jersey:'')+'\n';
