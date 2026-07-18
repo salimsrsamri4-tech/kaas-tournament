@@ -1141,22 +1141,7 @@ function renderMatchLineup(){
             '</select>'+
           '</div>'+
           '<div id="lineupPlayersList"></div>'+
-          '<div id="lineupSendBtn" style="display:none;">'+
-            '<button onclick="sendLineupWhatsApp()" style="width:100%;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-bottom:8px;">'+
-              '<i class="fab fa-whatsapp"></i> إرسال للإدارة عبر واتساب'+
-            '</button>'+
-            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">'+
-              '<button onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
-                '<i class="fas fa-print"></i><br>طباعة'+
-              '</button>'+
-              '<button onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
-                '<i class="fas fa-file-pdf"></i><br>PDF'+
-              '</button>'+
-              '<button onclick="shareLineupImage()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
-                '<i class="fas fa-share-alt"></i><br>مشاركة'+
-              '</button>'+
-            '</div>'+
-          '</div>'+
+          '<div id="lineupActions"></div>'+
         '</div>'+
       '</div>';
 
@@ -1178,15 +1163,15 @@ function renderMatchLineup(){
 function buildLineupPlayers(){
   var cid = document.getElementById('lineupCat').value;
   var listDiv = document.getElementById('lineupPlayersList');
-  var sendBtn = document.getElementById('lineupSendBtn');
-  if(!cid){ listDiv.innerHTML=''; sendBtn.style.display='none'; return; }
+  var actDiv = document.getElementById('lineupActions');
+  if(!cid){ listDiv.innerHTML=''; actDiv.innerHTML=''; return; }
 
   var ci = getCatInfo(cid);
   var catPlayers = (window._lineupPlayers||[]).filter(function(p){ return p.cat_id===cid; });
 
   if(!catPlayers.length){
     listDiv.innerHTML='<div style="text-align:center;padding:24px;color:#94a3b8;font-size:12px;">لا يوجد لاعبون في هذه الفئة</div>';
-    sendBtn.style.display='none';
+    actDiv.innerHTML='';
     return;
   }
 
@@ -1209,7 +1194,21 @@ function buildLineupPlayers(){
   html += '</div>';
 
   listDiv.innerHTML = html;
-  sendBtn.style.display = 'block';
+  actDiv.innerHTML =
+    '<a onclick="sendLineupWhatsApp()" style="display:block;width:100%;box-sizing:border-box;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;text-align:center;margin-bottom:8px;text-decoration:none;">'+
+      '<i class="fab fa-whatsapp"></i> إرسال للإدارة عبر واتساب'+
+    '</a>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">'+
+      '<a onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;display:block;">'+
+        '<i class="fas fa-print"></i><br>طباعة'+
+      '</a>'+
+      '<a onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;display:block;">'+
+        '<i class="fas fa-file-pdf"></i><br>PDF'+
+      '</a>'+
+      '<a onclick="shareLineupImage()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;display:block;">'+
+        '<i class="fas fa-share-alt"></i><br>مشاركة'+
+      '</a>'+
+    '</div>';
 }
 
 function _buildLineupContent(){
