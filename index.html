@@ -1195,19 +1195,19 @@ function buildLineupPlayers(){
 
   listDiv.innerHTML = html;
   actDiv.innerHTML =
-    '<a onclick="sendLineupWhatsApp()" style="display:block;width:100%;box-sizing:border-box;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;text-align:center;margin-bottom:8px;text-decoration:none;">'+
+    '<button onclick="sendLineupWhatsApp()" style="width:100%;background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:13px;font-weight:900;cursor:pointer;margin-bottom:8px;">'+
       '<i class="fab fa-whatsapp"></i> إرسال للإدارة عبر واتساب'+
-    '</a>'+
+    '</button>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">'+
-      '<a onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;display:block;">'+
+      '<button onclick="printLineup()" style="background:linear-gradient(135deg,#334155,#1e293b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
         '<i class="fas fa-print"></i><br>طباعة'+
-      '</a>'+
-      '<a onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;display:block;">'+
+      '</button>'+
+      '<button onclick="pdfLineup()" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
         '<i class="fas fa-file-pdf"></i><br>PDF'+
-      '</a>'+
-      '<a onclick="shareLineupImage()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;text-align:center;text-decoration:none;display:block;">'+
+      '</button>'+
+      '<button onclick="shareLineupImage()" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;border:none;border-radius:12px;padding:13px;font-family:Cairo,sans-serif;font-size:12px;font-weight:900;cursor:pointer;">'+
         '<i class="fas fa-share-alt"></i><br>مشاركة'+
-      '</a>'+
+      '</button>'+
     '</div>';
 }
 
