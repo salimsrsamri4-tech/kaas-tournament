@@ -676,6 +676,8 @@ function go(page) {
     match_lineup: renderMatchLineup,
     match_report: renderMatchReport,
     acad_reports: renderAcadReports,
+    acad_stats: renderAcadStats,
+    acad_schedule: renderAcadSchedule,
   };
   if(pages[page]) pages[page]();
 }
@@ -1854,6 +1856,227 @@ function toggleRpMatch(mid){
 }
 
 // ════════════════════════════════════════
+// إحصاءات اللاعبين التراكمية
+// ════════════════════════════════════════
+function renderAcadStats(){
+  var acadId   = sessionStorage.getItem('kaasAcadId');
+  var acadName = sessionStorage.getItem('kaasAcadName');
+  if(!acadId){ go('acad_login'); return; }
+
+  showL();
+  apiGet('تقرير اللاعبين').then(function(all){
+    var mine = all.filter(function(r){ return r['academy_id']===acadId; });
+
+    // تجميع حسب اللاعب
+    var byPlayer = {};
+    mine.forEach(function(r){
+      var pid = r['player_id']||r['اسم_اللاعب'];
+      if(!byPlayer[pid]){
+        byPlayer[pid] = {
+          name: r['اسم_اللاعب']||'', jersey: r['رقم_القميص']||'',
+          matches:0, goals:0, assists:0, minutes:0,
+          yellow:0, red:0,
+          ratings:[], tech:[], physical:[], mental:[]
+        };
+      }
+      var p = byPlayer[pid];
+      p.matches++;
+      p.goals   += parseInt(r['الأهداف']||0);
+      p.assists += parseInt(r['التمريرات_الحاسمة']||0);
+      p.minutes += parseInt(r['دقائق_اللعب']||0);
+      if(r['بطاقة_صفراء']==='نعم') p.yellow++;
+      if(r['بطاقة_حمراء']==='نعم') p.red++;
+      var ov=parseInt(r['التقييم_العام']||0);
+      if(ov>0) p.ratings.push(ov);
+      var tc=parseInt(r['الأداء_الفني']||0);
+      if(tc>0) p.tech.push(tc);
+      var ph=parseInt(r['الأداء_البدني']||0);
+      if(ph>0) p.physical.push(ph);
+      var mn=parseInt(r['العمل_الجماعي']||0);
+      if(mn>0) p.mental.push(mn);
+    });
+
+    function avg(arr){ return arr.length ? (arr.reduce(function(a,b){return a+b;},0)/arr.length).toFixed(1) : '—'; }
+
+    var players = Object.values(byPlayer).sort(function(a,b){
+      return parseFloat(avg(b.ratings)||0) - parseFloat(avg(a.ratings)||0);
+    });
+
+    // أفضل لاعب
+    var best = players[0];
+
+    var html =
+      '<div style="max-width:600px;margin:0 auto;">'+
+        '<div style="background:linear-gradient(135deg,#7c3aed,#5b21b6);padding:20px 16px;display:flex;align-items:center;gap:12px;">'+
+          '<button onclick="go(\'acad_dashboard\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;">←</button>'+
+          '<div>'+
+            '<div style="font-size:16px;font-weight:900;color:#fff;">إحصاءات اللاعبين</div>'+
+            '<div style="font-size:10px;color:rgba(255,255,255,.6);">'+acadName+' · '+players.length+' لاعب</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="padding:16px;">';
+
+    if(!players.length){
+      html += '<div style="text-align:center;padding:48px;color:#94a3b8;"><div style="font-size:48px;margin-bottom:12px;">📊</div>لا توجد تقارير بعد</div>';
+    } else {
+      // بطاقة أفضل لاعب
+      if(best){
+        html +=
+          '<div style="background:linear-gradient(135deg,#fef9c3,#fef08a);border:2px solid #f59e0b;border-radius:16px;padding:16px;margin-bottom:16px;text-align:center;">'+
+            '<div style="font-size:28px;margin-bottom:4px;">🏆</div>'+
+            '<div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:4px;">أفضل لاعب في الأكاديمية</div>'+
+            '<div style="font-size:18px;font-weight:900;color:#0f172a;">'+best.name+(best.jersey?' #'+best.jersey:'')+'</div>'+
+            '<div style="font-size:22px;color:#f59e0b;margin:4px 0;">'+'★'.repeat(Math.round(parseFloat(avg(best.ratings)||0)))+'</div>'+
+            '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;">'+
+              '<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px;"><div style="font-size:18px;font-weight:900;color:#b81d22;">'+best.goals+'</div><div style="font-size:9px;color:#64748b;">أهداف</div></div>'+
+              '<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px;"><div style="font-size:18px;font-weight:900;color:#1d4ed8;">'+best.assists+'</div><div style="font-size:9px;color:#64748b;">تمريرات</div></div>'+
+              '<div style="background:rgba(255,255,255,.7);border-radius:8px;padding:8px;"><div style="font-size:18px;font-weight:900;color:#7c3aed;">'+best.matches+'</div><div style="font-size:9px;color:#64748b;">مباريات</div></div>'+
+            '</div>'+
+          '</div>';
+      }
+
+      // جدول اللاعبين
+      html += '<div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:16px;">'+
+        '<div style="padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:800;color:#475569;">ترتيب اللاعبين حسب التقييم</div>';
+
+      players.forEach(function(p, i){
+        var avRat = avg(p.ratings);
+        var avTech = avg(p.tech);
+        var avPhys = avg(p.physical);
+        var avMent = avg(p.mental);
+        var starCount = avRat!=='—' ? Math.round(parseFloat(avRat)) : 0;
+        html +=
+          '<div style="padding:12px 14px;border-bottom:1px solid #f1f5f9;">'+
+            '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+              '<div style="width:28px;height:28px;background:'+(i===0?'#f59e0b':i===1?'#94a3b8':i===2?'#b45309':'#e2e8f0')+';border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:'+(i<3?'#fff':'#475569')+';flex-shrink:0;">'+(i+1)+'</div>'+
+              '<div style="flex:1;">'+
+                '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+p.name+(p.jersey?' #'+p.jersey:'')+'</div>'+
+                '<div style="font-size:12px;color:#f59e0b;">'+'★'.repeat(starCount)+'☆'.repeat(5-starCount)+' <span style="color:#64748b;font-size:10px;">('+avRat+'/5)</span></div>'+
+              '</div>'+
+              '<div style="text-align:center;background:#fef2f2;border-radius:8px;padding:6px 10px;">'+
+                '<div style="font-size:16px;font-weight:900;color:#b81d22;">'+p.goals+'</div>'+
+                '<div style="font-size:9px;color:#94a3b8;">⚽</div>'+
+              '</div>'+
+            '</div>'+
+            '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;">'+
+              '<div style="background:#f0fdf4;border-radius:6px;padding:5px;text-align:center;"><div style="font-size:11px;font-weight:900;color:#16a34a;">'+avTech+'</div><div style="font-size:9px;color:#94a3b8;">فني</div></div>'+
+              '<div style="background:#f0f9ff;border-radius:6px;padding:5px;text-align:center;"><div style="font-size:11px;font-weight:900;color:#0369a1;">'+avPhys+'</div><div style="font-size:9px;color:#94a3b8;">بدني</div></div>'+
+              '<div style="background:#faf5ff;border-radius:6px;padding:5px;text-align:center;"><div style="font-size:11px;font-weight:900;color:#7c3aed;">'+avMent+'</div><div style="font-size:9px;color:#94a3b8;">ذهني</div></div>'+
+              '<div style="background:#f0fdf4;border-radius:6px;padding:5px;text-align:center;"><div style="font-size:11px;font-weight:900;color:#1d4ed8;">'+p.assists+'</div><div style="font-size:9px;color:#94a3b8;">تمريرات</div></div>'+
+              '<div style="background:#f8fafc;border-radius:6px;padding:5px;text-align:center;"><div style="font-size:11px;font-weight:900;color:#475569;">'+p.matches+'</div><div style="font-size:9px;color:#94a3b8;">مباريات</div></div>'+
+            '</div>'+
+            (p.yellow||p.red ? '<div style="margin-top:6px;font-size:11px;">'+(p.yellow?'🟡 '+p.yellow+' صفراء  ':'')+  (p.red?'🔴 '+p.red+' حمراء':'')+'</div>' : '')+
+          '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div style="height:80px;"></div></div></div>';
+    document.getElementById('app').innerHTML = html;
+  });
+}
+
+// ════════════════════════════════════════
+// جدول مباريات الأكاديمية
+// ════════════════════════════════════════
+function renderAcadSchedule(){
+  var acadId   = sessionStorage.getItem('kaasAcadId');
+  var acadName = sessionStorage.getItem('kaasAcadName');
+  if(!acadId){ go('acad_login'); return; }
+
+  showL();
+  Promise.all([apiGet('جدول المباريات'), apiGet('نتائج المباريات')]).then(function(res){
+    var schedule = (res[0]||[]);
+    var results  = (res[1]||[]);
+
+    // فهرس النتائج
+    var resMap = {};
+    results.forEach(function(r){
+      var t1=(r['الفريق الأول']||r.team1||'').trim();
+      var t2=(r['الفريق الثاني']||r.team2||'').trim();
+      if(t1&&t2) resMap[t1+'|'+t2] = r['النتيجة']||r.result||'';
+    });
+
+    // فلترة مباريات هذه الأكاديمية
+    var myMatches = schedule.filter(function(m){
+      var t1=(m['الفريق الأول']||m.team1||'').trim();
+      var t2=(m['الفريق الثاني']||m.team2||'').trim();
+      return t1===acadName || t2===acadName;
+    });
+
+    myMatches.sort(function(a,b){
+      var da=String(a['التاريخ']||a.date||'');
+      var db=String(b['التاريخ']||b.date||'');
+      return da.localeCompare(db);
+    });
+
+    var html =
+      '<div style="max-width:600px;margin:0 auto;">'+
+        '<div style="background:linear-gradient(135deg,#0369a1,#075985);padding:20px 16px;display:flex;align-items:center;gap:12px;">'+
+          '<button onclick="go(\'acad_dashboard\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;font-size:18px;cursor:pointer;flex-shrink:0;">←</button>'+
+          '<div>'+
+            '<div style="font-size:16px;font-weight:900;color:#fff;">جدول مباريات الفريق</div>'+
+            '<div style="font-size:10px;color:rgba(255,255,255,.6);">'+acadName+' · '+myMatches.length+' مباراة</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="padding:16px;">';
+
+    if(!myMatches.length){
+      html += '<div style="text-align:center;padding:48px;color:#94a3b8;">'+
+        '<div style="font-size:48px;margin-bottom:12px;">📅</div>'+
+        '<div style="font-size:14px;font-weight:700;">لا توجد مباريات مجدولة</div>'+
+      '</div>';
+    } else {
+      var today = new Date().toISOString().split('T')[0];
+      myMatches.forEach(function(m){
+        var t1=(m['الفريق الأول']||m.team1||'').trim();
+        var t2=(m['الفريق الثاني']||m.team2||'').trim();
+        var date=String(m['التاريخ']||m.date||'').split('T')[0];
+        var time=m['الوقت']||m.time||'';
+        var venue=m['الملعب']||m.venue||'';
+        var cat=m['الفئة']||m.category||'';
+        var result=resMap[t1+'|'+t2]||resMap[t2+'|'+t1]||'';
+        var isPast = date && date < today;
+        var isToday = date === today;
+        var opponent = t1===acadName ? t2 : t1;
+        var isHome   = t1===acadName;
+
+        html +=
+          '<div style="background:#fff;border-radius:12px;border:1px solid '+(isToday?'#f59e0b':isPast?'#e2e8f0':'#bfdbfe')+';margin-bottom:10px;overflow:hidden;">'+
+            '<div style="padding:3px 12px;background:'+(isToday?'#f59e0b':isPast?'#f1f5f9':'#1d4ed8')+';font-size:10px;font-weight:900;color:#fff;display:flex;justify-content:space-between;">'+
+              '<span>'+(isToday?'⚡ اليوم':isPast?'انتهت':'قادمة')+'</span>'+
+              '<span>'+cat+'</span>'+
+            '</div>'+
+            '<div style="padding:14px;">'+
+              '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'+
+                '<div style="flex:1;text-align:center;">'+
+                  '<div style="font-size:12px;font-weight:900;color:#0369a1;">'+(isHome?acadName:opponent)+'</div>'+
+                  '<div style="font-size:9px;color:#94a3b8;">'+(isHome?'🏠 ديار':'🛫 ضيف')+'</div>'+
+                '</div>'+
+                '<div style="font-size:18px;font-weight:900;color:#0f172a;padding:8px 14px;background:#f8fafc;border-radius:10px;min-width:60px;text-align:center;">'+
+                  (result ? result : (isPast?'انتهت':'VS'))+
+                '</div>'+
+                '<div style="flex:1;text-align:center;">'+
+                  '<div style="font-size:12px;font-weight:900;color:#64748b;">'+(isHome?opponent:acadName)+'</div>'+
+                  '<div style="font-size:9px;color:#94a3b8;">'+(isHome?'🛫 ضيف':'🏠 ديار')+'</div>'+
+                '</div>'+
+              '</div>'+
+              '<div style="display:flex;gap:10px;margin-top:10px;font-size:11px;color:#64748b;">'+
+                '<span><i class="fas fa-calendar-alt" style="color:#0369a1;"></i> '+date+'</span>'+
+                (time?'<span><i class="fas fa-clock" style="color:#0369a1;"></i> '+time+'</span>':'')+
+                (venue?'<span><i class="fas fa-map-marker-alt" style="color:#0369a1;"></i> '+venue+'</span>':'')+
+              '</div>'+
+            '</div>'+
+          '</div>';
+      });
+    }
+
+    html += '<div style="height:80px;"></div></div></div>';
+    document.getElementById('app').innerHTML = html;
+  });
+}
+
+// ════════════════════════════════════════
 function renderAcadLogin() {
   document.getElementById('app').innerHTML =
     '<div style="padding:40px 16px;max-width:360px;margin:0 auto;">'+
@@ -1974,6 +2197,10 @@ function renderAcadDashboard() {
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
           '<button class="btn" onclick="go(\'match_report\')" style="background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;padding:11px;"><i class="fas fa-file-alt"></i> تقرير مباراة</button>'+
           '<button class="btn" onclick="go(\'acad_reports\')" style="background:linear-gradient(135deg,#1d4ed8,#1e40af);color:#fff;padding:11px;"><i class="fas fa-chart-bar"></i> عرض التقارير</button>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
+          '<button class="btn" onclick="go(\'acad_stats\')" style="background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;padding:11px;"><i class="fas fa-chart-line"></i> إحصاءات اللاعبين</button>'+
+          '<button class="btn" onclick="go(\'acad_schedule\')" style="background:linear-gradient(135deg,#0369a1,#075985);color:#fff;padding:11px;"><i class="fas fa-calendar-alt"></i> جدول مباريات الفريق</button>'+
         '</div>'+
         '<button class="btn" onclick="go(\'acad_message\')" style="background:linear-gradient(135deg,#0e7490,#155e75);color:#fff;margin-top:8px;"><i class="fas fa-paper-plane"></i> إرسال رسالة / ملاحظة للإدارة</button>'+
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">'+
