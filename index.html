@@ -7392,123 +7392,200 @@ function openBroadcast(){
   showL();
   apiGet('الأكاديميات').then(function(acadList){
     hideL();
-    if(!acadList||!acadList.length){ alert('لا توجد أكاديميات مسجلة'); return; }
-
-    var defMsg = 'السلام عليكم 🏆\nإشعار من إدارة بطولة '+CONFIG.TOURNAMENT_NAME+' '+CONFIG.TOURNAMENT_SHORT+'.\n\n✏️ اكتب رسالتك هنا...\n\nمع تحيات إدارة البطولة 🏆';
-
-    var modalHtml =
-      '<div class="modal-bg" id="broadcastModal" onclick="if(event.target===this)this.remove()">'+
-        '<div class="modal" style="max-height:90vh;overflow-y:auto;">'+
-          '<div class="modal-handle"></div>'+
-          '<div class="modal-title"><i class="fab fa-whatsapp" style="color:#25d366;"></i> إشعار جماعي للأكاديميات</div>'+
-
-          // رسالة مخصصة
-          '<div style="font-size:12px;font-weight:800;color:#0f172a;margin-bottom:6px;">✏️ نص الرسالة:</div>'+
-          '<textarea id="broadcastMsg" style="width:100%;box-sizing:border-box;min-height:120px;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;resize:vertical;outline:none;margin-bottom:10px;">'+defMsg+'</textarea>'+
-
-          // فلتر
-          '<div style="display:flex;gap:8px;margin-bottom:12px;">'+
-            '<button onclick="broadcastFilter(\'all\')" id="bfAll" style="flex:1;padding:7px;border-radius:8px;border:none;background:#0D3318;color:#fff;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">الكل ('+acadList.length+')</button>'+
-            '<button onclick="broadcastFilter(\'approved\')" id="bfApproved" style="flex:1;padding:7px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#334155;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">المعتمدة</button>'+
-            '<button onclick="broadcastFilter(\'pending\')" id="bfPending" style="flex:1;padding:7px;border-radius:8px;border:1px solid #e2e8f0;background:#f8fafc;color:#334155;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;">المعلقة</button>'+
-          '</div>'+
-
-          // قائمة الأكاديميات
-          '<div id="broadcastList">'+
-          acadList.map(function(a,idx){
-            var phone=(a.phone||'').replace(/\D/g,'');
-            var statusColor=a.status==='معتمد'?'#16a34a':'#d97706';
-            return '<div class="bc-item" data-status="'+(a.status||'معلق')+'" style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f1f5f9;">'+
-              '<input type="checkbox" id="bc_'+idx+'" checked style="width:17px;height:17px;accent-color:#0D3318;flex-shrink:0;">'+
-              '<div style="flex:1;min-width:0;">'+
-                '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+(a.name||'أكاديمية')+'</div>'+
-                '<div style="font-size:10px;color:#64748b;">'+(a.city||'')+(phone?' · 0'+phone:'')+'  <span style="color:'+statusColor+';font-weight:800;">'+(a.status||'معلق')+'</span></div>'+
-              '</div>'+
-              (phone?'<a id="wa_'+idx+'" href="#" onclick="sendOne(\''+phone+'\','+idx+');return false;" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border-radius:8px;padding:6px 10px;text-decoration:none;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;"><i class="fab fa-whatsapp"></i> إرسال</a>':'<span style="font-size:10px;color:#94a3b8;">لا يوجد رقم</span>')+
-            '</div>';
-          }).join('')+
-          '</div>'+
-
-          // أزرار الإجراء
-          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;">'+
-            '<button onclick="sendAllBroadcast()" style="background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fab fa-whatsapp"></i> إرسال للكل المحددين</button>'+
-            '<button onclick="copyPhones()" style="background:linear-gradient(135deg,#0D3318,#1A5C30);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;"><i class="fas fa-copy"></i> نسخ الأرقام</button>'+
-          '</div>'+
-          '<button onclick="document.getElementById(\'broadcastModal\').remove()" class="btn btn-light" style="margin-top:8px;">إغلاق</button>'+
-        '</div>'+
-      '</div>';
-
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-    // حفظ بيانات الأكاديميات للاستخدام في الدوال
+    if(!acadList||!acadList.length){ showToast('لا توجد أكاديميات مسجلة'); return; }
     window._bcAcads = acadList;
-  }).catch(function(){ hideL(); showToast('فشل تحميل البيانات'); });
+
+    // بناء الـ overlay
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-bg';
+    overlay.id = 'broadcastModal';
+    overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+    var modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.cssText = 'max-height:90vh;overflow-y:auto;';
+
+    // handle
+    var handle = document.createElement('div');
+    handle.className = 'modal-handle';
+    modal.appendChild(handle);
+
+    // title
+    var title = document.createElement('div');
+    title.className = 'modal-title';
+    title.innerHTML = '<i class="fab fa-whatsapp" style="color:#25d366;"></i> إشعار جماعي للأكاديميات';
+    modal.appendChild(title);
+
+    // label
+    var lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:12px;font-weight:800;color:#0f172a;margin-bottom:6px;';
+    lbl.textContent = '✏️ نص الرسالة:';
+    modal.appendChild(lbl);
+
+    // textarea
+    var ta = document.createElement('textarea');
+    ta.id = 'broadcastMsg';
+    ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:120px;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;resize:vertical;outline:none;margin-bottom:10px;';
+    ta.value = 'السلام عليكم 🏆\nإشعار من إدارة بطولة '+CONFIG.TOURNAMENT_NAME+'.\n\n✏️ اكتب رسالتك هنا...\n\nمع تحيات إدارة البطولة 🏆';
+    modal.appendChild(ta);
+
+    // فلتر أزرار
+    var filterRow = document.createElement('div');
+    filterRow.style.cssText = 'display:flex;gap:8px;margin-bottom:12px;';
+    [{id:'bfAll',lbl:'الكل ('+acadList.length+')',val:'all'},{id:'bfApproved',lbl:'المعتمدة',val:'approved'},{id:'bfPending',lbl:'المعلقة',val:'pending'}].forEach(function(f,fi){
+      var fb = document.createElement('button');
+      fb.id = f.id;
+      fb.textContent = f.lbl;
+      fb.style.cssText = 'flex:1;padding:7px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;'+(fi===0?'border:none;background:#0D3318;color:#fff;':'border:1px solid #e2e8f0;background:#f8fafc;color:#334155;');
+      fb.onclick = function(){ broadcastFilter(f.val); };
+      filterRow.appendChild(fb);
+    });
+    modal.appendChild(filterRow);
+
+    // قائمة الأكاديميات
+    var list = document.createElement('div');
+    list.id = 'broadcastList';
+    acadList.forEach(function(a, idx){
+      var phone = (a.phone||'').replace(/\D/g,'');
+      var approved = (a.status||'')==='معتمد';
+
+      var row = document.createElement('div');
+      row.className = 'bc-item';
+      row.dataset.status = a.status||'معلق';
+      row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f1f5f9;';
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.id = 'bc_'+idx;
+      cb.checked = true;
+      cb.style.cssText = 'width:17px;height:17px;accent-color:#0D3318;flex-shrink:0;';
+      row.appendChild(cb);
+
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      var nm = document.createElement('div');
+      nm.style.cssText = 'font-size:13px;font-weight:800;color:#0f172a;';
+      nm.textContent = a.name||'أكاديمية';
+      var sub = document.createElement('div');
+      sub.style.cssText = 'font-size:10px;color:#64748b;';
+      sub.textContent = (a.city||'')+(phone?' · 0'+phone:'');
+      var badge = document.createElement('span');
+      badge.style.cssText = 'color:'+(approved?'#16a34a':'#d97706')+';font-weight:800;margin-right:4px;';
+      badge.textContent = a.status||'معلق';
+      sub.appendChild(badge);
+      info.appendChild(nm);
+      info.appendChild(sub);
+      row.appendChild(info);
+
+      if(phone){
+        var waBtn = document.createElement('button');
+        waBtn.id = 'wa_'+idx;
+        waBtn.style.cssText = 'background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;cursor:pointer;';
+        waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> إرسال';
+        (function(ph,i,btn){
+          btn.onclick = function(){
+            var msg = document.getElementById('broadcastMsg').value||'';
+            window.open('https://api.whatsapp.com/send?phone=968'+ph+'&text='+encodeURIComponent(msg),'_blank');
+            btn.style.background='linear-gradient(135deg,#64748b,#475569)';
+            btn.textContent='✓ أُرسل';
+          };
+        })(phone, idx, waBtn);
+        row.appendChild(waBtn);
+      } else {
+        var noPhone = document.createElement('span');
+        noPhone.style.cssText = 'font-size:10px;color:#94a3b8;flex-shrink:0;';
+        noPhone.textContent = 'لا يوجد رقم';
+        row.appendChild(noPhone);
+      }
+      list.appendChild(row);
+    });
+    modal.appendChild(list);
+
+    // أزرار الإجراء
+    var actRow = document.createElement('div');
+    actRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;';
+
+    var sendAllBtn = document.createElement('button');
+    sendAllBtn.style.cssText = 'background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;';
+    sendAllBtn.innerHTML = '<i class="fab fa-whatsapp"></i> إرسال للكل';
+    sendAllBtn.onclick = sendAllBroadcast;
+    actRow.appendChild(sendAllBtn);
+
+    var copyBtn = document.createElement('button');
+    copyBtn.style.cssText = 'background:linear-gradient(135deg,#0D3318,#1A5C30);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;';
+    copyBtn.innerHTML = '<i class="fas fa-copy"></i> نسخ الأرقام';
+    copyBtn.onclick = copyPhones;
+    actRow.appendChild(copyBtn);
+    modal.appendChild(actRow);
+
+    var closeBtn = document.createElement('button');
+    closeBtn.className = 'btn btn-light';
+    closeBtn.style.marginTop = '8px';
+    closeBtn.textContent = 'إغلاق';
+    closeBtn.onclick = function(){ overlay.remove(); };
+    modal.appendChild(closeBtn);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+
+  }).catch(function(e){ hideL(); showToast('فشل تحميل البيانات'); });
 }
 
 function broadcastFilter(type){
   document.querySelectorAll('.bc-item').forEach(function(el){
-    var status = el.getAttribute('data-status');
+    var status = el.dataset.status||'';
     var show = type==='all' || (type==='approved'&&status==='معتمد') || (type==='pending'&&status!=='معتمد');
     el.style.display = show?'flex':'none';
     var cb = el.querySelector('input[type=checkbox]');
     if(cb) cb.checked = show;
   });
   ['bfAll','bfApproved','bfPending'].forEach(function(id){
-    var btn=document.getElementById(id);
-    if(btn){btn.style.background='#f8fafc';btn.style.color='#334155';btn.style.border='1px solid #e2e8f0';}
+    var b=document.getElementById(id);
+    if(b){b.style.background='#f8fafc';b.style.color='#334155';b.style.border='1px solid #e2e8f0';}
   });
-  var activeId = type==='all'?'bfAll':type==='approved'?'bfApproved':'bfPending';
-  var ab=document.getElementById(activeId);
+  var activeMap={all:'bfAll',approved:'bfApproved',pending:'bfPending'};
+  var ab=document.getElementById(activeMap[type]);
   if(ab){ab.style.background='#0D3318';ab.style.color='#fff';ab.style.border='none';}
-}
-
-function sendOne(phone, idx){
-  var msg = (document.getElementById('broadcastMsg')||{}).value || '';
-  var encoded = encodeURIComponent(msg);
-  window.open('https://api.whatsapp.com/send?phone=968'+phone+'&text='+encoded,'_blank');
-  var wa = document.getElementById('wa_'+idx);
-  if(wa){wa.style.background='linear-gradient(135deg,#64748b,#475569)';wa.textContent='✓ أُرسل';}
 }
 
 function sendAllBroadcast(){
   var acads = window._bcAcads||[];
   var msg = (document.getElementById('broadcastMsg')||{}).value||'';
   var encoded = encodeURIComponent(msg);
-  var items = document.querySelectorAll('.bc-item');
   var sent = 0;
-  items.forEach(function(el, idx){
+  document.querySelectorAll('.bc-item').forEach(function(el, idx){
     var cb = el.querySelector('input[type=checkbox]');
     if(!cb||!cb.checked) return;
-    var phone = (acads[idx]&&acads[idx].phone||'').replace(/\D/g,'');
+    var phone = ((acads[idx]&&acads[idx].phone)||'').replace(/\D/g,'');
     if(!phone) return;
-    setTimeout(function(){
-      window.open('https://api.whatsapp.com/send?phone=968'+phone+'&text='+encoded,'_blank');
-      var wa=document.getElementById('wa_'+idx);
-      if(wa){wa.style.background='linear-gradient(135deg,#64748b,#475569)';wa.textContent='✓ أُرسل';}
-    }, sent*1200);
+    var delay = sent*1500;
+    (function(ph, i, d){
+      setTimeout(function(){
+        window.open('https://api.whatsapp.com/send?phone=968'+ph+'&text='+encoded,'_blank');
+        var wa=document.getElementById('wa_'+i);
+        if(wa){wa.style.background='linear-gradient(135deg,#64748b,#475569)';wa.textContent='✓ أُرسل';}
+      }, d);
+    })(phone, idx, delay);
     sent++;
   });
   if(!sent){ showToast('لا توجد أكاديميات محددة لها رقم'); return; }
-  showToast('سيتم فتح '+sent+' نافذة واتساب تباعاً');
+  showToast('سيتم فتح '+sent+' محادثة واتساب تباعاً');
 }
 
 function copyPhones(){
   var acads = window._bcAcads||[];
-  var items = document.querySelectorAll('.bc-item');
   var phones = [];
-  items.forEach(function(el, idx){
+  document.querySelectorAll('.bc-item').forEach(function(el, idx){
     var cb = el.querySelector('input[type=checkbox]');
     if(!cb||!cb.checked) return;
-    var phone = (acads[idx]&&acads[idx].phone||'').replace(/\D/g,'');
+    var phone = ((acads[idx]&&acads[idx].phone)||'').replace(/\D/g,'');
     if(phone) phones.push('968'+phone);
   });
   if(!phones.length){ showToast('لا توجد أرقام محددة'); return; }
   var txt = phones.join('\n');
   navigator.clipboard.writeText(txt).then(function(){
     showToast('تم نسخ '+phones.length+' رقم — الصقها في واتساب بث');
-  }).catch(function(){
-    prompt('انسخ الأرقام:', txt);
-  });
+  }).catch(function(){ prompt('انسخ الأرقام:', txt); });
 }
 
 // ════════════════════════════════════════
