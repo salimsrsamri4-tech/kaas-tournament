@@ -1,4 +1,4 @@
-var CACHE = 'kaas-v22';
+var CACHE = 'kaas-v23';
 var FILES = ['/', '/index.html', '/hero_bg.jpg'];
 
 self.addEventListener('install', function(e){
