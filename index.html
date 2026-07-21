@@ -7527,7 +7527,7 @@ function openBroadcast(){
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-  }).catch(function(e){ showToast('فشل تحميل البيانات'); });
+  }).catch(function(e){ showToast('خطأ: '+(e&&e.message?e.message:'فشل')); console.error('openBroadcast error',e); });
 }
 
 function broadcastFilter(type){
