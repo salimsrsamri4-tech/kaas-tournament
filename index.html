@@ -7389,145 +7389,133 @@ function sendReminderWhatsApp(){
 // إشعار جماعي لجميع الأكاديميات
 // ════════════════════════════════════════
 function openBroadcast(){
-  showToast('جاري التحميل...');
+  // افتح النافذة فوراً بدون انتظار API
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-bg';
+  overlay.id = 'broadcastModal';
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
+
+  var modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.style.cssText = 'max-height:90vh;overflow-y:auto;';
+
+  var handle = document.createElement('div');
+  handle.className = 'modal-handle';
+  modal.appendChild(handle);
+
+  var title = document.createElement('div');
+  title.className = 'modal-title';
+  title.innerHTML = '<i class="fab fa-whatsapp" style="color:#25d366;"></i> إشعار جماعي للأكاديميات';
+  modal.appendChild(title);
+
+  var lbl = document.createElement('div');
+  lbl.style.cssText = 'font-size:12px;font-weight:800;color:#0f172a;margin-bottom:6px;';
+  lbl.textContent = '✏️ نص الرسالة:';
+  modal.appendChild(lbl);
+
+  var ta = document.createElement('textarea');
+  ta.id = 'broadcastMsg';
+  ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:130px;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;resize:vertical;outline:none;margin-bottom:10px;';
+  ta.value = 'السلام عليكم\nإشعار من إدارة بطولة كأس العرب للأكاديميات.\n\n[اكتب رسالتك هنا]\n\nمع تحيات الإدارة 🏆';
+  modal.appendChild(ta);
+
+  // منطقة قائمة الأكاديميات
+  var listArea = document.createElement('div');
+  listArea.id = 'broadcastList';
+  listArea.style.cssText = 'min-height:60px;';
+  var loadingMsg = document.createElement('div');
+  loadingMsg.style.cssText = 'text-align:center;color:#64748b;font-size:13px;padding:16px;';
+  loadingMsg.textContent = '⏳ جاري تحميل الأكاديميات...';
+  listArea.appendChild(loadingMsg);
+  modal.appendChild(listArea);
+
+  var actRow = document.createElement('div');
+  actRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;';
+
+  var sendAllBtn = document.createElement('button');
+  sendAllBtn.style.cssText = 'background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;';
+  sendAllBtn.innerHTML = '<i class="fab fa-whatsapp"></i> إرسال للكل';
+  sendAllBtn.onclick = sendAllBroadcast;
+  actRow.appendChild(sendAllBtn);
+
+  var copyBtn = document.createElement('button');
+  copyBtn.style.cssText = 'background:linear-gradient(135deg,#0D3318,#1A5C30);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;';
+  copyBtn.innerHTML = '<i class="fas fa-copy"></i> نسخ الأرقام';
+  copyBtn.onclick = copyPhones;
+  actRow.appendChild(copyBtn);
+  modal.appendChild(actRow);
+
+  var closeBtn = document.createElement('button');
+  closeBtn.className = 'btn btn-light';
+  closeBtn.style.marginTop = '8px';
+  closeBtn.textContent = 'إغلاق';
+  closeBtn.onclick = function(){ overlay.remove(); };
+  modal.appendChild(closeBtn);
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  // حمّل الأكاديميات في الخلفية بعد فتح النافذة
   apiGet('الأكاديميات').then(function(acadList){
-    if(!acadList||!acadList.length){ showToast('لا توجد أكاديميات مسجلة'); return; }
-    window._bcAcads = acadList;
-
-    // بناء الـ overlay
-    var overlay = document.createElement('div');
-    overlay.className = 'modal-bg';
-    overlay.id = 'broadcastModal';
-    overlay.addEventListener('click', function(e){ if(e.target===overlay) overlay.remove(); });
-
-    var modal = document.createElement('div');
-    modal.className = 'modal';
-    modal.style.cssText = 'max-height:90vh;overflow-y:auto;';
-
-    // handle
-    var handle = document.createElement('div');
-    handle.className = 'modal-handle';
-    modal.appendChild(handle);
-
-    // title
-    var title = document.createElement('div');
-    title.className = 'modal-title';
-    title.innerHTML = '<i class="fab fa-whatsapp" style="color:#25d366;"></i> إشعار جماعي للأكاديميات';
-    modal.appendChild(title);
-
-    // label
-    var lbl = document.createElement('div');
-    lbl.style.cssText = 'font-size:12px;font-weight:800;color:#0f172a;margin-bottom:6px;';
-    lbl.textContent = '✏️ نص الرسالة:';
-    modal.appendChild(lbl);
-
-    // textarea
-    var ta = document.createElement('textarea');
-    ta.id = 'broadcastMsg';
-    ta.style.cssText = 'width:100%;box-sizing:border-box;min-height:120px;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;resize:vertical;outline:none;margin-bottom:10px;';
-    ta.value = 'السلام عليكم 🏆\nإشعار من إدارة بطولة '+CONFIG.TOURNAMENT_NAME+'.\n\n✏️ اكتب رسالتك هنا...\n\nمع تحيات إدارة البطولة 🏆';
-    modal.appendChild(ta);
-
-    // فلتر أزرار
-    var filterRow = document.createElement('div');
-    filterRow.style.cssText = 'display:flex;gap:8px;margin-bottom:12px;';
-    [{id:'bfAll',lbl:'الكل ('+acadList.length+')',val:'all'},{id:'bfApproved',lbl:'المعتمدة',val:'approved'},{id:'bfPending',lbl:'المعلقة',val:'pending'}].forEach(function(f,fi){
-      var fb = document.createElement('button');
-      fb.id = f.id;
-      fb.textContent = f.lbl;
-      fb.style.cssText = 'flex:1;padding:7px;border-radius:8px;font-family:Cairo,sans-serif;font-size:12px;font-weight:800;cursor:pointer;'+(fi===0?'border:none;background:#0D3318;color:#fff;':'border:1px solid #e2e8f0;background:#f8fafc;color:#334155;');
-      fb.onclick = function(){ broadcastFilter(f.val); };
-      filterRow.appendChild(fb);
-    });
-    modal.appendChild(filterRow);
-
-    // قائمة الأكاديميات
-    var list = document.createElement('div');
-    list.id = 'broadcastList';
+    window._bcAcads = acadList||[];
+    listArea.innerHTML = '';
+    if(!acadList||!acadList.length){
+      listArea.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:13px;padding:16px;">لا توجد أكاديميات مسجلة</div>';
+      return;
+    }
     acadList.forEach(function(a, idx){
       var phone = (a.phone||'').replace(/\D/g,'');
       var approved = (a.status||'')==='معتمد';
-
       var row = document.createElement('div');
       row.className = 'bc-item';
       row.dataset.status = a.status||'معلق';
       row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f1f5f9;';
 
       var cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.id = 'bc_'+idx;
-      cb.checked = true;
-      cb.style.cssText = 'width:17px;height:17px;accent-color:#0D3318;flex-shrink:0;';
+      cb.type='checkbox'; cb.id='bc_'+idx; cb.checked=true;
+      cb.style.cssText='width:17px;height:17px;accent-color:#0D3318;flex-shrink:0;';
       row.appendChild(cb);
 
       var info = document.createElement('div');
-      info.style.cssText = 'flex:1;min-width:0;';
+      info.style.cssText='flex:1;min-width:0;';
       var nm = document.createElement('div');
-      nm.style.cssText = 'font-size:13px;font-weight:800;color:#0f172a;';
-      nm.textContent = a.name||'أكاديمية';
+      nm.style.cssText='font-size:13px;font-weight:800;color:#0f172a;';
+      nm.textContent=a.name||'أكاديمية';
       var sub = document.createElement('div');
-      sub.style.cssText = 'font-size:10px;color:#64748b;';
-      sub.textContent = (a.city||'')+(phone?' · 0'+phone:'');
+      sub.style.cssText='font-size:10px;color:#64748b;';
+      sub.textContent=(a.city||'')+(phone?' · 0'+phone:'');
       var badge = document.createElement('span');
-      badge.style.cssText = 'color:'+(approved?'#16a34a':'#d97706')+';font-weight:800;margin-right:4px;';
-      badge.textContent = a.status||'معلق';
+      badge.style.cssText='color:'+(approved?'#16a34a':'#d97706')+';font-weight:800;margin-right:4px;';
+      badge.textContent=' · '+(a.status||'معلق');
       sub.appendChild(badge);
-      info.appendChild(nm);
-      info.appendChild(sub);
+      info.appendChild(nm); info.appendChild(sub);
       row.appendChild(info);
 
       if(phone){
         var waBtn = document.createElement('button');
-        waBtn.id = 'wa_'+idx;
-        waBtn.style.cssText = 'background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;cursor:pointer;';
-        waBtn.innerHTML = '<i class="fab fa-whatsapp"></i> إرسال';
-        (function(ph,i,btn){
-          btn.onclick = function(){
-            var msg = document.getElementById('broadcastMsg').value||'';
+        waBtn.id='wa_'+idx;
+        waBtn.style.cssText='background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-family:Cairo,sans-serif;font-size:11px;font-weight:800;white-space:nowrap;flex-shrink:0;cursor:pointer;';
+        waBtn.innerHTML='<i class="fab fa-whatsapp"></i> إرسال';
+        (function(ph,btn){
+          btn.onclick=function(){
+            var msg=document.getElementById('broadcastMsg').value||'';
             window.open('https://api.whatsapp.com/send?phone=968'+ph+'&text='+encodeURIComponent(msg),'_blank');
             btn.style.background='linear-gradient(135deg,#64748b,#475569)';
             btn.textContent='✓ أُرسل';
           };
-        })(phone, idx, waBtn);
+        })(phone,waBtn);
         row.appendChild(waBtn);
       } else {
-        var noPhone = document.createElement('span');
-        noPhone.style.cssText = 'font-size:10px;color:#94a3b8;flex-shrink:0;';
-        noPhone.textContent = 'لا يوجد رقم';
-        row.appendChild(noPhone);
+        var noP=document.createElement('span');
+        noP.style.cssText='font-size:10px;color:#94a3b8;flex-shrink:0;';
+        noP.textContent='لا يوجد رقم';
+        row.appendChild(noP);
       }
-      list.appendChild(row);
+      listArea.appendChild(row);
     });
-    modal.appendChild(list);
-
-    // أزرار الإجراء
-    var actRow = document.createElement('div');
-    actRow.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;';
-
-    var sendAllBtn = document.createElement('button');
-    sendAllBtn.style.cssText = 'background:linear-gradient(135deg,#25d366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;';
-    sendAllBtn.innerHTML = '<i class="fab fa-whatsapp"></i> إرسال للكل';
-    sendAllBtn.onclick = sendAllBroadcast;
-    actRow.appendChild(sendAllBtn);
-
-    var copyBtn = document.createElement('button');
-    copyBtn.style.cssText = 'background:linear-gradient(135deg,#0D3318,#1A5C30);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;';
-    copyBtn.innerHTML = '<i class="fas fa-copy"></i> نسخ الأرقام';
-    copyBtn.onclick = copyPhones;
-    actRow.appendChild(copyBtn);
-    modal.appendChild(actRow);
-
-    var closeBtn = document.createElement('button');
-    closeBtn.className = 'btn btn-light';
-    closeBtn.style.marginTop = '8px';
-    closeBtn.textContent = 'إغلاق';
-    closeBtn.onclick = function(){ overlay.remove(); };
-    modal.appendChild(closeBtn);
-
-    overlay.appendChild(modal);
-    document.body.appendChild(overlay);
-
-  }).catch(function(e){ showToast('خطأ: '+(e&&e.message?e.message:'فشل')); console.error('openBroadcast error',e); });
+  }).catch(function(){
+    listArea.innerHTML='<div style="text-align:center;color:#ef4444;font-size:13px;padding:16px;">تعذّر تحميل القائمة — اكتب الرسالة وأرسل يدوياً</div>';
+  });
 }
 
 function broadcastFilter(type){
