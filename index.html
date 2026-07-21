@@ -7389,9 +7389,8 @@ function sendReminderWhatsApp(){
 // إشعار جماعي لجميع الأكاديميات
 // ════════════════════════════════════════
 function openBroadcast(){
-  showL();
+  showToast('جاري التحميل...');
   apiGet('الأكاديميات').then(function(acadList){
-    hideL();
     if(!acadList||!acadList.length){ showToast('لا توجد أكاديميات مسجلة'); return; }
     window._bcAcads = acadList;
 
@@ -7528,7 +7527,7 @@ function openBroadcast(){
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
 
-  }).catch(function(e){ hideL(); showToast('فشل تحميل البيانات'); });
+  }).catch(function(e){ showToast('فشل تحميل البيانات'); });
 }
 
 function broadcastFilter(type){
