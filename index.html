@@ -7825,64 +7825,150 @@ function renderLeagueHome(){
 // ── تسجيل فريق جديد ─────────────────────
 function renderLeagueTeamReg(){
   lApp(
-    '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:16px 16px 8px;display:flex;align-items:center;gap:12px;">'+
-      '<button onclick="go(\'league_home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-      '<div style="font-size:15px;font-weight:900;color:#fff;">📋 تسجيل فريق جديد</div>'+
+    '<div style="background:linear-gradient(135deg,#3d0a0a,#8B1A1A);padding:16px 16px 12px;display:flex;align-items:center;gap:12px;">'+
+      '<button onclick="go(\'league_home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+      '<div>'+
+        '<div style="font-size:15px;font-weight:900;color:#C8A951;">📋 تسجيل فريق جديد</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.7);">دوري الدرجة الأولى — نادي إزكي 2026</div>'+
+      '</div>'+
     '</div>'+
-    '<div style="padding:16px;">'+
-      '<div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;">'+
-        '<div style="font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e94560;">معلومات الفريق</div>'+
-        leagueField('team_name','اسم الفريق','text','اسم الفريق الرسمي','','','','true')+
-        leagueField('team_city','المدينة / المنطقة','text','','','','')+
-        leagueField('team_color','لون الفريق الأساسي','text','مثال: أحمر وأبيض','','','')+
-        leagueField('team_ground','الملعب الرئيسي','text','','','','')+
+    '<div style="padding:14px;display:flex;flex-direction:column;gap:12px;">'+
+
+      // ── القسم 1: معلومات الفريق ──
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#8B1A1A,#5c1010);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">🏟️</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#C8A951;">معلومات الفريق</div>'+
+        '</div>'+
+        '<div style="padding:14px;">'+
+          leagueField('team_name','اسم الفريق الرسمي','text','','','','','true')+
+          leagueField('team_city','المدينة / المنطقة','text','مثال: أزكي','','','')+
+          leagueField('team_founded','سنة التأسيس','number','مثال: 2010','','','')+
+          leagueField('team_ground','الملعب الرئيسي','text','اسم الملعب','','','')+
+        '</div>'+
       '</div>'+
-      '<div style="background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;">'+
-        '<div style="font-size:12px;font-weight:800;color:#1a1a2e;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e94560;">مسؤول الفريق</div>'+
-        leagueField('manager_name','اسم المسؤول الرئيسي','text','','','','','true')+
-        leagueField('manager_phone','رقم الهاتف','tel','','','','','true')+
-        leagueField('manager_id','رقم الهوية / جواز السفر','text','','','','')+
-        leagueField('manager_pass','كلمة مرور الدخول','password','ستستخدمها للدخول لاحقاً','','','','true')+
-        leagueField('manager_pass2','تأكيد كلمة المرور','password','','','','','true')+
+
+      // ── القسم 2: ألوان اللبسة ──
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#0f3460,#1e4a7f);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">👕</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#93c5fd;">ألوان اللبسة</div>'+
+        '</div>'+
+        '<div style="padding:14px;">'+
+          // اللبسة الأساسية مع مربع اللون
+          '<div style="margin-bottom:12px;">'+
+            '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">لون اللبسة الأساسية (الرئيسية)</label>'+
+            '<div style="display:flex;align-items:center;gap:8px;">'+
+              '<input id="lt_team_color_pick" type="color" value="#8B1A1A" '+
+              'style="width:42px;height:38px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:#f8fafc;border:1.5px solid #e2e8f0;" '+
+              'oninput="document.getElementById(\'lt_team_color\').value=this.value">'+
+              '<input id="lt_team_color" type="text" placeholder="مثال: أحمر وأبيض / #8B1A1A" '+
+              'style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;outline:none;direction:rtl;">'+
+            '</div>'+
+          '</div>'+
+          // اللبسة الاحتياطية
+          '<div style="margin-bottom:4px;">'+
+            '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">لون اللبسة الاحتياطية (البديلة)</label>'+
+            '<div style="display:flex;align-items:center;gap:8px;">'+
+              '<input id="lt_team_color2_pick" type="color" value="#ffffff" '+
+              'style="width:42px;height:38px;border:none;border-radius:8px;cursor:pointer;padding:2px;background:#f8fafc;border:1.5px solid #e2e8f0;" '+
+              'oninput="document.getElementById(\'lt_team_color2\').value=this.value">'+
+              '<input id="lt_team_color2" type="text" placeholder="مثال: أبيض وأسود / #ffffff" '+
+              'style="flex:1;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;outline:none;direction:rtl;">'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
       '</div>'+
-      '<button onclick="submitLeagueTeamReg()" style="width:100%;background:linear-gradient(135deg,#e94560,#c23152);color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">تسجيل الفريق ✓</button>'+
+
+      // ── القسم 3: نبذة الفريق ──
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#1a4a1a,#2d6e2d);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">📖</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#86efac;">نبذة الفريق وبطولاته</div>'+
+        '</div>'+
+        '<div style="padding:14px;">'+
+          '<div style="margin-bottom:12px;">'+
+            '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">نبذة عن الفريق</label>'+
+            '<textarea id="lt_team_bio" rows="3" placeholder="اكتب نبذة مختصرة عن الفريق، تاريخه، وأهدافه..." '+
+            'style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;outline:none;direction:rtl;resize:none;line-height:1.6;"></textarea>'+
+          '</div>'+
+          '<div>'+
+            '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">الإنجازات والبطولات السابقة</label>'+
+            '<textarea id="lt_team_titles" rows="3" placeholder="مثال: بطل دوري 2022 · كأس المنطقة 2023 · المركز الثالث 2024..." '+
+            'style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;outline:none;direction:rtl;resize:none;line-height:1.6;"></textarea>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      // ── القسم 4: المسؤول ──
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#5a2d82,#7c3aed);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">👤</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#e9d5ff;">مسؤول الفريق</div>'+
+        '</div>'+
+        '<div style="padding:14px;">'+
+          leagueField('manager_name','اسم المسؤول الرئيسي','text','','','','','true')+
+          leagueField('manager_phone','رقم الهاتف','tel','','','','','true')+
+          leagueField('manager_id','رقم الهوية / جواز السفر','text','','','','')+
+          leagueField('manager_pass','كلمة مرور الدخول','password','ستستخدمها للدخول لاحقاً','','','<div style="font-size:10px;color:#94a3b8;margin-top:3px;">4 أحرف على الأقل · لا تشاركها مع أحد</div>','true')+
+          leagueField('manager_pass2','تأكيد كلمة المرور','password','','','','','true')+
+        '</div>'+
+      '</div>'+
+
+      '<button onclick="submitLeagueTeamReg()" '+
+      'style="width:100%;background:linear-gradient(135deg,#8B1A1A,#5c1010);color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;box-shadow:0 4px 16px rgba(139,26,26,.3);">'+
+      'إرسال طلب التسجيل ✓</button>'+
+
+      '<div style="font-size:10px;color:#94a3b8;text-align:center;">سيتم مراجعة طلبكم من الإدارة وإبلاغكم خلال 24 ساعة</div>'+
     '</div>'
   );
 }
 
 function leagueField(id,label,type,ph,val,extra,hint,req){
   return '<div style="margin-bottom:12px;">'+
-    '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">'+label+(req?'  <span style="color:#e94560;">*</span>':'')+'</label>'+
+    '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">'+label+(req?' <span style="color:#8B1A1A;">*</span>':'')+'</label>'+
     '<input id="lt_'+id+'" type="'+(type||'text')+'" placeholder="'+(ph||'')+'" value="'+(val||'')+'" '+
     'style="width:100%;box-sizing:border-box;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;outline:none;direction:rtl;" '+extra+'>'+
-    (hint?'<div style="font-size:10px;color:#94a3b8;margin-top:3px;">'+hint+'</div>':'')+
+    (hint?hint:'')+
   '</div>';
 }
 
-function glt(id){ var el=document.getElementById('lt_'+id); return el?el.value.trim():''; }
+function glt(id){
+  var el=document.getElementById('lt_'+id);
+  if(!el) return '';
+  return (el.value||'').trim();
+}
 
 function submitLeagueTeamReg(){
   var name=glt('team_name'), phone=glt('manager_phone'), mgr=glt('manager_name'), pass=glt('manager_pass'), pass2=glt('manager_pass2');
   if(!name||!phone||!mgr||!pass){ showToast('يرجى ملء الحقول المطلوبة *'); return; }
   if(pass!==pass2){ showToast('كلمتا المرور غير متطابقتين'); return; }
   if(pass.length<4){ showToast('كلمة المرور 4 أحرف على الأقل'); return; }
+
+  var bioEl=document.getElementById('lt_team_bio');
+  var titlesEl=document.getElementById('lt_team_titles');
+
   var teamId='T'+Date.now();
   var row = {
-    'تاريخ_التسجيل': new Date().toLocaleString('ar'),
-    'team_id': teamId,
-    'اسم_الفريق': name,
-    'المدينة': glt('team_city'),
-    'اللون': glt('team_color'),
-    'الملعب': glt('team_ground'),
-    'المسؤول': mgr,
-    'الهاتف': phone,
-    'رقم_الهوية': glt('manager_id'),
-    'كلمة_المرور': pass,
-    'الحالة': 'قيد المراجعة',
+    'تاريخ_التسجيل':   new Date().toLocaleString('ar'),
+    'team_id':          teamId,
+    'اسم_الفريق':      name,
+    'المدينة':          glt('team_city'),
+    'سنة_التأسيس':     glt('team_founded'),
+    'الملعب':           glt('team_ground'),
+    'اللون_الأساسي':   glt('team_color'),
+    'اللون_الاحتياطي': glt('team_color2'),
+    'نبذة_الفريق':     bioEl?bioEl.value.trim():'',
+    'البطولات':        titlesEl?titlesEl.value.trim():'',
+    'المسؤول':         mgr,
+    'الهاتف':          phone,
+    'رقم_الهوية':      glt('manager_id'),
+    'كلمة_المرور':     pass,
+    'الحالة':          'قيد المراجعة',
   };
   apiAppend(LEAGUE_CONFIG.SHEETS.TEAMS, row);
-  showToast('تم إرسال الطلب! سيتم مراجعته من الإدارة');
-  setTimeout(function(){ go('league_home'); }, 2000);
+  showToast('✅ تم إرسال الطلب! سيتم مراجعته خلال 24 ساعة');
+  setTimeout(function(){ go('league_home'); }, 2200);
 }
 
 // ── دخول الفريق ─────────────────────────
