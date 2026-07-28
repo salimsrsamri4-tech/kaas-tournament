@@ -414,7 +414,7 @@ var CONFIG = {
 // إعدادات دوري الدرجة الأولى
 // ══════════════════════════════════════
 var LEAGUE_CONFIG = {
-  GAS_URL: CONFIG.GAS_URL,
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbzpVqpPk-awFG_oBegfPuaJPF9bOwKpFIjcire0OKJXirKDQxNva9V6I2admxy5ccs-Qg/exec',
   ADMIN_PASS: '1251',
   NAME: 'دوري الدرجة الأولى',
   NAME_EN: 'First Division League',
@@ -590,6 +590,32 @@ function apiGet(sheet, forceRefresh) {
 }
 
 function invalidateCache(sheet){ delete _cache[sheet]; }
+
+// ── دوال API خاصة بالدوري (تستخدم LEAGUE_CONFIG.GAS_URL) ──
+var _leagueCache = {};
+function leagueApiGet(sheet, forceRefresh){
+  var url = LEAGUE_CONFIG.GAS_URL;
+  var now = Date.now();
+  var key = 'league_'+sheet;
+  if(!forceRefresh && _leagueCache[key] && (now-_leagueCache[key].t)<_CACHE_TTL){
+    return Promise.resolve(_leagueCache[key].d);
+  }
+  return fetch(url+'?sheet='+encodeURIComponent(sheet)+'&t='+now)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ _leagueCache[key]={d:d,t:Date.now()}; return d; })
+    .catch(function(){ return _leagueCache[key]?_leagueCache[key].d:[]; });
+}
+function leagueApiAppend(sheet, rowObj){
+  var url = LEAGUE_CONFIG.GAS_URL;
+  delete _leagueCache['league_'+sheet];
+  return fetch(url, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type':'text/plain'},
+    body: JSON.stringify({action:'append', sheet:sheet, data:[rowObj]})
+  }).then(function(){ return {status:'ok'}; })
+    .catch(function(){ return {status:'error'}; });
+}
 
 // تتبع العناصر المحذوفة في sessionStorage
 function markGalleryDeleted(url, title){
@@ -7966,7 +7992,7 @@ function submitLeagueTeamReg(){
     'كلمة_المرور':     pass,
     'الحالة':          'قيد المراجعة',
   };
-  apiAppend(LEAGUE_CONFIG.SHEETS.TEAMS, row);
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.TEAMS, row);
   showToast('✅ تم إرسال الطلب! سيتم مراجعته خلال 24 ساعة');
   setTimeout(function(){ go('league_home'); }, 2200);
 }
@@ -7994,7 +8020,7 @@ function submitLeagueTeamLogin(){
   var pass=(document.getElementById('lt_tl_pass')||{}).value||'';
   if(!phone||!pass){ showToast('أدخل رقم الهاتف وكلمة المرور'); return; }
   showToast('جاري التحقق...');
-  apiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
     var team=(teams||[]).find(function(t){
       return (t['الهاتف']||'').replace(/\D/g,'')===(phone||'').replace(/\D/g,'') && t['كلمة_المرور']===pass;
     });
@@ -8013,8 +8039,8 @@ function renderLeagueTeamDash(){
   if(!teamId){ go('league_team_login'); return; }
 
   Promise.all([
-    apiGet(LEAGUE_CONFIG.SHEETS.PLAYERS),
-    apiGet(LEAGUE_CONFIG.SHEETS.STAFF)
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.PLAYERS),
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.STAFF)
   ]).then(function(res){
     var players=(res[0]||[]).filter(function(p){ return p['team_id']===teamId; });
     var staff=(res[1]||[]).filter(function(s){ return s['team_id']===teamId; });
@@ -8133,7 +8159,7 @@ function submitLeaguePlayer(){
     'المركز':posEl?posEl.value:'',
     'الهاتف':glt('p_phone'),
   };
-  apiAppend(LEAGUE_CONFIG.SHEETS.PLAYERS, row);
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.PLAYERS, row);
   showToast('تم إضافة اللاعب '+name);
   setTimeout(function(){ go('league_team_dash'); },1500);
 }
@@ -8177,7 +8203,7 @@ function submitLeagueStaff(){
     'الاسم':name,'الدور':roleEl?roleEl.value:'',
     'الهاتف':glt('s_phone'),'رقم_الهوية':glt('s_id'),
   };
-  apiAppend(LEAGUE_CONFIG.SHEETS.STAFF, row);
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.STAFF, row);
   showToast('تم إضافة '+name);
   setTimeout(function(){ go('league_team_dash'); },1500);
 }
@@ -8247,7 +8273,7 @@ function groupTableHTML(rows, groupLetter){
 
 function renderLeagueStandings(){
   lApp('<div style="padding:32px;text-align:center;color:#94a3b8;"><div style="font-size:32px;margin-bottom:8px;">🏅</div>جاري تحميل الترتيب...</div>');
-  apiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
     var finishedMatches=(matches||[]).filter(function(m){ return m['الحالة']==='انتهت'; });
     var groups=getLeagueGroups();
     var groupLetters=Object.keys(groups);
@@ -8279,7 +8305,7 @@ function renderLeagueStandings(){
 // ── جدول المباريات ───────────────────────
 function renderLeagueSchedule(){
   lApp('<div style="padding:32px;text-align:center;color:#94a3b8;">⏳ جاري التحميل...</div>');
-  apiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
     matches=matches||[];
     var byRound={};
     matches.forEach(function(m){
@@ -8319,7 +8345,7 @@ function renderLeagueSchedule(){
 // ── قائمة الأندية ────────────────────────
 function renderLeagueTeamsList(){
   lApp('<div style="padding:32px;text-align:center;color:#94a3b8;">⏳ جاري التحميل...</div>');
-  apiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
     teams=teams||[];
     var approved=teams.filter(function(t){ return t['الحالة']==='مقبول'; });
     lApp(
@@ -8371,8 +8397,8 @@ function renderLeagueAdmin(){
   var hasDraw=!!sessionStorage.getItem('_leagueGroups');
 
   Promise.all([
-    apiGet(LEAGUE_CONFIG.SHEETS.TEAMS),
-    apiGet(LEAGUE_CONFIG.SHEETS.PLAYERS),
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS),
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.PLAYERS),
   ]).then(function(res){
     var teams=res[0]||[], players=res[1]||[];
     var pending=teams.filter(function(t){ return t['الحالة']==='قيد المراجعة'; });
@@ -8591,7 +8617,7 @@ function saveLeagueDraw(){
   var groupLetters=Object.keys(groups);
   groupLetters.forEach(function(g){
     groups[g].forEach(function(team, pos){
-      apiAppend(LEAGUE_CONFIG.SHEETS.GROUPS, {
+      leagueApiAppend(LEAGUE_CONFIG.SHEETS.GROUPS, {
         'المجموعة': g,
         'الترتيب': pos+1,
         'الفريق': team,
@@ -8607,11 +8633,11 @@ function saveLeagueDraw(){
 function approveLeagueTeam(teamId, teamName){
   if(!confirm('قبول فريق: '+teamName+'؟')) return;
   // نبحث عن الصف في الشيت ونحدّثه — نرسل row جديد بالحالة المحدّثة
-  apiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
     var team=(teams||[]).find(function(t){ return t['team_id']===teamId; });
     if(!team){ showToast('لم يُعثر على الفريق'); return; }
     team['الحالة']='مقبول';
-    apiAppend(LEAGUE_CONFIG.SHEETS.TEAMS+'_updates', {'team_id':teamId,'الحالة':'مقبول','وقت_القبول':new Date().toLocaleString('ar')});
+    leagueApiAppend(LEAGUE_CONFIG.SHEETS.TEAMS+'_updates', {'team_id':teamId,'الحالة':'مقبول','وقت_القبول':new Date().toLocaleString('ar')});
     showToast('تم قبول '+teamName);
     setTimeout(function(){ go('league_admin'); },1500);
   });
@@ -8620,7 +8646,7 @@ function approveLeagueTeam(teamId, teamName){
 // ── إدارة المباريات ──────────────────────
 function renderLeagueAdminMatches(){
   if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
-  apiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
     teams=(teams||[]).filter(function(t){ return t['الحالة']==='مقبول'; });
     var teamOpts=teams.map(function(t){ return '<option value="'+t['اسم_الفريق']+'">'+t['اسم_الفريق']+'</option>'; }).join('');
     lApp(
@@ -8661,7 +8687,7 @@ function submitLeagueMatch(){
     'النتيجة_1':'','النتيجة_2':'',
     'الحالة':'لم تبدأ',
   };
-  apiAppend(LEAGUE_CONFIG.SHEETS.MATCHES, row);
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.MATCHES, row);
   showToast('تمت إضافة المباراة للجدول');
   setTimeout(function(){ go('league_admin_matches'); },1500);
 }
@@ -8669,7 +8695,7 @@ function submitLeagueMatch(){
 // ── إدخال نتيجة ──────────────────────────
 function renderLeagueAdminResult(){
   if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
-  apiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
     var pending=(matches||[]).filter(function(m){ return m['الحالة']!=='انتهت'; });
     lApp(
       '<div style="background:linear-gradient(135deg,#7c2d12,#9a3412);padding:16px 16px 8px;display:flex;align-items:center;gap:12px;">'+
@@ -8706,7 +8732,7 @@ function saveLeagueResult(i,t1,t2,round){
     'النتيجة_1':g1,'النتيجة_2':g2,'الحالة':'انتهت',
     'وقت_الإدخال':new Date().toLocaleString('ar'),
   };
-  apiAppend(LEAGUE_CONFIG.SHEETS.MATCHES, row);
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.MATCHES, row);
   showToast('تم حفظ النتيجة: '+t1+' '+g1+' — '+g2+' '+t2);
   setTimeout(function(){ go('league_admin_result'); },1500);
 }
