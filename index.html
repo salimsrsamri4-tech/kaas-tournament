@@ -423,15 +423,30 @@ var LEAGUE_CONFIG = {
   ORGANIZER: 'نادي أزكي',
   LOCATION: 'أزكي، سلطنة عُمان',
   COLOR_PRIMARY: '#1a1a2e',
-  COLOR_ACCENT:  '#e94560',
-  COLOR_GOLD:    '#f5a623',
+  COLOR_ACCENT:  '#8B1A1A',
+  COLOR_GOLD:    '#C8A951',
   MAX_TEAMS: 16,
+  // الفرق الـ 16 الرسمية
+  TEAMS_LIST: [
+    'العربي','الصقر','السهم','إمطي',
+    'الوحدة إمطي','شباب إزكي','سدي','الأهلي',
+    'العين','السد','النجوم','البصرة',
+    'قلعة العوامر','إزكي جرنان','زكيت','الاتفاق'
+  ],
+  // التقسيم الافتراضي للمجموعات (يمكن تعديله من الإدارة)
+  GROUPS: {
+    'أ': ['العربي','العين','الوحدة إمطي','البصرة'],
+    'ب': ['الصقر','السد','شباب إزكي','قلعة العوامر'],
+    'ج': ['السهم','النجوم','سدي','إزكي جرنان'],
+    'د': ['إمطي','الأهلي','زكيت','الاتفاق'],
+  },
   SHEETS: {
     TEAMS:    'أندية_الدوري',
     PLAYERS:  'لاعبو_الدوري',
     STAFF:    'طاقم_الدوري',
     MATCHES:  'مباريات_الدوري',
     SCORERS:  'هدافو_الدوري',
+    GROUPS:   'مجموعات_الدوري',
   }
 };
 
@@ -7693,19 +7708,19 @@ function renderSelectTournament(){
     '</div>'+
 
     // بطاقة دوري الدرجة الأولى
-    '<div onclick="setMode(\'league\')" style="width:100%;max-width:360px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #e94560;border-radius:20px;padding:24px;cursor:pointer;box-shadow:0 8px 32px rgba(233,69,96,.2);">'+
+    '<div onclick="setMode(\'league\')" style="width:100%;max-width:360px;background:linear-gradient(135deg,#5c1010,#8B1A1A);border:2px solid #C8A951;border-radius:20px;padding:24px;cursor:pointer;box-shadow:0 8px 32px rgba(139,26,26,.35);">'+
       '<div style="display:flex;align-items:center;gap:14px;">'+
-        '<div style="font-size:40px;">🥇</div>'+
+        '<div style="font-size:40px;">⚽</div>'+
         '<div>'+
-          '<div style="font-size:16px;font-weight:900;color:#e94560;">دوري الدرجة الأولى</div>'+
-          '<div style="font-size:11px;color:#93c5fd;margin-top:3px;">First Division League — FDL</div>'+
-          '<div style="font-size:11px;color:#94a3b8;margin-top:2px;">نادي أزكي · 2026</div>'+
+          '<div style="font-size:16px;font-weight:900;color:#C8A951;">دوري الدرجة الأولى</div>'+
+          '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:3px;">نادي إزكي · First Division 2026</div>'+
+          '<div style="font-size:11px;color:rgba(200,169,81,.8);margin-top:2px;">4 مجموعات · 16 فريق · أزكي</div>'+
         '</div>'+
       '</div>'+
       '<div style="margin-top:14px;display:flex;gap:8px;">'+
-        '<span style="background:rgba(233,69,96,.15);color:#e94560;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(233,69,96,.3);">16 فريق</span>'+
-        '<span style="background:rgba(233,69,96,.15);color:#e94560;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(233,69,96,.3);">18+ سنة</span>'+
-        '<span style="background:rgba(233,69,96,.15);color:#e94560;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(233,69,96,.3);">دوري كامل</span>'+
+        '<span style="background:rgba(200,169,81,.2);color:#C8A951;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(200,169,81,.4);">16 فريق</span>'+
+        '<span style="background:rgba(200,169,81,.2);color:#C8A951;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(200,169,81,.4);">18+ سنة</span>'+
+        '<span style="background:rgba(200,169,81,.2);color:#C8A951;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(200,169,81,.4);">4 مجموعات</span>'+
       '</div>'+
     '</div>'+
     '<div style="margin-top:24px;font-size:10px;color:#475569;text-align:center;">acadcup.com · منصة رقمية متكاملة</div>'+
@@ -7723,78 +7738,87 @@ function setMode(mode){
 // ── رئيسية الدوري ───────────────────────
 function renderLeagueHome(){
   var P = LEAGUE_CONFIG;
-  apiGet(P.SHEETS.TEAMS).then(function(teams){
-    teams = teams||[];
-    var approved = teams.filter(function(t){ return t['الحالة']==='مقبول'; });
-    lApp(
-      // هيدر
-      '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:0 0 16px;">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0;">'+
-          '<button onclick="go(\'select_tournament\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;">← تغيير</button>'+
-          '<div style="text-align:center;">'+
-            '<div style="font-size:14px;font-weight:900;color:#e94560;">🥇 دوري الدرجة الأولى</div>'+
-            '<div style="font-size:10px;color:#93c5fd;">نادي أزكي '+P.SEASON+'</div>'+
-          '</div>'+
-          '<div style="font-size:22px;">⚽</div>'+
+  var groups = P.GROUPS;
+  var groupLetters = Object.keys(groups);
+  var groupColors = {'أ':'#8B1A1A','ب':'#1a4a1a','ج':'#0f3460','د':'#5a2d82'};
+
+  lApp(
+    // هيدر بألوان نادي أزكي
+    '<div style="background:linear-gradient(160deg,#3d0a0a,#8B1A1A);padding:0 0 16px;">'+
+      '<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0;">'+
+        '<button onclick="go(\'select_tournament\')" style="background:rgba(255,255,255,.12);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;">← رجوع</button>'+
+        '<div style="text-align:center;">'+
+          '<div style="font-size:13px;font-weight:900;color:#C8A951;">نادي إزكي</div>'+
+          '<div style="font-size:11px;color:rgba(255,255,255,.8);">دوري الدرجة الأولى '+P.SEASON+'</div>'+
         '</div>'+
-        // إحصاء سريع
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:14px 16px 0;">'+
-          '<div style="background:rgba(233,69,96,.15);border:1px solid rgba(233,69,96,.3);border-radius:12px;padding:10px;text-align:center;">'+
-            '<div style="font-size:22px;font-weight:900;color:#e94560;">'+teams.length+'</div>'+
-            '<div style="font-size:10px;color:#94a3b8;">فريق مسجل</div>'+
-          '</div>'+
-          '<div style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.3);border-radius:12px;padding:10px;text-align:center;">'+
-            '<div style="font-size:22px;font-weight:900;color:#f5a623;">'+approved.length+'</div>'+
-            '<div style="font-size:10px;color:#94a3b8;">فريق مقبول</div>'+
-          '</div>'+
-          '<div style="background:rgba(147,197,253,.15);border:1px solid rgba(147,197,253,.3);border-radius:12px;padding:10px;text-align:center;">'+
-            '<div style="font-size:22px;font-weight:900;color:#93c5fd;">'+P.MAX_TEAMS+'</div>'+
-            '<div style="font-size:10px;color:#94a3b8;">الحد الأقصى</div>'+
-          '</div>'+
+        '<div style="width:38px;height:38px;background:rgba(200,169,81,.15);border:1px solid rgba(200,169,81,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;">⚽</div>'+
+      '</div>'+
+      // المجموعات الأربع — شريط سريع
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:14px 16px 0;">'+
+        groupLetters.map(function(g){
+          return '<div style="background:rgba(200,169,81,.1);border:1px solid rgba(200,169,81,.25);border-radius:10px;padding:8px 4px;text-align:center;">'+
+            '<div style="font-size:16px;font-weight:900;color:#C8A951;">'+g+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px;">'+groups[g].length+' فرق</div>'+
+          '</div>';
+        }).join('')+
+      '</div>'+
+    '</div>'+
+
+    '<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+
+
+      // المجموعات — عرض الفرق
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="padding:10px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">'+
+          '<div style="font-size:12px;font-weight:900;color:#0f172a;">توزيع المجموعات</div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">'+
+          groupLetters.map(function(g,gi){
+            var borderRight = gi%2===0 ? 'border-left:1px solid #f1f5f9;' : '';
+            var borderBottom = gi<2 ? 'border-bottom:1px solid #f1f5f9;' : '';
+            return '<div style="padding:10px 12px;'+borderRight+borderBottom+'">'+
+              '<div style="font-size:10px;font-weight:900;color:'+(groupColors[g]||'#8B1A1A')+';margin-bottom:6px;display:flex;align-items:center;gap:4px;">'+
+                '<span style="width:18px;height:18px;background:'+(groupColors[g]||'#8B1A1A')+';border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:900;">'+g+'</span>'+
+                'المجموعة '+g+
+              '</div>'+
+              groups[g].map(function(t){ return '<div style="font-size:11px;color:#334155;padding:2px 0;border-bottom:1px dotted #f1f5f9;">'+t+'</div>'; }).join('')+
+            '</div>';
+          }).join('')+
         '</div>'+
       '</div>'+
 
-      '<div style="padding:16px;display:flex;flex-direction:column;gap:10px;">'+
+      // أزرار التنقل
+      '<div onclick="go(\'league_standings\')" style="background:linear-gradient(135deg,#8B1A1A,#5c1010);border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;">'+
+        '<div style="font-size:30px;">🏅</div>'+
+        '<div><div style="font-size:14px;font-weight:900;color:#C8A951;">ترتيب المجموعات</div><div style="font-size:11px;color:rgba(255,255,255,.7);">نتائج وترتيب الفرق الأربع</div></div>'+
+        '<div style="margin-right:auto;font-size:18px;color:rgba(200,169,81,.6);">›</div>'+
+      '</div>'+
 
-        // تسجيل فريق
-        '<div onclick="go(\'league_team_reg\')" style="background:linear-gradient(135deg,#e94560,#c23152);border-radius:14px;padding:18px;cursor:pointer;display:flex;align-items:center;gap:14px;">'+
-          '<div style="font-size:32px;">📋</div>'+
-          '<div>'+
-            '<div style="font-size:15px;font-weight:900;color:#fff;">تسجيل فريق جديد</div>'+
-            '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;">للفرق المشاركة في الدوري</div>'+
-          '</div>'+
-        '</div>'+
+      '<div onclick="go(\'league_schedule\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+        '<div style="font-size:30px;">📅</div>'+
+        '<div><div style="font-size:14px;font-weight:900;color:#0f172a;">جدول المباريات</div><div style="font-size:11px;color:#64748b;">مواعيد وملاعب المباريات</div></div>'+
+        '<div style="margin-right:auto;font-size:18px;color:#cbd5e1;">›</div>'+
+      '</div>'+
 
-        // دخول الفريق
-        '<div onclick="go(\'league_team_login\')" style="background:linear-gradient(135deg,#0f3460,#16213e);border:1px solid rgba(147,197,253,.3);border-radius:14px;padding:18px;cursor:pointer;display:flex;align-items:center;gap:14px;">'+
-          '<div style="font-size:32px;">🔑</div>'+
-          '<div>'+
-            '<div style="font-size:15px;font-weight:900;color:#fff;">دخول لوحة الفريق</div>'+
-            '<div style="font-size:11px;color:#93c5fd;margin-top:2px;">إدارة اللاعبين والطاقم</div>'+
-          '</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
+        '<div onclick="go(\'league_team_reg\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;cursor:pointer;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+          '<div style="font-size:26px;margin-bottom:5px;">📋</div>'+
+          '<div style="font-size:12px;font-weight:800;color:#0f172a;">تسجيل فريق</div>'+
         '</div>'+
-
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
-          '<div onclick="go(\'league_standings\')" style="background:linear-gradient(135deg,#1a1a2e,#0f3460);border:1px solid rgba(233,69,96,.3);border-radius:14px;padding:16px;cursor:pointer;text-align:center;">'+
-            '<div style="font-size:28px;margin-bottom:6px;">🏅</div>'+
-            '<div style="font-size:13px;font-weight:800;color:#fff;">الترتيب</div>'+
-          '</div>'+
-          '<div onclick="go(\'league_schedule\')" style="background:linear-gradient(135deg,#1a1a2e,#0f3460);border:1px solid rgba(245,166,35,.3);border-radius:14px;padding:16px;cursor:pointer;text-align:center;">'+
-            '<div style="font-size:28px;margin-bottom:6px;">📅</div>'+
-            '<div style="font-size:13px;font-weight:800;color:#fff;">الجدول</div>'+
-          '</div>'+
-          '<div onclick="go(\'league_teams_list\')" style="background:linear-gradient(135deg,#1a1a2e,#0f3460);border:1px solid rgba(147,197,253,.3);border-radius:14px;padding:16px;cursor:pointer;text-align:center;">'+
-            '<div style="font-size:28px;margin-bottom:6px;">👥</div>'+
-            '<div style="font-size:13px;font-weight:800;color:#fff;">الأندية</div>'+
-          '</div>'+
-          '<div onclick="leagueAdminLogin()" style="background:linear-gradient(135deg,#7c2d12,#9a3412);border:1px solid rgba(233,69,96,.3);border-radius:14px;padding:16px;cursor:pointer;text-align:center;">'+
-            '<div style="font-size:28px;margin-bottom:6px;">⚙️</div>'+
-            '<div style="font-size:13px;font-weight:800;color:#fff;">الإدارة</div>'+
-          '</div>'+
+        '<div onclick="go(\'league_team_login\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;cursor:pointer;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+          '<div style="font-size:26px;margin-bottom:5px;">🔑</div>'+
+          '<div style="font-size:12px;font-weight:800;color:#0f172a;">دخول الفريق</div>'+
         '</div>'+
-      '</div>'
-    );
-  }).catch(function(){ lApp('<div style="padding:32px;text-align:center;color:#ef4444;">فشل الاتصال</div>'); });
+        '<div onclick="go(\'league_teams_list\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;cursor:pointer;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+          '<div style="font-size:26px;margin-bottom:5px;">👥</div>'+
+          '<div style="font-size:12px;font-weight:800;color:#0f172a;">الأندية</div>'+
+        '</div>'+
+        '<div onclick="leagueAdminLogin()" style="background:linear-gradient(135deg,#3d0a0a,#8B1A1A);border-radius:12px;padding:14px;cursor:pointer;text-align:center;">'+
+          '<div style="font-size:26px;margin-bottom:5px;">⚙️</div>'+
+          '<div style="font-size:12px;font-weight:800;color:#C8A951;">الإدارة</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  );
 }
 
 // ── تسجيل فريق جديد ─────────────────────
@@ -8071,76 +8095,97 @@ function submitLeagueStaff(){
   setTimeout(function(){ go('league_team_dash'); },1500);
 }
 
-// ── جدول الترتيب ─────────────────────────
+// ── جدول الترتيب بالمجموعات ──────────────
+function calcGroupTable(teamNames, matches){
+  var tbl={};
+  teamNames.forEach(function(n){ tbl[n]={name:n,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0}; });
+  matches.forEach(function(m){
+    var h=m['الفريق_الأول'], a=m['الفريق_الثاني'];
+    if(!tbl[h]||!tbl[a]) return;
+    var hg=parseInt(m['النتيجة_1'])||0, ag=parseInt(m['النتيجة_2'])||0;
+    tbl[h].p++; tbl[a].p++;
+    tbl[h].gf+=hg; tbl[h].ga+=ag;
+    tbl[a].gf+=ag; tbl[a].ga+=hg;
+    if(hg>ag){tbl[h].w++;tbl[h].pts+=3;tbl[a].l++;}
+    else if(hg===ag){tbl[h].d++;tbl[h].pts++;tbl[a].d++;tbl[a].pts++;}
+    else{tbl[a].w++;tbl[a].pts+=3;tbl[h].l++;}
+  });
+  return Object.values(tbl).sort(function(a,b){
+    if(b.pts!==a.pts) return b.pts-a.pts;
+    return (b.gf-b.ga)-(a.gf-a.ga);
+  });
+}
+
+function groupTableHTML(rows, groupLetter){
+  var colors=['#8B1A1A','#1a4a1a','#0f3460','#5a2d82'];
+  var ci={'أ':0,'ب':1,'ج':2,'د':3}[groupLetter]||0;
+  var accent=colors[ci];
+  var html='<div style="background:#fff;border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.08);">'+
+    '<div style="background:'+accent+';padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+      '<div style="width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;">'+groupLetter+'</div>'+
+      '<div style="font-size:13px;font-weight:900;color:#fff;">المجموعة '+groupLetter+'</div>'+
+    '</div>'+
+    '<table style="width:100%;border-collapse:collapse;font-family:Cairo,sans-serif;direction:rtl;">'+
+    '<thead><tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">'+
+      '<th style="padding:8px 6px;font-size:10px;color:#64748b;text-align:center;width:24px;">#</th>'+
+      '<th style="padding:8px 6px;font-size:10px;color:#64748b;text-align:right;">الفريق</th>'+
+      '<th style="padding:8px 4px;font-size:10px;color:#64748b;text-align:center;">ل</th>'+
+      '<th style="padding:8px 4px;font-size:10px;color:#16a34a;text-align:center;font-weight:900;">ف</th>'+
+      '<th style="padding:8px 4px;font-size:10px;color:#64748b;text-align:center;">ت</th>'+
+      '<th style="padding:8px 4px;font-size:10px;color:#ef4444;text-align:center;">خ</th>'+
+      '<th style="padding:8px 4px;font-size:10px;color:#64748b;text-align:center;">أه</th>'+
+      '<th style="padding:8px 6px;font-size:11px;color:'+accent+';text-align:center;font-weight:900;">ن</th>'+
+    '</tr></thead><tbody>';
+  rows.forEach(function(t,i){
+    var qualified=i<2;
+    var bg=qualified?'rgba(139,26,26,.04)':'';
+    html+='<tr style="background:'+bg+';border-bottom:1px solid #f1f5f9;">'+
+      '<td style="padding:9px 6px;text-align:center;">'+
+        '<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;background:'+(qualified?accent:'#e2e8f0')+';color:'+(qualified?'#fff':'#64748b')+';border-radius:50%;font-size:10px;font-weight:900;">'+(i+1)+'</span>'+
+      '</td>'+
+      '<td style="padding:9px 6px;font-size:12px;font-weight:800;color:#0f172a;">'+t.name+'</td>'+
+      '<td style="padding:9px 4px;text-align:center;font-size:12px;color:#475569;">'+t.p+'</td>'+
+      '<td style="padding:9px 4px;text-align:center;font-size:12px;color:#16a34a;font-weight:800;">'+t.w+'</td>'+
+      '<td style="padding:9px 4px;text-align:center;font-size:12px;color:#475569;">'+t.d+'</td>'+
+      '<td style="padding:9px 4px;text-align:center;font-size:12px;color:#ef4444;">'+t.l+'</td>'+
+      '<td style="padding:9px 4px;text-align:center;font-size:11px;color:#64748b;">'+t.gf+'-'+t.ga+'</td>'+
+      '<td style="padding:9px 6px;text-align:center;font-size:13px;font-weight:900;color:'+accent+';">'+t.pts+'</td>'+
+    '</tr>';
+  });
+  html+='</tbody></table>'+
+    '<div style="padding:6px 14px 8px;font-size:10px;color:#94a3b8;text-align:right;">● الأول والثاني يتأهلان للدور التالي</div>'+
+  '</div>';
+  return html;
+}
+
 function renderLeagueStandings(){
   lApp('<div style="padding:32px;text-align:center;color:#94a3b8;"><div style="font-size:32px;margin-bottom:8px;">🏅</div>جاري تحميل الترتيب...</div>');
-  Promise.all([
-    apiGet(LEAGUE_CONFIG.SHEETS.TEAMS),
-    apiGet(LEAGUE_CONFIG.SHEETS.MATCHES)
-  ]).then(function(res){
-    var teams=(res[0]||[]).filter(function(t){ return t['الحالة']==='مقبول'; });
-    var matches=(res[1]||[]).filter(function(m){ return m['الحالة']==='انتهت'; });
+  apiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
+    var finishedMatches=(matches||[]).filter(function(m){ return m['الحالة']==='انتهت'; });
+    var groups=LEAGUE_CONFIG.GROUPS;
+    var groupLetters=Object.keys(groups);
 
-    // احسب الترتيب
-    var tbl={};
-    teams.forEach(function(t){
-      tbl[t['اسم_الفريق']]={name:t['اسم_الفريق'],p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};
-    });
-    matches.forEach(function(m){
-      var h=m['الفريق_الأول'],a=m['الفريق_الثاني'];
-      var hg=parseInt(m['النتيجة_1'])||0, ag=parseInt(m['النتيجة_2'])||0;
-      if(!tbl[h]) tbl[h]={name:h,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};
-      if(!tbl[a]) tbl[a]={name:a,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0};
-      tbl[h].p++; tbl[a].p++;
-      tbl[h].gf+=hg; tbl[h].ga+=ag;
-      tbl[a].gf+=ag; tbl[a].ga+=hg;
-      if(hg>ag){tbl[h].w++;tbl[h].pts+=3;tbl[a].l++;}
-      else if(hg===ag){tbl[h].d++;tbl[h].pts++;tbl[a].d++;tbl[a].pts++;}
-      else{tbl[a].w++;tbl[a].pts+=3;tbl[h].l++;}
-    });
-    var sorted=Object.values(tbl).sort(function(a,b){
-      if(b.pts!==a.pts) return b.pts-a.pts;
-      return (b.gf-b.ga)-(a.gf-a.ga);
-    });
-
-    var rows=sorted.map(function(t,i){
-      var bg=i===0?'rgba(245,166,35,.15)':i<3?'rgba(147,197,253,.08)':'';
-      var rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-      return '<tr style="background:'+bg+';">'+
-        '<td style="padding:10px 6px;text-align:center;font-weight:800;font-size:13px;">'+rank+'</td>'+
-        '<td style="padding:10px 6px;font-weight:800;font-size:12px;">'+t.name+'</td>'+
-        '<td style="padding:10px 6px;text-align:center;font-size:12px;">'+t.p+'</td>'+
-        '<td style="padding:10px 6px;text-align:center;font-size:12px;color:#16a34a;font-weight:800;">'+t.w+'</td>'+
-        '<td style="padding:10px 6px;text-align:center;font-size:12px;">'+t.d+'</td>'+
-        '<td style="padding:10px 6px;text-align:center;font-size:12px;color:#ef4444;">'+t.l+'</td>'+
-        '<td style="padding:10px 6px;text-align:center;font-size:12px;">'+t.gf+':'+t.ga+'</td>'+
-        '<td style="padding:10px 6px;text-align:center;font-size:13px;font-weight:900;color:#e94560;">'+t.pts+'</td>'+
-      '</tr>';
-    }).join('');
-
-    lApp(
-      '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:16px 16px 8px;display:flex;align-items:center;gap:12px;">'+
-        '<button onclick="go(\'league_home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div style="font-size:15px;font-weight:900;color:#fff;">🏅 جدول الترتيب</div>'+
+    var html=
+      '<div style="background:linear-gradient(135deg,#8B1A1A,#5c1010);padding:16px 16px 12px;display:flex;align-items:center;gap:12px;">'+
+        '<button onclick="go(\'league_home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div>'+
+          '<div style="font-size:15px;font-weight:900;color:#fff;">🏅 ترتيب المجموعات</div>'+
+          '<div style="font-size:10px;color:rgba(255,255,255,.7);">دوري الدرجة الأولى — نادي أزكي 2026</div>'+
+        '</div>'+
       '</div>'+
-      '<div style="padding:12px;overflow-x:auto;">'+
-        (sorted.length?
-          '<table style="width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;font-family:Cairo,sans-serif;direction:rtl;">'+
-            '<thead><tr style="background:#1a1a2e;color:#fff;">'+
-              '<th style="padding:10px 6px;font-size:11px;">#</th>'+
-              '<th style="padding:10px 6px;font-size:11px;text-align:right;">الفريق</th>'+
-              '<th style="padding:10px 6px;font-size:11px;">ل</th>'+
-              '<th style="padding:10px 6px;font-size:11px;">ف</th>'+
-              '<th style="padding:10px 6px;font-size:11px;">ت</th>'+
-              '<th style="padding:10px 6px;font-size:11px;">خ</th>'+
-              '<th style="padding:10px 6px;font-size:11px;">أه</th>'+
-              '<th style="padding:10px 6px;font-size:11px;">ن</th>'+
-            '</tr></thead>'+
-            '<tbody>'+rows+'</tbody>'+
-          '</table>'
-        :'<div style="text-align:center;padding:32px;color:#94a3b8;">لا توجد بيانات بعد</div>')+
-      '</div>'
-    );
+      '<div style="padding:12px;">';
+
+    groupLetters.forEach(function(letter){
+      var teamNames=groups[letter];
+      var groupMatches=finishedMatches.filter(function(m){
+        return teamNames.indexOf(m['الفريق_الأول'])!==-1 && teamNames.indexOf(m['الفريق_الثاني'])!==-1;
+      });
+      var rows=calcGroupTable(teamNames, groupMatches);
+      html+=groupTableHTML(rows, letter);
+    });
+
+    html+='</div>';
+    lApp(html);
   }).catch(function(){ lApp('<div style="padding:32px;text-align:center;color:#ef4444;">فشل التحميل</div>'); });
 }
 
