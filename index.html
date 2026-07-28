@@ -723,6 +723,7 @@ function go(page) {
     league_admin:        renderLeagueAdmin,
     league_admin_matches:renderLeagueAdminMatches,
     league_admin_result: renderLeagueAdminResult,
+    league_admin_draw:   renderLeagueAdminDraw,
     league_teams_list:   renderLeagueTeamsList,
   };
   if(pages[page]) pages[page]();
@@ -7738,7 +7739,7 @@ function setMode(mode){
 // ── رئيسية الدوري ───────────────────────
 function renderLeagueHome(){
   var P = LEAGUE_CONFIG;
-  var groups = P.GROUPS;
+  var groups = getLeagueGroups();
   var groupLetters = Object.keys(groups);
   var groupColors = {'أ':'#8B1A1A','ب':'#1a4a1a','ج':'#0f3460','د':'#5a2d82'};
 
@@ -8162,7 +8163,7 @@ function renderLeagueStandings(){
   lApp('<div style="padding:32px;text-align:center;color:#94a3b8;"><div style="font-size:32px;margin-bottom:8px;">🏅</div>جاري تحميل الترتيب...</div>');
   apiGet(LEAGUE_CONFIG.SHEETS.MATCHES).then(function(matches){
     var finishedMatches=(matches||[]).filter(function(m){ return m['الحالة']==='انتهت'; });
-    var groups=LEAGUE_CONFIG.GROUPS;
+    var groups=getLeagueGroups();
     var groupLetters=Object.keys(groups);
 
     var html=
@@ -8268,8 +8269,21 @@ function leagueAdminLogin(){
   } else { showToast('كلمة المرور غير صحيحة'); }
 }
 
+// ── مساعد المجموعات ──────────────────────
+// يعيد المجموعات من sessionStorage إن وُجدت وإلا من الإعداد الافتراضي
+function getLeagueGroups(){
+  var saved=sessionStorage.getItem('_leagueGroups');
+  if(saved){ try{ return JSON.parse(saved); }catch(e){} }
+  return LEAGUE_CONFIG.GROUPS;
+}
+
 function renderLeagueAdmin(){
   if(sessionStorage.getItem('_leagueAdmin')!=='1'){ leagueAdminLogin(); return; }
+  var savedGroups=getLeagueGroups();
+  var groupLetters=Object.keys(savedGroups);
+  var groupColors={'أ':'#8B1A1A','ب':'#1a4a1a','ج':'#0f3460','د':'#5a2d82'};
+  var hasDraw=!!sessionStorage.getItem('_leagueGroups');
+
   Promise.all([
     apiGet(LEAGUE_CONFIG.SHEETS.TEAMS),
     apiGet(LEAGUE_CONFIG.SHEETS.PLAYERS),
@@ -8277,54 +8291,231 @@ function renderLeagueAdmin(){
     var teams=res[0]||[], players=res[1]||[];
     var pending=teams.filter(function(t){ return t['الحالة']==='قيد المراجعة'; });
     lApp(
-      '<div style="background:linear-gradient(135deg,#7c2d12,#9a3412);padding:16px 16px 8px;display:flex;align-items:center;gap:12px;">'+
-        '<button onclick="go(\'league_home\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
-        '<div style="font-size:15px;font-weight:900;color:#fff;">⚙️ إدارة الدوري</div>'+
-      '</div>'+
-      '<div style="padding:16px;display:flex;flex-direction:column;gap:10px;">'+
-
-        // إحصاء
+      '<div style="background:linear-gradient(135deg,#3d0a0a,#8B1A1A);padding:16px 16px 12px;">'+
+        '<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">'+
+          '<button onclick="go(\'league_home\')" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+          '<div>'+
+            '<div style="font-size:15px;font-weight:900;color:#C8A951;">⚙️ لوحة الإدارة</div>'+
+            '<div style="font-size:10px;color:rgba(255,255,255,.7);">دوري الدرجة الأولى — نادي إزكي 2026</div>'+
+          '</div>'+
+        '</div>'+
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">'+
-          '<div style="background:#fff;border-radius:12px;padding:12px;text-align:center;border-right:3px solid #e94560;">'+
-            '<div style="font-size:22px;font-weight:900;color:#1a1a2e;">'+teams.length+'</div>'+
-            '<div style="font-size:10px;color:#64748b;">أندية</div>'+
+          '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center;">'+
+            '<div style="font-size:20px;font-weight:900;color:#C8A951;">'+teams.length+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.6);">أندية</div>'+
           '</div>'+
-          '<div style="background:#fff;border-radius:12px;padding:12px;text-align:center;border-right:3px solid #f5a623;">'+
-            '<div style="font-size:22px;font-weight:900;color:#1a1a2e;">'+players.length+'</div>'+
-            '<div style="font-size:10px;color:#64748b;">لاعب</div>'+
+          '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center;">'+
+            '<div style="font-size:20px;font-weight:900;color:#C8A951;">'+players.length+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.6);">لاعب</div>'+
           '</div>'+
-          '<div style="background:#fff;border-radius:12px;padding:12px;text-align:center;border-right:3px solid #ef4444;">'+
-            '<div style="font-size:22px;font-weight:900;color:#ef4444;">'+pending.length+'</div>'+
-            '<div style="font-size:10px;color:#64748b;">طلبات</div>'+
+          '<div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center;">'+
+            '<div style="font-size:20px;font-weight:900;color:'+(pending.length?'#fca5a5':'rgba(255,255,255,.5)')+';">'+pending.length+'</div>'+
+            '<div style="font-size:9px;color:rgba(255,255,255,.6);">طلبات</div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+
+
+        // ── قرعة المجموعات ──
+        '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+          '<div style="background:linear-gradient(135deg,#C8A951,#a8893a);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">'+
+            '<div style="display:flex;align-items:center;gap:8px;">'+
+              '<div style="font-size:20px;">🎲</div>'+
+              '<div>'+
+                '<div style="font-size:13px;font-weight:900;color:#1a0a00;">قرعة المجموعات</div>'+
+                '<div style="font-size:10px;color:rgba(26,10,0,.6);">'+(hasDraw?'تم سحب القرعة ✓':'لم تُسحب القرعة بعد')+'</div>'+
+              '</div>'+
+            '</div>'+
+            '<button onclick="go(\'league_admin_draw\')" style="background:#1a0a00;color:#C8A951;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+(hasDraw?'تعديل':'سحب')+'</button>'+
+          '</div>'+
+          // عرض مختصر للمجموعات الحالية
+          '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;">'+
+            groupLetters.map(function(g,gi){
+              var border=gi<3?'border-left:1px solid #f1f5f9;':'';
+              return '<div style="padding:8px 6px;'+border+'text-align:center;">'+
+                '<div style="font-size:10px;font-weight:900;color:'+(groupColors[g]||'#8B1A1A')+';margin-bottom:4px;">'+g+'</div>'+
+                savedGroups[g].map(function(t){
+                  return '<div style="font-size:9px;color:#475569;padding:1px 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;" title="'+t+'">'+t+'</div>';
+                }).join('')+
+              '</div>';
+            }).join('')+
           '</div>'+
         '</div>'+
 
-        // إجراءات
-        '<div onclick="go(\'league_admin_matches\')" style="background:linear-gradient(135deg,#0f3460,#1e3a5f);border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;">'+
-          '<div style="font-size:28px;">📅</div>'+
-          '<div><div style="font-size:14px;font-weight:900;color:#fff;">إدارة الجدول والمباريات</div><div style="font-size:11px;color:#93c5fd;">إضافة جولات وإدخال النتائج</div></div>'+
+        // ── جدول المباريات ──
+        '<div onclick="go(\'league_admin_matches\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+          '<div style="width:42px;height:42px;background:linear-gradient(135deg,#0f3460,#1e4a7f);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">📅</div>'+
+          '<div style="flex:1;">'+
+            '<div style="font-size:14px;font-weight:900;color:#0f172a;">إدارة المباريات</div>'+
+            '<div style="font-size:11px;color:#64748b;">إضافة جولات · إدخال النتائج</div>'+
+          '</div>'+
+          '<div style="font-size:18px;color:#cbd5e1;">›</div>'+
         '</div>'+
 
-        // قبول الأندية المعلقة
+        // ── طلبات الانضمام ──
         (pending.length?
-          '<div style="background:#fff;border-radius:14px;padding:14px;">'+
-            '<div style="font-size:12px;font-weight:900;color:#ef4444;margin-bottom:10px;">⏳ طلبات الانضمام ('+pending.length+')</div>'+
+          '<div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+            '<div style="font-size:12px;font-weight:900;color:#ef4444;margin-bottom:10px;display:flex;align-items:center;gap:6px;">'+
+              '<span style="width:20px;height:20px;background:#ef4444;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:900;">'+pending.length+'</span>'+
+              'طلبات انضمام جديدة'+
+            '</div>'+
             pending.map(function(t){
-              return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9;">'+
+              return '<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f1f5f9;">'+
+                '<div style="width:36px;height:36px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🏟️</div>'+
                 '<div style="flex:1;">'+
-                  '<div style="font-size:13px;font-weight:800;">'+(t['اسم_الفريق']||'')+'</div>'+
+                  '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+(t['اسم_الفريق']||'')+'</div>'+
                   '<div style="font-size:10px;color:#64748b;">'+(t['المسؤول']||'')+' · '+(t['الهاتف']||'')+'</div>'+
                 '</div>'+
-                '<button onclick="approveLeagueTeam(\''+t['team_id']+'\',\''+t['اسم_الفريق']+'\')" style="background:#16a34a;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">قبول</button>'+
+                '<button onclick="approveLeagueTeam(\''+t['team_id']+'\',\''+t['اسم_الفريق']+'\')" '+
+                'style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">قبول ✓</button>'+
               '</div>';
             }).join('')+
           '</div>'
         :'')+
 
-        '<button onclick="sessionStorage.removeItem(\'_leagueAdmin\');go(\'league_home\')" style="width:100%;background:#f1f5f9;color:#475569;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">تسجيل الخروج</button>'+
+        '<button onclick="sessionStorage.removeItem(\'_leagueAdmin\');go(\'league_home\')" '+
+        'style="width:100%;background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">تسجيل الخروج ↩</button>'+
       '</div>'
     );
   }).catch(function(){ lApp('<div style="padding:32px;text-align:center;color:#ef4444;">فشل التحميل</div>'); });
+}
+
+// ── صفحة قرعة المجموعات ──────────────────
+function renderLeagueAdminDraw(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+
+  var allTeams = LEAGUE_CONFIG.TEAMS_LIST.slice(); // نسخة من القائمة
+  var groupLetters = ['أ','ب','ج','د'];
+  var groupColors  = {'أ':'#8B1A1A','ب':'#1a4a1a','ج':'#0f3460','د':'#5a2d82'};
+  var groupEmojis  = {'أ':'🔴','ب':'🟢','ج':'🔵','د':'🟣'};
+
+  // المجموعات الحالية للعرض الأولي
+  var currentGroups = getLeagueGroups();
+
+  function drawPageHTML(groups, isNew){
+    var html=
+      '<div style="background:linear-gradient(135deg,#C8A951,#8a6e2a);padding:16px 16px 12px;display:flex;align-items:center;gap:12px;">'+
+        '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#1a0a00;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div>'+
+          '<div style="font-size:15px;font-weight:900;color:#1a0a00;">🎲 قرعة المجموعات</div>'+
+          '<div style="font-size:10px;color:rgba(26,10,0,.65);">دوري الدرجة الأولى — 16 فريق · 4 مجموعات</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="padding:14px;">'+
+
+      // أزرار السحب والحفظ
+      '<div style="display:flex;gap:8px;margin-bottom:14px;">'+
+        '<button onclick="doLeagueDraw()" id="btnDraw" '+
+        'style="flex:1;background:linear-gradient(135deg,#C8A951,#8a6e2a);color:#1a0a00;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+        '🎲 سحب القرعة عشوائياً</button>'+
+        '<button onclick="saveLeagueDraw()" id="btnSave" '+
+        'style="background:linear-gradient(135deg,#8B1A1A,#5c1010);color:#fff;border:none;border-radius:12px;padding:13px 18px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+        '💾 حفظ</button>'+
+      '</div>'+
+
+      // بطاقات المجموعات
+      '<div id="drawResult" style="display:flex;flex-direction:column;gap:10px;">';
+
+    groupLetters.forEach(function(g){
+      var teams=groups[g]||[];
+      html+=
+        '<div id="group_card_'+g+'" style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.07);">'+
+          '<div style="background:'+(groupColors[g])+';padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">'+
+            '<div style="display:flex;align-items:center;gap:8px;">'+
+              '<div style="width:28px;height:28px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;">'+g+'</div>'+
+              '<div style="font-size:13px;font-weight:900;color:#fff;">المجموعة '+g+'</div>'+
+            '</div>'+
+            '<div style="font-size:18px;">'+groupEmojis[g]+'</div>'+
+          '</div>'+
+          '<div style="padding:10px 14px;" id="group_teams_'+g+'">'+
+            teams.map(function(t,i){
+              return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc;">'+
+                '<div style="width:22px;height:22px;background:'+(groupColors[g])+';border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0;">'+(i+1)+'</div>'+
+                '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+t+'</div>'+
+              '</div>';
+            }).join('')+
+          '</div>'+
+        '</div>';
+    });
+
+    html+='</div>'+
+      // ملاحظة
+      '<div style="margin-top:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 12px;">'+
+        '<div style="font-size:11px;color:#92400e;font-weight:700;">ملاحظة: بعد السحب اضغط "حفظ" لتثبيت النتيجة وإرسالها للـ Google Sheet</div>'+
+      '</div>'+
+    '</div>';
+    return html;
+  }
+
+  lApp(drawPageHTML(currentGroups, false));
+}
+
+// سحب عشوائي
+function doLeagueDraw(){
+  var allTeams = LEAGUE_CONFIG.TEAMS_LIST.slice();
+  var groupLetters = ['أ','ب','ج','د'];
+  var groupColors  = {'أ':'#8B1A1A','ب':'#1a4a1a','ج':'#0f3460','د':'#5a2d82'};
+
+  // خلط عشوائي (Fisher-Yates)
+  for(var i=allTeams.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var tmp=allTeams[i]; allTeams[i]=allTeams[j]; allTeams[j]=tmp;
+  }
+
+  // توزيع 4 فرق لكل مجموعة
+  var newGroups={};
+  groupLetters.forEach(function(g,gi){
+    newGroups[g]=allTeams.slice(gi*4, gi*4+4);
+  });
+
+  // تحديث الواجهة مع أنيميشن بسيط
+  groupLetters.forEach(function(g){
+    var el=document.getElementById('group_teams_'+g);
+    if(!el) return;
+    el.style.opacity='0';
+    el.style.transition='opacity .3s';
+    setTimeout(function(){
+      el.innerHTML=newGroups[g].map(function(t,i){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f8fafc;animation:fadeIn .4s ease '+(i*0.1)+'s both;">'+
+          '<div style="width:22px;height:22px;background:'+(groupColors[g])+';border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0;">'+(i+1)+'</div>'+
+          '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+t+'</div>'+
+        '</div>';
+      }).join('');
+      el.style.opacity='1';
+    },200);
+  });
+
+  // حفظ مؤقت في متغير عالمي
+  window._pendingDraw = newGroups;
+  showToast('تمت القرعة! اضغط حفظ لتثبيتها 💾');
+}
+
+// حفظ القرعة
+function saveLeagueDraw(){
+  var groups = window._pendingDraw || getLeagueGroups();
+
+  // حفظ في sessionStorage
+  sessionStorage.setItem('_leagueGroups', JSON.stringify(groups));
+
+  // تحديث LEAGUE_CONFIG في الذاكرة
+  LEAGUE_CONFIG.GROUPS = groups;
+
+  // إرسال للـ Google Sheet
+  var groupLetters=Object.keys(groups);
+  groupLetters.forEach(function(g){
+    groups[g].forEach(function(team, pos){
+      apiAppend(LEAGUE_CONFIG.SHEETS.GROUPS, {
+        'المجموعة': g,
+        'الترتيب': pos+1,
+        'الفريق': team,
+        'تاريخ_القرعة': new Date().toLocaleString('ar'),
+      });
+    });
+  });
+
+  showToast('✅ تم حفظ القرعة بنجاح!');
+  setTimeout(function(){ go('league_admin'); }, 1500);
 }
 
 function approveLeagueTeam(teamId, teamName){
