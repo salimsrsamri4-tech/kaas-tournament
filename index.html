@@ -8138,12 +8138,16 @@ function renderLeagueTeamDash(){
           '<div style="background:#fff;border-radius:14px;padding:14px;">'+
             '<div style="font-size:12px;font-weight:900;color:#1a1a2e;margin-bottom:10px;">قائمة اللاعبين ('+players.length+')</div>'+
             players.map(function(p,i){
-              return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;">'+
-                '<div style="width:28px;height:28px;background:#e94560;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;">'+(p['رقم_القميص']||i+1)+'</div>'+
+              var pJson = encodeURIComponent(JSON.stringify(p));
+              return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f1f5f9;">'+
+                '<div style="width:30px;height:30px;background:linear-gradient(135deg,#8B1A1A,#5c1010);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#C8A951;flex-shrink:0;">'+(p['رقم_القميص']||i+1)+'</div>'+
                 '<div style="flex:1;">'+
                   '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+(p['الاسم']||'')+'</div>'+
                   '<div style="font-size:10px;color:#64748b;">'+(p['المركز']||'')+'</div>'+
                 '</div>'+
+                '<button onclick="showLeaguePlayerCard(JSON.parse(decodeURIComponent(\''+pJson+'\')),\''+(i+1)+'\')" '+
+                'style="background:linear-gradient(135deg,#C8A951,#8a6e2a);color:#1a0a00;border:none;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;">'+
+                '🪪 بطاقة</button>'+
               '</div>';
             }).join('')+
           '</div>'
@@ -8286,6 +8290,118 @@ function renderLeaguePlayerSelfReg(){
   );
 }
 
+// ════════════════════════════════════════
+// بطاقة لاعب الدوري
+// ════════════════════════════════════════
+function buildLeaguePlayerCardHTML(p, num){
+  var initials = (p['الاسم']||'').split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('');
+  var posColors = {
+    'حارس مرمى':'#0f3460','مدافع أيمن':'#1a4a1a','مدافع أيسر':'#1a4a1a',
+    'قلب دفاع':'#1a4a1a','وسط دفاعي':'#5a2d82','وسط':'#5a2d82',
+    'وسط هجومي':'#8B1A1A','جناح أيمن':'#8B1A1A','جناح أيسر':'#8B1A1A',
+    'مهاجم':'#8B1A1A','مهاجم ثانٍ':'#8B1A1A'
+  };
+  var posColor = posColors[p['المركز']] || '#8B1A1A';
+  var jerseyNum = p['رقم_القميص'] || num || '00';
+
+  return '<div id="leaguePlayerCard" style="width:300px;margin:0 auto;border-radius:18px;overflow:hidden;font-family:Cairo,sans-serif;direction:rtl;background:#0f0404;border:2px solid #C8A951;">'+
+    // الهيدر
+    '<div style="background:linear-gradient(145deg,#1a0505,#3d0a0a);padding:10px 14px 8px;text-align:center;">'+
+      '<div style="font-size:7px;color:#C8A951;font-weight:900;letter-spacing:2px;margin-bottom:2px;direction:ltr;">FIRST DIVISION LEAGUE · IZKI CLUB 2026</div>'+
+      '<div style="font-size:13px;font-weight:900;color:#fff;">⚽ دوري الدرجة الأولى</div>'+
+      '<div style="font-size:9px;color:rgba(200,169,81,.7);margin-top:2px;">نادي إزكي 2026</div>'+
+      '<div style="height:1px;background:linear-gradient(90deg,transparent,#C8A951,transparent);margin-top:8px;"></div>'+
+    '</div>'+
+    // صورة اللاعب والاسم
+    '<div style="background:linear-gradient(160deg,#200808,#0f0404);padding:14px;display:flex;align-items:center;gap:12px;">'+
+      // دائرة رقم القميص
+      '<div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#8B1A1A,#5c1010);border:2px solid #C8A951;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;">'+
+        '<div style="font-size:6px;color:rgba(200,169,81,.7);font-weight:900;letter-spacing:1px;">#</div>'+
+        '<div style="font-size:22px;font-weight:900;color:#C8A951;line-height:1;">'+String(jerseyNum).padStart(2,'0')+'</div>'+
+      '</div>'+
+      '<div style="flex:1;">'+
+        '<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+(p['الاسم']||'')+'</div>'+
+        '<div style="font-size:10px;color:rgba(200,169,81,.8);margin-top:3px;font-weight:700;">'+(p['اسم_الفريق']||p['team_name']||'')+'</div>'+
+        '<div style="display:inline-block;background:'+posColor+';color:#fff;font-size:8px;font-weight:900;padding:3px 10px;border-radius:20px;margin-top:5px;">'+(p['المركز']||'')+'</div>'+
+      '</div>'+
+    '</div>'+
+    // بيانات إضافية
+    '<div style="background:rgba(0,0,0,.3);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(200,169,81,.2);border-bottom:1px solid rgba(200,169,81,.2);">'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:7px;color:rgba(200,169,81,.6);font-weight:700;">رقم الهوية</div>'+
+        '<div style="font-size:9px;font-weight:900;color:#C8A951;">'+(p['رقم_الهوية']||'—')+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:7px;color:rgba(200,169,81,.6);font-weight:700;">تاريخ الميلاد</div>'+
+        '<div style="font-size:9px;font-weight:700;color:#fff;">'+(p['تاريخ_الميلاد']||'—')+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:7px;color:rgba(200,169,81,.6);font-weight:700;">الهاتف</div>'+
+        '<div style="font-size:9px;font-weight:700;color:#fff;">'+(p['الهاتف']||'—')+'</div>'+
+      '</div>'+
+    '</div>'+
+    // الفوتر
+    '<div style="background:linear-gradient(90deg,#8B1A1A,#5c1010);padding:7px 14px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<div style="font-size:8px;color:rgba(255,255,255,.8);font-weight:900;">نادي إزكي · دوري الدرجة الأولى</div>'+
+      '<div style="font-size:8px;color:#C8A951;font-weight:900;">2026</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function showLeaguePlayerCard(p, num){
+  var overlay = document.createElement('div');
+  overlay.id = 'leagueCardOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+  overlay.innerHTML =
+    '<div style="width:100%;max-width:340px;">'+
+      buildLeaguePlayerCardHTML(p, num||1)+
+      '<div style="display:flex;gap:8px;margin-top:14px;">'+
+        '<button onclick="downloadLeagueCard()" style="flex:1;background:#1e293b;color:#C8A951;border:1px solid rgba(200,169,81,.4);border-radius:10px;padding:11px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">⬇️ تنزيل</button>'+
+        '<button onclick="shareLeagueCard(\''+encodeURIComponent(JSON.stringify(p))+'\')" style="flex:2;background:#25D366;color:#fff;border:none;border-radius:10px;padding:11px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">📲 مشاركة واتساب</button>'+
+      '</div>'+
+      '<button onclick="document.getElementById(\'leagueCardOverlay\').remove()" style="width:100%;margin-top:8px;background:transparent;color:rgba(255,255,255,.5);border:none;padding:8px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;">إغلاق ✕</button>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function downloadLeagueCard(){
+  var card = document.getElementById('leaguePlayerCard');
+  if(!card) return;
+  showToast('جاري التحضير...');
+  html2canvas(card, {scale:2.5, useCORS:true, backgroundColor:'#0f0404'}).then(function(canvas){
+    var a = document.createElement('a');
+    a.download = 'بطاقة-لاعب-دوري-إزكي.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+}
+
+function shareLeagueCard(pJson){
+  var card = document.getElementById('leaguePlayerCard');
+  if(!card) return;
+  var p = {}; try{ p=JSON.parse(decodeURIComponent(pJson)); }catch(e){}
+  var btn = event && event.target ? event.target.closest('button') : null;
+  if(btn){ btn.disabled=true; btn.textContent='جاري...'; }
+  html2canvas(card, {scale:2, useCORS:true, backgroundColor:'#0f0404'}).then(function(canvas){
+    if(btn){ btn.disabled=false; btn.innerHTML='📲 مشاركة واتساب'; }
+    canvas.toBlob(function(blob){
+      var file = new File([blob], 'بطاقة-'+(p['الاسم']||'لاعب')+'.png', {type:'image/png'});
+      var msg = 'بطاقة لاعب ⚽\n*'+(p['الاسم']||'')+' — '+(p['اسم_الفريق']||'')+' *\nدوري الدرجة الأولى — نادي إزكي 2026';
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file], text:msg}).catch(function(){
+          window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+        });
+      } else {
+        var a=document.createElement('a');
+        a.download='بطاقة-'+(p['الاسم']||'لاعب')+'.png';
+        a.href=URL.createObjectURL(blob); a.click();
+      }
+    },'image/png');
+  }).catch(function(){
+    if(btn){ btn.disabled=false; btn.innerHTML='📲 مشاركة واتساب'; }
+  });
+}
+
 function getLeaguePlayerLink(teamId){
   return location.origin + location.pathname + '?lteam=' + teamId;
 }
@@ -8341,26 +8457,37 @@ function submitLeaguePlayerSelfReg(){
   leagueApiAppend(LEAGUE_CONFIG.SHEETS.PLAYERS, row);
   showToast('✅ تم تسجيلك بنجاح في فريق '+teamName+'!');
 
-  // صفحة النجاح
+  // صفحة النجاح + عرض البطاقة
+  var playerObj = {
+    'الاسم': name, 'الهاتف': phone, 'المركز': pos,
+    'رقم_القميص': glt('sr_num'), 'رقم_الهوية': glt('sr_id'),
+    'تاريخ_الميلاد': birth, 'اسم_الفريق': teamName, 'team_id': teamId
+  };
   setTimeout(function(){
     lApp(
-      '<div style="padding:48px 24px;text-align:center;font-family:Cairo,sans-serif;">'+
-        '<div style="font-size:64px;margin-bottom:16px;">🎉</div>'+
-        '<div style="font-size:20px;font-weight:900;color:#8B1A1A;margin-bottom:8px;">تم التسجيل بنجاح!</div>'+
-        '<div style="font-size:14px;color:#475569;margin-bottom:6px;">مرحباً <strong>'+name+'</strong></div>'+
-        '<div style="font-size:13px;color:#64748b;margin-bottom:24px;">تم إضافتك في قائمة فريق <strong style="color:#8B1A1A;">'+teamName+'</strong></div>'+
-        '<div style="background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:24px;text-align:right;">'+
-          '<div style="font-size:11px;color:#64748b;margin-bottom:8px;text-align:center;font-weight:700;">بياناتك المسجلة</div>'+
-          '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:1px solid #e2e8f0;">الاسم: <strong>'+name+'</strong></div>'+
-          '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:1px solid #e2e8f0;">الهاتف: <strong>'+phone+'</strong></div>'+
-          '<div style="font-size:12px;color:#334155;padding:4px 0;">المركز: <strong>'+pos+'</strong></div>'+
+      '<div style="background:linear-gradient(135deg,#3d0a0a,#8B1A1A);padding:24px 16px;text-align:center;">'+
+        '<div style="font-size:48px;margin-bottom:8px;">🎉</div>'+
+        '<div style="font-size:19px;font-weight:900;color:#C8A951;">تم التسجيل بنجاح!</div>'+
+        '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:4px;">مرحباً <strong>'+name+'</strong> في فريق '+teamName+'</div>'+
+      '</div>'+
+      '<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+
+        // بطاقة اللاعب
+        buildLeaguePlayerCardHTML(playerObj, glt('sr_num')||1)+
+        // أزرار
+        '<div style="display:flex;gap:8px;">'+
+          '<button onclick="downloadLeagueCard()" '+
+          'style="flex:1;background:#1e293b;color:#C8A951;border:1px solid rgba(200,169,81,.4);border-radius:10px;padding:12px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '⬇️ تنزيل البطاقة</button>'+
+          '<button onclick="shareLeagueCard(\''+encodeURIComponent(JSON.stringify(playerObj))+'\')" '+
+          'style="flex:2;background:#25D366;color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '📲 مشاركة واتساب</button>'+
         '</div>'+
         '<button onclick="go(\'league_home\')" '+
-        'style="background:linear-gradient(135deg,#8B1A1A,#5c1010);color:#fff;border:none;border-radius:12px;padding:12px 32px;font-size:14px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
-        'الصفحة الرئيسية</button>'+
+        'style="width:100%;background:#f1f5f9;color:#475569;border:none;border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">'+
+        'الصفحة الرئيسية ↩</button>'+
       '</div>'
     );
-  }, 1500);
+  }, 1200);
 }
 
 function renderLeagueAddStaff(){
