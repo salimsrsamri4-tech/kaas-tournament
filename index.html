@@ -8513,6 +8513,20 @@ function submitLeaguePlayerSelfReg(){
     if(age<18){ showToast('يجب أن يكون عمرك 18 سنة أو أكثر'); return; }
   }
 
+  // التحقق من رقم القميص (1-100)
+  var numVal = parseInt(glt('sr_num')||'0', 10);
+  if(glt('sr_num') && (isNaN(numVal) || numVal < 1 || numVal > 100)){
+    showToast('رقم القميص يجب أن يكون بين 1 و 100'); return;
+  }
+
+  // التحقق من تكرار رقم القميص في الفريق
+  if(numVal){
+    var cachedPlayers = (_leagueCache['league_'+LEAGUE_CONFIG.SHEETS.PLAYERS]||{}).d||[];
+    var teamPlayers = cachedPlayers.filter(function(pl){ return pl['team_id']===teamId; });
+    var taken = teamPlayers.some(function(pl){ return parseInt(pl['رقم_القميص']||'0',10)===numVal; });
+    if(taken){ showToast('رقم القميص '+numVal+' محجوز مسبقاً في هذا الفريق'); return; }
+  }
+
   var playerId = 'P'+Date.now();
   var row = {
     'تاريخ_الإضافة': new Date().toLocaleString('ar'),
