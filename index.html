@@ -8169,12 +8169,20 @@ function renderLeagueTeamDash(){
           '<div style="background:#fff;border-radius:14px;padding:14px;">'+
             '<div style="font-size:12px;font-weight:900;color:#1a1a2e;margin-bottom:10px;">الطاقم الإداري والفني ('+staff.length+')</div>'+
             staff.map(function(s){
+              var sId=s['staff_id']||'';
+              var sPhoto=sId?getLeaguePlayerPhoto(sId):'';
               return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;">'+
-                '<div style="font-size:20px;">'+({'مدرب':'🧑‍💼','مساعد مدرب':'🤝','مدرب حراس':'🧤','طبيب':'⚕️','مدير إداري':'📋'}[s['الدور']]||'👤')+'</div>'+
+                (sPhoto
+                  ? '<img src="'+sPhoto+'" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1.5px solid #0f3460;flex-shrink:0;">'
+                  : '<div style="width:36px;height:36px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">'+({'مدرب رئيسي':'🧑‍💼','مساعد مدرب':'🤝','مدرب حراس المرمى':'🧤','طبيب الفريق':'⚕️','مدير إداري':'📋'}[s['الدور']]||'👤')+'</div>'
+                )+
                 '<div style="flex:1;">'+
                   '<div style="font-size:13px;font-weight:800;color:#0f172a;">'+(s['الاسم']||'')+'</div>'+
                   '<div style="font-size:10px;color:#64748b;">'+(s['الدور']||'')+'</div>'+
                 '</div>'+
+                (sId?'<label style="background:#e0e7ff;color:#3730a3;border:none;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;" title="تغيير الصورة">'+
+                  '📷<input type="file" accept="image/*" style="display:none;" onchange="leagueOpenPlayerPhotoCropper(this,\''+sId+'\')">'+
+                '</label>':'')+
               '</div>';
             }).join('')+
           '</div>'
@@ -8195,7 +8203,26 @@ function renderLeagueAddPlayer(){
       '<button onclick="go(\'league_team_dash\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
       '<div style="font-size:15px;font-weight:900;color:#fff;">⊕ إضافة لاعب</div>'+
     '</div>'+
-    '<div style="padding:16px;">'+
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">'+
+      // صورة اللاعب
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#1a0a2e,#3a1060);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">📷</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#d4af37;">صورة اللاعب</div>'+
+          '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-right:auto;">(اختياري)</div>'+
+        '</div>'+
+        '<div style="padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;">'+
+          '<div id="addpPhotoPreview" onclick="document.getElementById(\'addpPhotoInput\').click()" '+
+          'style="width:80px;height:80px;border-radius:50%;border:3px dashed #C8A951;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#f8fafc;overflow:hidden;">'+
+            '<div style="font-size:22px;">📷</div>'+
+            '<div style="font-size:9px;color:#94a3b8;margin-top:3px;">أضف صورة</div>'+
+          '</div>'+
+          '<input type="file" id="addpPhotoInput" accept="image/*" style="display:none;" onchange="leagueAddPlayerOpenCropper(this)">'+
+          '<div id="addpPhotoEditBtn" style="display:none;">'+
+            '<button onclick="document.getElementById(\'addpPhotoInput\').click()" style="background:transparent;border:1px solid #C8A951;color:#C8A951;border-radius:8px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">✏️ تغيير</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
       '<div style="background:#fff;border-radius:14px;padding:16px;">'+
         leagueField('p_name','اسم اللاعب الكامل','text','','','','','true')+
         leagueField('p_id','رقم الهوية','text','','','','')+
@@ -8218,19 +8245,32 @@ function submitLeaguePlayer(){
   var teamId=sessionStorage.getItem('_leagueTeamId'), teamName=sessionStorage.getItem('_leagueTeamName')||'';
   var name=glt('p_name');
   if(!name){ showToast('أدخل اسم اللاعب'); return; }
+  var numVal=parseInt(glt('p_num')||'0',10);
+  if(glt('p_num')&&(isNaN(numVal)||numVal<1||numVal>100)){ showToast('رقم القميص يجب أن يكون بين 1 و 100'); return; }
+  if(numVal){
+    var cached=(_leagueCache['league_'+LEAGUE_CONFIG.SHEETS.PLAYERS]||{}).d||[];
+    var taken=cached.filter(function(pl){return pl['team_id']===teamId;}).some(function(pl){return parseInt(pl['رقم_القميص']||'0',10)===numVal;});
+    if(taken){ showToast('رقم القميص '+numVal+' محجوز مسبقاً'); return; }
+  }
   var posEl=document.getElementById('lt_p_pos');
+  var playerId='P'+Date.now();
   var row={
     'تاريخ_الإضافة':new Date().toLocaleString('ar'),
     'team_id':teamId,'اسم_الفريق':teamName,
-    'player_id':'P'+Date.now(),
+    'player_id':playerId,
     'الاسم':name,'رقم_الهوية':glt('p_id'),
     'تاريخ_الميلاد':glt('p_birth'),
     'رقم_القميص':glt('p_num'),
     'المركز':posEl?posEl.value:'',
     'الهاتف':glt('p_phone'),
+    'نوع_التسجيل':'يدوي',
   };
+  if(window._leagueAddPlayerPhoto){
+    try{ localStorage.setItem('leaguePhoto_'+playerId, window._leagueAddPlayerPhoto); }catch(e){}
+    window._leagueAddPlayerPhoto=null;
+  }
   leagueApiAppend(LEAGUE_CONFIG.SHEETS.PLAYERS, row);
-  showToast('تم إضافة اللاعب '+name);
+  showToast('✅ تم إضافة اللاعب '+name);
   setTimeout(function(){ go('league_team_dash'); },1500);
 }
 
@@ -8593,7 +8633,25 @@ function renderLeagueAddStaff(){
       '<button onclick="go(\'league_team_dash\')" style="background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
       '<div style="font-size:15px;font-weight:900;color:#fff;">👔 إضافة طاقم</div>'+
     '</div>'+
-    '<div style="padding:16px;">'+
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:12px;">'+
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#1a0a2e,#3a1060);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">📷</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#d4af37;">الصورة الشخصية</div>'+
+          '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-right:auto;">(اختياري)</div>'+
+        '</div>'+
+        '<div style="padding:14px;display:flex;flex-direction:column;align-items:center;gap:8px;">'+
+          '<div id="addstPhotoPreview" onclick="document.getElementById(\'addstPhotoInput\').click()" '+
+          'style="width:80px;height:80px;border-radius:50%;border:3px dashed #0f3460;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#f8fafc;overflow:hidden;">'+
+            '<div style="font-size:22px;">📷</div>'+
+            '<div style="font-size:9px;color:#94a3b8;margin-top:3px;">أضف صورة</div>'+
+          '</div>'+
+          '<input type="file" id="addstPhotoInput" accept="image/*" style="display:none;" onchange="leagueAddStaffOpenCropper(this)">'+
+          '<div id="addstPhotoEditBtn" style="display:none;">'+
+            '<button onclick="document.getElementById(\'addstPhotoInput\').click()" style="background:transparent;border:1px solid #0f3460;color:#0f3460;border-radius:8px;padding:4px 12px;font-size:11px;cursor:pointer;font-family:Cairo,sans-serif;">✏️ تغيير</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
       '<div style="background:#fff;border-radius:14px;padding:16px;">'+
         leagueField('s_name','الاسم الكامل','text','','','','','true')+
         '<div style="margin-bottom:12px;">'+
@@ -8615,16 +8673,49 @@ function submitLeagueStaff(){
   var name=glt('s_name');
   if(!name){ showToast('أدخل الاسم'); return; }
   var roleEl=document.getElementById('lt_s_role');
+  var staffId='S'+Date.now();
   var row={
     'تاريخ_الإضافة':new Date().toLocaleString('ar'),
     'team_id':teamId,'اسم_الفريق':teamName,
-    'staff_id':'S'+Date.now(),
+    'staff_id':staffId,
     'الاسم':name,'الدور':roleEl?roleEl.value:'',
     'الهاتف':glt('s_phone'),'رقم_الهوية':glt('s_id'),
   };
+  if(window._leagueAddStaffPhoto){
+    try{ localStorage.setItem('leaguePhoto_'+staffId, window._leagueAddStaffPhoto); }catch(e){}
+    window._leagueAddStaffPhoto=null;
+  }
   leagueApiAppend(LEAGUE_CONFIG.SHEETS.STAFF, row);
-  showToast('تم إضافة '+name);
+  showToast('✅ تم إضافة '+name);
   setTimeout(function(){ go('league_team_dash'); },1500);
+}
+
+function leagueAddPlayerOpenCropper(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _showCropper(e.target.result, function(res){
+      window._leagueAddPlayerPhoto=res;
+      var box=document.getElementById('addpPhotoPreview');
+      if(box){ box.style.border='3px solid #C8A951'; box.innerHTML='<img src="'+res+'" style="width:100%;height:100%;object-fit:cover;">'; }
+      var eb=document.getElementById('addpPhotoEditBtn'); if(eb) eb.style.display='block';
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function leagueAddStaffOpenCropper(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    _showCropper(e.target.result, function(res){
+      window._leagueAddStaffPhoto=res;
+      var box=document.getElementById('addstPhotoPreview');
+      if(box){ box.style.border='3px solid #0f3460'; box.innerHTML='<img src="'+res+'" style="width:100%;height:100%;object-fit:cover;">'; }
+      var eb=document.getElementById('addstPhotoEditBtn'); if(eb) eb.style.display='block';
+    });
+  };
+  reader.readAsDataURL(file);
 }
 
 // ── جدول الترتيب بالمجموعات ──────────────
