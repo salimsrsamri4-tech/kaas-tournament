@@ -1,5 +1,8 @@
-var CACHE = 'kaas-v25';
-var FILES = ['/', '/index.html', '/hero_bg.jpg'];
+var CACHE = 'kaas-v26';
+var FILES = ['/hero_bg.jpg'];
+
+// index.html لا يُخزّن في الكاش — يُجلب دائماً من الشبكة
+var NO_CACHE = ['/', '/index.html'];
 
 self.addEventListener('install', function(e){
   e.waitUntil(
@@ -18,8 +21,19 @@ self.addEventListener('activate', function(e){
 });
 
 self.addEventListener('fetch', function(e){
-  // للـ API لا نستخدم الكاش
-  if(e.request.url.indexOf('script.google.com') !== -1) return;
+  var url = e.request.url;
+
+  // API — بدون كاش
+  if(url.indexOf('script.google.com') !== -1) return;
+
+  // index.html — دائماً من الشبكة، بدون كاش
+  var path = new URL(url).pathname;
+  if(path === '/' || path.indexOf('index.html') !== -1){
+    e.respondWith(fetch(e.request).catch(function(){ return caches.match(e.request); }));
+    return;
+  }
+
+  // باقي الملفات — شبكة أولاً ثم كاش
   e.respondWith(
     fetch(e.request)
       .then(function(res){
