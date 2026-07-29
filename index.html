@@ -8183,6 +8183,9 @@ function renderLeagueTeamDash(){
                 (sId?'<label style="background:#e0e7ff;color:#3730a3;border:none;border-radius:8px;padding:6px 8px;font-size:10px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;" title="تغيير الصورة">'+
                   '📷<input type="file" accept="image/*" style="display:none;" onchange="leagueOpenPlayerPhotoCropper(this,\''+sId+'\')">'+
                 '</label>':'')+
+                '<button onclick="showLeagueStaffCard('+JSON.stringify(s).replace(/'/g,"\\'",'g')+')" '+
+                'style="background:linear-gradient(135deg,#0f3460,#1e3a5f);color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:10px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;flex-shrink:0;">'+
+                '🪪 بطاقة</button>'+
               '</div>';
             }).join('')+
           '</div>'
@@ -8482,6 +8485,121 @@ function shareLeagueCard(pJson){
 
 function getLeaguePlayerLink(teamId){
   return location.origin + location.pathname + '?lteam=' + teamId;
+}
+
+// ════════════════════════════════════════
+// بطاقة الطاقم الفني والإداري
+// ════════════════════════════════════════
+function buildLeagueStaffCardHTML(s){
+  var roleIcons = {
+    'مدرب رئيسي':'🧑‍💼','مساعد مدرب':'🤝','مدرب حراس المرمى':'🧤',
+    'مدرب لياقة':'💪','طبيب الفريق':'⚕️','مسعف':'🩺',
+    'مدير إداري':'📋','مدير فني':'🎯','مراقب مباريات':'👁','ممثل نادي':'🏛'
+  };
+  var roleColors = {
+    'مدرب رئيسي':'#0f3460','مساعد مدرب':'#1a4a7f','مدرب حراس المرمى':'#1a4a1a',
+    'مدرب لياقة':'#5a2d82','طبيب الفريق':'#0f5a3c','مسعف':'#0f5a3c',
+    'مدير إداري':'#8B1A1A','مدير فني':'#8B1A1A','مراقب مباريات':'#3a3a00','ممثل نادي':'#3a3a00'
+  };
+  var sId = s['staff_id']||'';
+  var photo = sId ? getLeaguePlayerPhoto(sId) : '';
+  var roleColor = roleColors[s['الدور']] || '#0f3460';
+  var roleIcon  = roleIcons[s['الدور']]  || '👤';
+
+  var photoHtml = photo
+    ? '<img class="lp-photo" src="'+photo+'" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #C8A951;flex-shrink:0;">'
+    : '<div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,'+roleColor+',#0a0a1a);border:2px solid #C8A951;display:flex;align-items:center;justify-content:center;font-size:30px;flex-shrink:0;">'+roleIcon+'</div>';
+
+  return '<div id="leagueStaffCard" style="width:300px;margin:0 auto;border-radius:18px;overflow:hidden;font-family:Cairo,sans-serif;direction:rtl;background:#0a0a1e;border:2px solid #C8A951;">'+
+    '<div style="background:linear-gradient(145deg,#080820,#0f1a40);padding:10px 14px 8px;text-align:center;">'+
+      '<div style="font-size:7px;color:#C8A951;font-weight:900;letter-spacing:2px;margin-bottom:2px;direction:ltr;">FIRST DIVISION LEAGUE · IZKI CLUB 2026</div>'+
+      '<div style="font-size:13px;font-weight:900;color:#fff;">⚽ دوري الدرجة الأولى</div>'+
+      '<div style="font-size:9px;color:rgba(200,169,81,.7);margin-top:2px;">نادي إزكي 2026 — الطاقم الفني والإداري</div>'+
+      '<div style="height:1px;background:linear-gradient(90deg,transparent,#C8A951,transparent);margin-top:8px;"></div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(160deg,#0d1530,#0a0a1e);padding:14px;display:flex;align-items:center;gap:12px;">'+
+      photoHtml+
+      '<div style="flex:1;">'+
+        '<div style="font-size:14px;font-weight:900;color:#fff;line-height:1.3;">'+(s['الاسم']||'')+'</div>'+
+        '<div style="font-size:10px;color:rgba(200,169,81,.8);margin-top:3px;font-weight:700;">'+(s['اسم_الفريق']||'')+'</div>'+
+        '<div style="display:inline-flex;align-items:center;gap:5px;background:'+roleColor+';color:#fff;font-size:8px;font-weight:900;padding:3px 10px;border-radius:20px;margin-top:5px;">'+
+          '<span>'+roleIcon+'</span><span>'+(s['الدور']||'')+'</span>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="background:rgba(0,0,0,.4);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(200,169,81,.2);border-bottom:1px solid rgba(200,169,81,.2);">'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:7px;color:rgba(200,169,81,.6);font-weight:700;">رقم الهوية</div>'+
+        '<div style="font-size:9px;font-weight:900;color:#C8A951;">'+(s['رقم_الهوية']||'—')+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:7px;color:rgba(200,169,81,.6);font-weight:700;">الهاتف</div>'+
+        '<div style="font-size:9px;font-weight:700;color:#fff;">'+(s['الهاتف']||'—')+'</div>'+
+      '</div>'+
+      '<div style="text-align:center;">'+
+        '<div style="font-size:7px;color:rgba(200,169,81,.6);font-weight:700;">الموسم</div>'+
+        '<div style="font-size:9px;font-weight:700;color:#fff;">2026</div>'+
+      '</div>'+
+    '</div>'+
+    '<div style="background:linear-gradient(90deg,#0f3460,#1a1a5e);padding:7px 14px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<div style="font-size:8px;color:rgba(255,255,255,.8);font-weight:900;">نادي إزكي · دوري الدرجة الأولى</div>'+
+      '<div style="font-size:8px;color:#C8A951;font-weight:900;">IZKI CLUB</div>'+
+    '</div>'+
+  '</div>';
+}
+
+function showLeagueStaffCard(s){
+  var overlay = document.createElement('div');
+  overlay.id = 'leagueStaffCardOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;';
+  var sJson = encodeURIComponent(JSON.stringify(s));
+  overlay.innerHTML =
+    '<div style="width:100%;max-width:340px;">'+
+      buildLeagueStaffCardHTML(s)+
+      '<div style="display:flex;gap:8px;margin-top:14px;">'+
+        '<button onclick="downloadLeagueStaffCard()" style="flex:1;background:#1e293b;color:#C8A951;border:1px solid rgba(200,169,81,.4);border-radius:10px;padding:11px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">⬇️ تنزيل</button>'+
+        '<button onclick="shareLeagueStaffCard(\''+sJson+'\')" style="flex:2;background:#25D366;color:#fff;border:none;border-radius:10px;padding:11px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">📲 مشاركة واتساب</button>'+
+      '</div>'+
+      '<button onclick="document.getElementById(\'leagueStaffCardOverlay\').remove()" style="width:100%;margin-top:8px;background:transparent;color:rgba(255,255,255,.5);border:none;padding:8px;font-size:12px;cursor:pointer;font-family:Cairo,sans-serif;">إغلاق ✕</button>'+
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+function downloadLeagueStaffCard(){
+  var card = document.getElementById('leagueStaffCard');
+  if(!card) return;
+  showToast('جاري التحضير...');
+  html2canvas(card, {scale:2.5, useCORS:true, backgroundColor:'#0a0a1e'}).then(function(canvas){
+    var a = document.createElement('a');
+    a.download = 'بطاقة-طاقم-دوري-إزكي.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  });
+}
+
+function shareLeagueStaffCard(sJson){
+  var card = document.getElementById('leagueStaffCard');
+  if(!card) return;
+  var s={}; try{ s=JSON.parse(decodeURIComponent(sJson)); }catch(e){}
+  var btn = event && event.target ? event.target.closest('button') : null;
+  if(btn){ btn.disabled=true; btn.textContent='جاري...'; }
+  html2canvas(card, {scale:2, useCORS:true, backgroundColor:'#0a0a1e'}).then(function(canvas){
+    if(btn){ btn.disabled=false; btn.innerHTML='📲 مشاركة واتساب'; }
+    canvas.toBlob(function(blob){
+      var file = new File([blob], 'بطاقة-'+(s['الاسم']||'طاقم')+'.png', {type:'image/png'});
+      var msg = 'بطاقة طاقم ⚽\n*'+(s['الاسم']||'')+' — '+(s['الدور']||'')+' *\n'+(s['اسم_الفريق']||'')+'\nدوري الدرجة الأولى — نادي إزكي 2026';
+      if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+        navigator.share({files:[file], text:msg}).catch(function(){
+          window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+        });
+      } else {
+        var a=document.createElement('a'); a.download='بطاقة-'+(s['الاسم']||'طاقم')+'.png';
+        a.href=URL.createObjectURL(blob); a.click();
+      }
+    },'image/png');
+  }).catch(function(){
+    if(btn){ btn.disabled=false; btn.innerHTML='📲 مشاركة واتساب'; }
+  });
 }
 
 function leagueSelfRegOpenCropper(input){
