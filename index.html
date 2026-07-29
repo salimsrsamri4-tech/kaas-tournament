@@ -749,7 +749,8 @@ function go(page) {
     league_admin:        renderLeagueAdmin,
     league_admin_matches:renderLeagueAdminMatches,
     league_admin_result: renderLeagueAdminResult,
-    league_admin_draw:   renderLeagueAdminDraw,
+    league_admin_draw:      renderLeagueAdminDraw,
+    league_player_selfreg:  renderLeaguePlayerSelfReg,
     league_teams_list:   renderLeagueTeamsList,
   };
   if(pages[page]) pages[page]();
@@ -6085,6 +6086,25 @@ function handleAcadLink(){
   var params = new URLSearchParams(location.search);
   // فتح صفحة الدخول مباشرة عند ?page=login
   if(params.get('page')==='login'){go('acad_login');return true;}
+
+  // ── رابط تسجيل لاعب في الدوري ?lteam=TEAM_ID ──
+  var lteam = params.get('lteam');
+  if(lteam){
+    sessionStorage.setItem('_appMode','league');
+    sessionStorage.setItem('_leagueTeamId', lteam);
+    // جلب اسم الفريق من الشيت
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+      var team=(teams||[]).find(function(t){ return t['team_id']===lteam; });
+      if(!team){
+        lApp('<div style="padding:40px;text-align:center;"><div style="font-size:40px;">❌</div><div style="font-size:15px;font-weight:900;color:#8B1A1A;margin-top:12px;">رابط غير صحيح</div><div style="font-size:12px;color:#64748b;margin-top:6px;">تعذّر العثور على الفريق</div><button onclick="go(\'league_home\')" style="margin-top:16px;background:#8B1A1A;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-family:Cairo,sans-serif;cursor:pointer;">الرئيسية</button></div>');
+        return;
+      }
+      sessionStorage.setItem('_leagueTeamName', team['اسم_الفريق']||'');
+      go('league_player_selfreg');
+    }).catch(function(){ go('league_home'); });
+    return true;
+  }
+
   var acadId = params.get('acad');
   if(!acadId) return false;
 
@@ -8079,14 +8099,38 @@ function renderLeagueTeamDash(){
       '</div>'+
       '<div style="padding:16px;display:flex;flex-direction:column;gap:10px;">'+
 
-        '<div onclick="go(\'league_add_player\')" style="background:linear-gradient(135deg,#e94560,#c23152);border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;">'+
-          '<div style="font-size:28px;">⊕</div>'+
-          '<div><div style="font-size:14px;font-weight:900;color:#fff;">إضافة لاعب</div><div style="font-size:11px;color:rgba(255,255,255,.75);">30-40 لاعب لكل فريق</div></div>'+
+        // ── إضافة لاعب: يدوي أو رابط ──
+        '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+          '<div style="background:linear-gradient(135deg,#8B1A1A,#5c1010);padding:10px 14px;">'+
+            '<div style="font-size:12px;font-weight:900;color:#C8A951;">⚽ إضافة لاعبين</div>'+
+          '</div>'+
+          '<div style="padding:10px;display:flex;flex-direction:column;gap:8px;">'+
+            // يدوي
+            '<div onclick="go(\'league_add_player\')" style="background:linear-gradient(135deg,#8B1A1A,#5c1010);border-radius:10px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:10px;">'+
+              '<div style="font-size:22px;">✍️</div>'+
+              '<div><div style="font-size:13px;font-weight:900;color:#fff;">إضافة يدوية</div><div style="font-size:10px;color:rgba(255,255,255,.7);">أدخل بيانات اللاعب مباشرة</div></div>'+
+            '</div>'+
+            // رابط التسجيل الذاتي
+            '<div style="background:#f8fafc;border:1px dashed #C8A951;border-radius:10px;padding:12px;">'+
+              '<div style="font-size:11px;font-weight:800;color:#0f172a;margin-bottom:6px;display:flex;align-items:center;gap:6px;">'+
+                '<span style="font-size:16px;">🔗</span> رابط التسجيل الذاتي'+
+              '</div>'+
+              '<div style="font-size:10px;color:#64748b;margin-bottom:8px;">أرسل هذا الرابط للاعبين — يسجلون أنفسهم مباشرة</div>'+
+              '<button onclick="copyLeaguePlayerLink(\''+teamId+'\')" '+
+              'style="width:100%;background:linear-gradient(135deg,#C8A951,#8a6e2a);color:#1a0a00;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+              '📋 نسخ رابط التسجيل</button>'+
+              '<button onclick="shareLeaguePlayerLink(\''+teamId+'\',\''+teamName+'\')" '+
+              'style="width:100%;background:#25D366;color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;margin-top:6px;">'+
+              '📲 مشاركة عبر واتساب</button>'+
+            '</div>'+
+          '</div>'+
         '</div>'+
 
-        '<div onclick="go(\'league_add_staff\')" style="background:linear-gradient(135deg,#0f3460,#1e3a5f);border:1px solid rgba(147,197,253,.3);border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;">'+
-          '<div style="font-size:28px;">👔</div>'+
-          '<div><div style="font-size:14px;font-weight:900;color:#fff;">إضافة طاقم</div><div style="font-size:11px;color:#93c5fd;">مدرب · فني · إداري</div></div>'+
+        // ── الطاقم ──
+        '<div onclick="go(\'league_add_staff\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
+          '<div style="width:40px;height:40px;background:linear-gradient(135deg,#0f3460,#1e4a7f);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;">👔</div>'+
+          '<div style="flex:1;"><div style="font-size:13px;font-weight:900;color:#0f172a;">إضافة طاقم</div><div style="font-size:10px;color:#64748b;">مدرب · فني · إداري</div></div>'+
+          '<div style="font-size:16px;color:#cbd5e1;">›</div>'+
         '</div>'+
 
         // قائمة اللاعبين
@@ -8176,6 +8220,149 @@ function submitLeaguePlayer(){
 }
 
 // ── إضافة طاقم ──────────────────────────
+// ── تسجيل لاعب ذاتي عبر الرابط ─────────
+function renderLeaguePlayerSelfReg(){
+  var teamId   = sessionStorage.getItem('_leagueTeamId');
+  var teamName = sessionStorage.getItem('_leagueTeamName') || 'الفريق';
+  if(!teamId){ go('league_home'); return; }
+
+  var positions=['حارس مرمى','مدافع أيمن','مدافع أيسر','قلب دفاع','وسط دفاعي','وسط','وسط هجومي','جناح أيمن','جناح أيسر','مهاجم','مهاجم ثانٍ'];
+
+  lApp(
+    // هيدر مميز يوضح اسم الفريق
+    '<div style="background:linear-gradient(135deg,#3d0a0a,#8B1A1A);padding:20px 16px;text-align:center;">'+
+      '<div style="font-size:32px;margin-bottom:8px;">⚽</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:4px;">دوري الدرجة الأولى — نادي إزكي 2026</div>'+
+      '<div style="font-size:18px;font-weight:900;color:#C8A951;">'+teamName+'</div>'+
+      '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:4px;">نموذج تسجيل اللاعبين</div>'+
+    '</div>'+
+
+    '<div style="padding:14px;display:flex;flex-direction:column;gap:12px;">'+
+
+      '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;">'+
+        '<div style="font-size:18px;flex-shrink:0;">📋</div>'+
+        '<div style="font-size:11px;color:#856404;line-height:1.6;">'+
+          'يرجى تعبئة البيانات بشكل صحيح. سيتم إضافتك تلقائياً في قائمة فريق <strong>'+teamName+'</strong>. '+
+          'تأكد أن عمرك 18 سنة أو أكثر.'+
+        '</div>'+
+      '</div>'+
+
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#8B1A1A,#5c1010);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">👤</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#C8A951;">البيانات الشخصية</div>'+
+        '</div>'+
+        '<div style="padding:14px;">'+
+          leagueField('sr_name','الاسم الكامل','text','','','','','true')+
+          leagueField('sr_id','رقم الهوية الوطنية','text','','','','')+
+          leagueField('sr_birth','تاريخ الميلاد','date','','','','<div style="font-size:10px;color:#94a3b8;margin-top:3px;">يجب أن يكون عمرك 18 سنة أو أكثر</div>')+
+          leagueField('sr_phone','رقم الهاتف','tel','','','','','true')+
+        '</div>'+
+      '</div>'+
+
+      '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#0f3460,#1e4a7f);padding:10px 14px;display:flex;align-items:center;gap:8px;">'+
+          '<div style="font-size:16px;">⚽</div>'+
+          '<div style="font-size:12px;font-weight:900;color:#93c5fd;">بيانات اللعب</div>'+
+        '</div>'+
+        '<div style="padding:14px;">'+
+          leagueField('sr_num','رقم القميص المفضل','number','1-99','','','')+
+          '<div style="margin-bottom:4px;">'+
+            '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">المركز <span style="color:#8B1A1A;">*</span></label>'+
+            '<select id="lt_sr_pos" style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;outline:none;direction:rtl;background:#fff;">'+
+              '<option value="">— اختر المركز —</option>'+
+              positions.map(function(p){ return '<option value="'+p+'">'+p+'</option>'; }).join('')+
+            '</select>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+
+      '<button onclick="submitLeaguePlayerSelfReg()" '+
+      'style="width:100%;background:linear-gradient(135deg,#8B1A1A,#5c1010);color:#fff;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;box-shadow:0 4px 16px rgba(139,26,26,.3);">'+
+      'تسجيل في الفريق ✓</button>'+
+
+      '<div style="text-align:center;font-size:10px;color:#94a3b8;">دوري الدرجة الأولى لنادي إزكي · 2026</div>'+
+    '</div>'
+  );
+}
+
+function getLeaguePlayerLink(teamId){
+  return location.origin + location.pathname + '?lteam=' + teamId;
+}
+
+function copyLeaguePlayerLink(teamId){
+  var link = getLeaguePlayerLink(teamId);
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(link).then(function(){ showToast('✅ تم نسخ الرابط!'); });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = link; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ تم نسخ الرابط!');
+  }
+}
+
+function shareLeaguePlayerLink(teamId, teamName){
+  var link = getLeaguePlayerLink(teamId);
+  var msg  = 'مرحباً 👋\n\nأنت مدعو للتسجيل في فريق *'+teamName+'*\nدوري الدرجة الأولى — نادي إزكي 2026 ⚽\n\nسجّل بياناتك من هنا:\n'+link;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg), '_blank');
+}
+
+function submitLeaguePlayerSelfReg(){
+  var teamId   = sessionStorage.getItem('_leagueTeamId');
+  var teamName = sessionStorage.getItem('_leagueTeamName')||'';
+  var name  = glt('sr_name');
+  var phone = glt('sr_phone');
+  var pos   = (document.getElementById('lt_sr_pos')||{}).value||'';
+  if(!name||!phone){ showToast('يرجى إدخال الاسم ورقم الهاتف *'); return; }
+  if(!pos){ showToast('يرجى اختيار المركز'); return; }
+
+  // التحقق من العمر (18+)
+  var birth = glt('sr_birth');
+  if(birth){
+    var age = (Date.now()-new Date(birth).getTime())/(365.25*24*3600*1000);
+    if(age<18){ showToast('يجب أن يكون عمرك 18 سنة أو أكثر'); return; }
+  }
+
+  var row = {
+    'تاريخ_الإضافة': new Date().toLocaleString('ar'),
+    'team_id':        teamId,
+    'اسم_الفريق':    teamName,
+    'player_id':      'P'+Date.now(),
+    'الاسم':          name,
+    'رقم_الهوية':    glt('sr_id'),
+    'تاريخ_الميلاد': birth,
+    'رقم_القميص':    glt('sr_num'),
+    'المركز':         pos,
+    'الهاتف':         phone,
+    'نوع_التسجيل':   'ذاتي',
+  };
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.PLAYERS, row);
+  showToast('✅ تم تسجيلك بنجاح في فريق '+teamName+'!');
+
+  // صفحة النجاح
+  setTimeout(function(){
+    lApp(
+      '<div style="padding:48px 24px;text-align:center;font-family:Cairo,sans-serif;">'+
+        '<div style="font-size:64px;margin-bottom:16px;">🎉</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#8B1A1A;margin-bottom:8px;">تم التسجيل بنجاح!</div>'+
+        '<div style="font-size:14px;color:#475569;margin-bottom:6px;">مرحباً <strong>'+name+'</strong></div>'+
+        '<div style="font-size:13px;color:#64748b;margin-bottom:24px;">تم إضافتك في قائمة فريق <strong style="color:#8B1A1A;">'+teamName+'</strong></div>'+
+        '<div style="background:#f8fafc;border-radius:14px;padding:16px;margin-bottom:24px;text-align:right;">'+
+          '<div style="font-size:11px;color:#64748b;margin-bottom:8px;text-align:center;font-weight:700;">بياناتك المسجلة</div>'+
+          '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:1px solid #e2e8f0;">الاسم: <strong>'+name+'</strong></div>'+
+          '<div style="font-size:12px;color:#334155;padding:4px 0;border-bottom:1px solid #e2e8f0;">الهاتف: <strong>'+phone+'</strong></div>'+
+          '<div style="font-size:12px;color:#334155;padding:4px 0;">المركز: <strong>'+pos+'</strong></div>'+
+        '</div>'+
+        '<button onclick="go(\'league_home\')" '+
+        'style="background:linear-gradient(135deg,#8B1A1A,#5c1010);color:#fff;border:none;border-radius:12px;padding:12px 32px;font-size:14px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+        'الصفحة الرئيسية</button>'+
+      '</div>'
+    );
+  }, 1500);
+}
+
 function renderLeagueAddStaff(){
   var teamId=sessionStorage.getItem('_leagueTeamId');
   if(!teamId){ go('league_team_login'); return; }
