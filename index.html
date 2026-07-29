@@ -749,8 +749,16 @@ function go(page) {
     league_admin:        renderLeagueAdmin,
     league_admin_matches:renderLeagueAdminMatches,
     league_admin_result: renderLeagueAdminResult,
-    league_admin_draw:      renderLeagueAdminDraw,
-    league_player_selfreg:  renderLeaguePlayerSelfReg,
+    league_admin_draw:        renderLeagueAdminDraw,
+    league_player_selfreg:    renderLeaguePlayerSelfReg,
+    league_admin_players:     renderLeagueAdminPlayers,
+    league_admin_scorers:     renderLeagueAdminScorers,
+    league_admin_best_player: renderLeagueAdminBestPlayer,
+    league_admin_referee:     renderLeagueAdminReferee,
+    league_admin_knockout:    renderLeagueAdminKnockout,
+    league_admin_awards:      renderLeagueAdminAwards,
+    league_admin_reports:     renderLeagueAdminReports,
+    league_admin_gallery:     renderLeagueAdminGallery,
     league_teams_list:   renderLeagueTeamsList,
   };
   if(pages[page]) pages[page]();
@@ -9017,6 +9025,11 @@ function getLeagueGroups(){
   return LEAGUE_CONFIG.GROUPS;
 }
 
+function leagueAdminBtn(onclick, bg, icon, label, span){
+  return '<button onclick="'+onclick+'" style="background:'+bg+';color:#fff;border:none;border-radius:10px;padding:13px 8px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;'+(span?'grid-column:'+span+';':'')+' display:flex;flex-direction:column;align-items:center;gap:5px;">'+
+    '<span style="font-size:20px;">'+icon+'</span>'+label+'</button>';
+}
+
 function renderLeagueAdmin(){
   if(sessionStorage.getItem('_leagueAdmin')!=='1'){ leagueAdminLogin(); return; }
   var savedGroups=getLeagueGroups();
@@ -9069,7 +9082,6 @@ function renderLeagueAdmin(){
             '</div>'+
             '<button onclick="go(\'league_admin_draw\')" style="background:#1a0a00;color:#C8A951;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+(hasDraw?'تعديل':'سحب')+'</button>'+
           '</div>'+
-          // عرض مختصر للمجموعات الحالية
           '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;">'+
             groupLetters.map(function(g,gi){
               var border=gi<3?'border-left:1px solid #f1f5f9;':'';
@@ -9081,16 +9093,6 @@ function renderLeagueAdmin(){
               '</div>';
             }).join('')+
           '</div>'+
-        '</div>'+
-
-        // ── جدول المباريات ──
-        '<div onclick="go(\'league_admin_matches\')" style="background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05);">'+
-          '<div style="width:42px;height:42px;background:linear-gradient(135deg,#0f3460,#1e4a7f);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;">📅</div>'+
-          '<div style="flex:1;">'+
-            '<div style="font-size:14px;font-weight:900;color:#0f172a;">إدارة المباريات</div>'+
-            '<div style="font-size:11px;color:#64748b;">إضافة جولات · إدخال النتائج</div>'+
-          '</div>'+
-          '<div style="font-size:18px;color:#cbd5e1;">›</div>'+
         '</div>'+
 
         // ── طلبات الانضمام ──
@@ -9114,6 +9116,29 @@ function renderLeagueAdmin(){
           '</div>'
         :'')+
 
+        // ── شبكة الأزرار ──
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+          leagueAdminBtn('go(\'league_admin_players\')','linear-gradient(135deg,#8B1A1A,#5c1010)','👥','اللاعبون')+
+          leagueAdminBtn('go(\'league_admin_matches\')','linear-gradient(135deg,#0f3460,#1e4a7f)','📅','جدول المباريات')+
+          leagueAdminBtn('go(\'league_admin_result\')','linear-gradient(135deg,#1d4ed8,#1e3a8a)','⚽','نتائج المباريات')+
+          leagueAdminBtn('go(\'league_standings\')','linear-gradient(135deg,#0369a1,#075985)','📊','ترتيب المجموعات')+
+          leagueAdminBtn('go(\'league_admin_scorers\')','linear-gradient(135deg,#b45309,#92400e)','🥇','هدافو الدوري')+
+          leagueAdminBtn('go(\'league_admin_best_player\')','linear-gradient(135deg,#d4af37,#92700a)','⭐','أفضل لاعب')+
+          leagueAdminBtn('go(\'league_teams_list\')','linear-gradient(135deg,#1a4a1a,#166534)','🏟️','إدارة الأندية')+
+          leagueAdminBtn('go(\'league_admin_knockout\')','linear-gradient(135deg,#7a0f12,#b81d22)','🏆','الأدوار الإقصائية')+
+          leagueAdminBtn('go(\'league_admin_referee\')','linear-gradient(135deg,#6d28d9,#4c1d95)','🏁','تقارير الحكام')+
+          leagueAdminBtn('go(\'league_admin_awards\')','linear-gradient(135deg,#C8A951,#8a6e2a)','🥈','جوائز البطولة')+
+          leagueAdminBtn('go(\'league_admin_reports\')','linear-gradient(135deg,#0f4c75,#1b6ca8)','📈','التقارير','span 2')+
+          leagueAdminBtn('go(\'league_admin_gallery\')','linear-gradient(135deg,#6d28d9,#7c3aed)','🖼️','معرض الصور','span 2')+
+        '</div>'+
+
+        // ── روابط وأدوات ──
+        '<button onclick="leagueShareAllLinks()" style="width:100%;background:linear-gradient(135deg,#25D366,#128c7e);color:#fff;border:none;border-radius:12px;padding:13px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">📲 مشاركة روابط التسجيل للأندية</button>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">'+
+          '<button onclick="leagueExportCSV()" style="background:linear-gradient(135deg,#065f46,#047857);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">📋 تصدير Excel</button>'+
+          '<button onclick="leagueBroadcast()" style="background:linear-gradient(135deg,#25D366,#128c7e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:12px;font-weight:800;cursor:pointer;font-family:Cairo,sans-serif;">📣 إشعار الأندية</button>'+
+        '</div>'+
+        '<button onclick="leagueTestConnection()" style="width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">📶 اختبار الاتصال بجوجل شيت</button>'+
         '<button onclick="sessionStorage.removeItem(\'_leagueAdmin\');go(\'league_home\')" '+
         'style="width:100%;background:#f8fafc;color:#64748b;border:1px solid #e2e8f0;border-radius:10px;padding:11px;font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">تسجيل الخروج ↩</button>'+
       '</div>'
@@ -9122,6 +9147,429 @@ function renderLeagueAdmin(){
 }
 
 // ── صفحة قرعة المجموعات ──────────────────
+// ════════════ اللاعبون ════════════
+function renderLeagueAdminPlayers(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  lApp('<div style="padding:60px;text-align:center;color:#94a3b8;">جاري التحميل...</div>');
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.PLAYERS,true).then(function(players){
+    players=players||[];
+    var teamMap={};
+    players.forEach(function(p){ var k=p['اسم_الفريق']||'غير محدد'; if(!teamMap[k])teamMap[k]=[]; teamMap[k].push(p); });
+    var teams=Object.keys(teamMap).sort();
+    window._leagueAdminPlayers=players;
+    var html=
+      '<div style="background:linear-gradient(135deg,#8B1A1A,#5c1010);padding:16px;display:flex;align-items:center;gap:12px;">'+
+        '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div><div style="font-size:15px;font-weight:900;color:#fff;">👥 اللاعبون</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.7);">'+players.length+' لاعب · '+teams.length+' فريق</div></div>'+
+      '</div>'+
+      '<div style="background:#f8fafc;padding:10px 14px;border-bottom:1px solid #e2e8f0;">'+
+        '<input id="lApSrch" type="text" placeholder="بحث باسم اللاعب أو الفريق..." oninput="leagueApplyPlayerFilter()" '+
+        'style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:12px;font-family:Cairo,sans-serif;outline:none;direction:rtl;box-sizing:border-box;">'+
+      '</div>'+
+      '<div id="lAdminPlayersList" style="padding:14px;display:flex;flex-direction:column;gap:12px;">';
+    teams.forEach(function(teamName){
+      var tp=teamMap[teamName];
+      html+='<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+        '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">'+
+          '<div style="font-size:13px;font-weight:900;color:#fff;">🏟️ '+teamName+'</div>'+
+          '<span style="background:#C8A951;color:#0a0a00;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;">'+tp.length+' لاعب</span>'+
+        '</div>';
+      tp.forEach(function(p,i){
+        html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #f8fafc;">'+
+          '<div style="width:24px;height:24px;border-radius:50%;background:#8B1A1A;color:#C8A951;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(p['رقم_القميص']||i+1)+'</div>'+
+          '<div style="flex:1;"><div style="font-size:12px;font-weight:800;color:#0f172a;">'+(p['الاسم']||'')+'</div>'+
+          '<div style="font-size:10px;color:#64748b;">'+(p['المركز']||'')+' · '+(p['الهاتف']||'')+'</div></div>'+
+          '<span style="font-size:9px;background:#f1f5f9;color:#475569;padding:2px 7px;border-radius:8px;">'+(p['نوع_التسجيل']||'')+'</span>'+
+        '</div>';
+      });
+      html+='</div>';
+    });
+    html+='</div>';
+    lApp(html);
+  });
+}
+function leagueApplyPlayerFilter(){
+  var q=(document.getElementById('lApSrch').value||'').toLowerCase();
+  var players=(window._leagueAdminPlayers||[]).filter(function(p){
+    return !q||(p['الاسم']||'').toLowerCase().includes(q)||(p['اسم_الفريق']||'').toLowerCase().includes(q);
+  });
+  var teamMap={};
+  players.forEach(function(p){ var k=p['اسم_الفريق']||'غير محدد'; if(!teamMap[k])teamMap[k]=[]; teamMap[k].push(p); });
+  var html='';
+  Object.keys(teamMap).sort().forEach(function(teamName){
+    var tp=teamMap[teamName];
+    html+='<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+      '<div style="background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">'+
+        '<div style="font-size:13px;font-weight:900;color:#fff;">🏟️ '+teamName+'</div>'+
+        '<span style="background:#C8A951;color:#0a0a00;font-size:10px;font-weight:900;padding:3px 10px;border-radius:20px;">'+tp.length+'</span>'+
+      '</div>';
+    tp.forEach(function(p,i){
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid #f8fafc;">'+
+        '<div style="width:24px;height:24px;border-radius:50%;background:#8B1A1A;color:#C8A951;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(p['رقم_القميص']||i+1)+'</div>'+
+        '<div style="flex:1;"><div style="font-size:12px;font-weight:800;color:#0f172a;">'+(p['الاسم']||'')+'</div>'+
+        '<div style="font-size:10px;color:#64748b;">'+(p['المركز']||'')+'</div></div>'+
+      '</div>';
+    });
+    html+='</div>';
+  });
+  var el=document.getElementById('lAdminPlayersList');
+  if(el) el.innerHTML=html;
+}
+
+// ════════════ هدافو الدوري ════════════
+function renderLeagueAdminScorers(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  lApp('<div style="padding:60px;text-align:center;color:#94a3b8;">جاري التحميل...</div>');
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.SCORERS,true).then(function(rows){
+    rows=rows||[];
+    var grouped={};
+    rows.forEach(function(r){ var k=r['اسم_اللاعب']||''; if(!grouped[k]){ grouped[k]={name:k,team:r['اسم_الفريق']||'',goals:0}; } grouped[k].goals+=parseInt(r['الأهداف']||0); });
+    var sorted=Object.values(grouped).sort(function(a,b){return b.goals-a.goals;});
+    var medals=['🥇','🥈','🥉'];
+    lApp(
+      '<div style="background:linear-gradient(135deg,#b45309,#92400e);padding:16px;display:flex;align-items:center;gap:12px;">'+
+        '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div style="font-size:15px;font-weight:900;color:#fff;">🥇 هدافو الدوري</div>'+
+      '</div>'+
+      '<div style="padding:14px;">'+
+        '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+          (sorted.length
+            ? sorted.map(function(s,i){
+                return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #f1f5f9;">'+
+                  '<div style="font-size:i<3?22:14px;width:28px;text-align:center;">'+(medals[i]||'#'+(i+1))+'</div>'+
+                  '<div style="flex:1;"><div style="font-size:13px;font-weight:800;color:#0f172a;">'+s.name+'</div>'+
+                  '<div style="font-size:10px;color:#64748b;">'+s.team+'</div></div>'+
+                  '<div style="font-size:20px;font-weight:900;color:#b45309;">'+s.goals+'<span style="font-size:9px;color:#94a3b8;margin-right:2px;">هدف</span></div>'+
+                '</div>';
+              }).join('')
+            : '<div style="padding:40px;text-align:center;color:#94a3b8;">لا توجد بيانات هدافين بعد</div>'
+          )+
+        '</div>'+
+        '<div style="margin-top:12px;background:#fff;border-radius:14px;padding:14px;">'+
+          '<div style="font-size:12px;font-weight:900;color:#334155;margin-bottom:10px;">➕ إضافة هدف</div>'+
+          leagueField('sc_player','اسم اللاعب','text','','','','')+
+          leagueField('sc_team','اسم الفريق','text','','','','')+
+          leagueField('sc_goals','عدد الأهداف','number','','','','')+
+          '<button onclick="leagueAddScorer()" style="width:100%;background:linear-gradient(135deg,#b45309,#92400e);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">حفظ ✓</button>'+
+        '</div>'+
+      '</div>'
+    );
+  });
+}
+function leagueAddScorer(){
+  var row={'اسم_اللاعب':glt('sc_player'),'اسم_الفريق':glt('sc_team'),'الأهداف':glt('sc_goals'),'تاريخ_الإضافة':new Date().toLocaleString('ar')};
+  if(!row['اسم_اللاعب']||!row['الأهداف']){ showToast('أدخل اسم اللاعب وعدد الأهداف'); return; }
+  leagueApiAppend(LEAGUE_CONFIG.SHEETS.SCORERS, row);
+  showToast('✅ تم الحفظ');
+  setTimeout(function(){ renderLeagueAdminScorers(); },1200);
+}
+
+// ════════════ أفضل لاعب ════════════
+function renderLeagueAdminBestPlayer(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  var saved=sessionStorage.getItem('_leagueBestPlayer')||'';
+  lApp(
+    '<div style="background:linear-gradient(135deg,#d4af37,#8a6e2a);padding:16px;display:flex;align-items:center;gap:12px;">'+
+      '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#1a0a00;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+      '<div style="font-size:15px;font-weight:900;color:#1a0a00;">⭐ أفضل لاعب في الدوري</div>'+
+    '</div>'+
+    '<div style="padding:14px;">'+
+      (saved?'<div style="background:linear-gradient(135deg,#0f0404,#3d0a0a);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;">'+
+        '<div style="font-size:36px;margin-bottom:8px;">⭐</div>'+
+        '<div style="font-size:11px;color:#C8A951;letter-spacing:2px;margin-bottom:4px;">أفضل لاعب في الدوري</div>'+
+        '<div style="font-size:20px;font-weight:900;color:#fff;">'+saved+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-top:6px;">دوري الدرجة الأولى — نادي إزكي 2026</div>'+
+      '</div>':'<div style="background:#f8fafc;border-radius:14px;padding:20px;text-align:center;margin-bottom:14px;color:#94a3b8;font-size:13px;">لم يُحدَّد بعد</div>')+
+      '<div style="background:#fff;border-radius:14px;padding:14px;">'+
+        '<div style="font-size:12px;font-weight:900;color:#334155;margin-bottom:10px;">تحديد أفضل لاعب</div>'+
+        leagueField('bp_name','اسم اللاعب','text','','','','')+
+        leagueField('bp_team','اسم الفريق','text','','','','')+
+        '<button onclick="leagueSaveBestPlayer()" style="width:100%;background:linear-gradient(135deg,#d4af37,#8a6e2a);color:#1a0a00;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">⭐ حفظ وإعلان</button>'+
+      '</div>'+
+    '</div>'
+  );
+}
+function leagueSaveBestPlayer(){
+  var name=glt('bp_name'), team=glt('bp_team');
+  if(!name){ showToast('أدخل اسم اللاعب'); return; }
+  sessionStorage.setItem('_leagueBestPlayer', name+(team?' ('+team+')':''));
+  showToast('✅ تم حفظ أفضل لاعب');
+  setTimeout(renderLeagueAdminBestPlayer, 800);
+}
+
+// ════════════ تقارير الحكام ════════════
+function renderLeagueAdminReferee(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  lApp('<div style="padding:60px;text-align:center;color:#94a3b8;">جاري التحميل...</div>');
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.MATCHES,true).then(function(matches){
+    matches=(matches||[]).filter(function(m){ return m['تقرير_الحكم']; });
+    lApp(
+      '<div style="background:linear-gradient(135deg,#6d28d9,#4c1d95);padding:16px;display:flex;align-items:center;gap:12px;">'+
+        '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div style="font-size:15px;font-weight:900;color:#fff;">🏁 تقارير الحكام</div>'+
+      '</div>'+
+      '<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+
+        (matches.length
+          ? matches.map(function(m){
+              return '<div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+                '<div style="font-size:12px;font-weight:900;color:#0f172a;margin-bottom:6px;">⚽ '+(m['الفريق_الأول']||'')+' vs '+(m['الفريق_الثاني']||'')+'</div>'+
+                '<div style="font-size:11px;color:#64748b;margin-bottom:6px;">الجولة '+(m['الجولة']||'')+' · '+(m['التاريخ']||'')+'</div>'+
+                '<div style="font-size:11px;color:#334155;line-height:1.6;background:#f8fafc;border-radius:8px;padding:10px;">'+m['تقرير_الحكم']+'</div>'+
+              '</div>';
+            }).join('')
+          : '<div style="background:#fff;border-radius:14px;padding:40px;text-align:center;color:#94a3b8;">لا توجد تقارير حكام مسجلة</div>'
+        )+
+      '</div>'
+    );
+  });
+}
+
+// ════════════ الأدوار الإقصائية ════════════
+function renderLeagueAdminKnockout(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  var saved=JSON.parse(sessionStorage.getItem('_leagueKnockout')||'{}');
+  var rounds=[{key:'qf',label:'ربع النهائي',count:4},{key:'sf',label:'نصف النهائي',count:2},{key:'f',label:'النهائي',count:1}];
+  lApp(
+    '<div style="background:linear-gradient(135deg,#7a0f12,#b81d22);padding:16px;display:flex;align-items:center;gap:12px;">'+
+      '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+      '<div style="font-size:15px;font-weight:900;color:#fff;">🏆 الأدوار الإقصائية</div>'+
+    '</div>'+
+    '<div style="padding:14px;display:flex;flex-direction:column;gap:12px;">'+
+      rounds.map(function(r){
+        var pairs=saved[r.key]||[];
+        return '<div style="background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+          '<div style="background:linear-gradient(135deg,#8B1A1A,#5c1010);padding:10px 14px;">'+
+            '<div style="font-size:13px;font-weight:900;color:#C8A951;">🏆 '+r.label+'</div>'+
+          '</div>'+
+          '<div style="padding:12px;">'+
+            (new Array(r.count)).fill(0).map(function(_,i){
+              var p=pairs[i]||{t1:'',t2:'',r1:'',r2:''};
+              return '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-bottom:8px;">'+
+                '<input value="'+p.t1+'" placeholder="الفريق أ" id="ko_'+r.key+'_'+i+'_t1" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:7px;font-family:Cairo,sans-serif;font-size:12px;direction:rtl;outline:none;text-align:center;">'+
+                '<span style="font-size:10px;color:#94a3b8;text-align:center;">vs</span>'+
+                '<input value="'+p.t2+'" placeholder="الفريق ب" id="ko_'+r.key+'_'+i+'_t2" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:7px;font-family:Cairo,sans-serif;font-size:12px;direction:rtl;outline:none;text-align:center;">'+
+              '</div>';
+            }).join('')+
+            '<button onclick="leagueSaveKnockoutRound(\''+r.key+'\','+r.count+')" style="width:100%;background:linear-gradient(135deg,#8B1A1A,#5c1010);color:#C8A951;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">حفظ '+r.label+'</button>'+
+          '</div>'+
+        '</div>';
+      }).join('')+
+    '</div>'
+  );
+}
+function leagueSaveKnockoutRound(key,count){
+  var saved=JSON.parse(sessionStorage.getItem('_leagueKnockout')||'{}');
+  saved[key]=[];
+  for(var i=0;i<count;i++){
+    var t1=(document.getElementById('ko_'+key+'_'+i+'_t1')||{}).value||'';
+    var t2=(document.getElementById('ko_'+key+'_'+i+'_t2')||{}).value||'';
+    saved[key].push({t1:t1,t2:t2});
+  }
+  sessionStorage.setItem('_leagueKnockout',JSON.stringify(saved));
+  showToast('✅ تم الحفظ');
+}
+
+// ════════════ جوائز البطولة ════════════
+function renderLeagueAdminAwards(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  var saved=JSON.parse(sessionStorage.getItem('_leagueAwards')||'{}');
+  var cats=[
+    {key:'winner',label:'🏆 البطل'},
+    {key:'runner',label:'🥈 الوصيف'},
+    {key:'third',label:'🥉 المركز الثالث'},
+    {key:'best_player',label:'⭐ أفضل لاعب'},
+    {key:'top_scorer',label:'⚽ هداف الدوري'},
+    {key:'best_keeper',label:'🧤 أفضل حارس'},
+  ];
+  lApp(
+    '<div style="background:linear-gradient(135deg,#C8A951,#8a6e2a);padding:16px;display:flex;align-items:center;gap:12px;">'+
+      '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#1a0a00;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+      '<div style="font-size:15px;font-weight:900;color:#1a0a00;">🥈 جوائز البطولة</div>'+
+    '</div>'+
+    '<div style="padding:14px;display:flex;flex-direction:column;gap:10px;">'+
+      '<div style="background:#fff;border-radius:14px;padding:14px;">'+
+        cats.map(function(c){
+          return '<div style="margin-bottom:12px;">'+
+            '<label style="font-size:11px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">'+c.label+'</label>'+
+            '<input id="aw_'+c.key+'" value="'+(saved[c.key]||'')+'" placeholder="أدخل الاسم..." '+
+            'style="width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 12px;font-family:Cairo,sans-serif;font-size:13px;direction:rtl;outline:none;box-sizing:border-box;">'+
+          '</div>';
+        }).join('')+
+        '<button onclick="leagueSaveAwards()" style="width:100%;background:linear-gradient(135deg,#C8A951,#8a6e2a);color:#1a0a00;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">حفظ الجوائز ✓</button>'+
+      '</div>'+
+      (Object.keys(saved).length?
+        '<div style="background:linear-gradient(135deg,#0f0404,#3d0a0a);border-radius:14px;padding:14px;">'+
+          '<div style="font-size:12px;font-weight:900;color:#C8A951;margin-bottom:10px;">🏆 الجوائز المحفوظة</div>'+
+          cats.filter(function(c){return saved[c.key];}).map(function(c){
+            return '<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(200,169,81,.2);">'+
+              '<span style="font-size:11px;color:rgba(255,255,255,.7);">'+c.label+'</span>'+
+              '<span style="font-size:12px;font-weight:800;color:#C8A951;">'+saved[c.key]+'</span>'+
+            '</div>';
+          }).join('')+
+        '</div>'
+      :'')+
+    '</div>'
+  );
+}
+function leagueSaveAwards(){
+  var cats=['winner','runner','third','best_player','top_scorer','best_keeper'];
+  var saved={};
+  cats.forEach(function(k){ var v=(document.getElementById('aw_'+k)||{}).value||''; if(v) saved[k]=v; });
+  sessionStorage.setItem('_leagueAwards',JSON.stringify(saved));
+  showToast('✅ تم حفظ الجوائز');
+  setTimeout(renderLeagueAdminAwards,800);
+}
+
+// ════════════ التقارير ════════════
+function renderLeagueAdminReports(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  lApp('<div style="padding:60px;text-align:center;color:#94a3b8;">جاري التحميل...</div>');
+  Promise.all([
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS),
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.PLAYERS),
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.MATCHES),
+    leagueApiGet(LEAGUE_CONFIG.SHEETS.STAFF),
+  ]).then(function(res){
+    var teams=res[0]||[], players=res[1]||[], matches=res[2]||[], staff=res[3]||[];
+    var played=matches.filter(function(m){return m['النتيجة_1']!==undefined&&m['النتيجة_1']!=='';});
+    var totalGoals=matches.reduce(function(s,m){return s+(parseInt(m['النتيجة_1'])||0)+(parseInt(m['النتيجة_2'])||0);},0);
+    lApp(
+      '<div style="background:linear-gradient(135deg,#0f4c75,#1b6ca8);padding:16px;display:flex;align-items:center;gap:12px;">'+
+        '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+        '<div style="font-size:15px;font-weight:900;color:#fff;">📈 التقارير</div>'+
+      '</div>'+
+      '<div style="padding:14px;display:flex;flex-direction:column;gap:12px;">'+
+        '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">'+
+          _leagueStatCard(teams.length,'أندية مسجلة','#8B1A1A')+
+          _leagueStatCard(players.length,'لاعب','#0f3460')+
+          _leagueStatCard(staff.length,'طاقم','#1a4a1a')+
+          _leagueStatCard(played.length,'مباراة لُعبت','#b45309')+
+          _leagueStatCard(matches.length-played.length,'مباراة متبقية','#6d28d9')+
+          _leagueStatCard(totalGoals,'هدف مجموع','#C8A951')+
+        '</div>'+
+        '<div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+          '<div style="font-size:12px;font-weight:900;color:#334155;margin-bottom:10px;">اللاعبون حسب الفريق</div>'+
+          teams.map(function(t){
+            var count=players.filter(function(p){return p['team_id']===t['team_id'];}).length;
+            return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9;">'+
+              '<span style="font-size:12px;font-weight:700;color:#0f172a;">'+(t['اسم_الفريق']||'')+'</span>'+
+              '<span style="background:#8B1A1A;color:#fff;font-size:10px;font-weight:900;padding:2px 10px;border-radius:20px;">'+count+' لاعب</span>'+
+            '</div>';
+          }).join('')+
+        '</div>'+
+        '<button onclick="leagueExportCSV()" style="width:100%;background:linear-gradient(135deg,#065f46,#047857);color:#fff;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">📋 تصدير بيانات اللاعبين (CSV)</button>'+
+      '</div>'
+    );
+  });
+}
+function _leagueStatCard(val,label,color){
+  return '<div style="background:#fff;border-radius:12px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+    '<div style="font-size:26px;font-weight:900;color:'+color+';">'+val+'</div>'+
+    '<div style="font-size:10px;color:#64748b;margin-top:3px;">'+label+'</div>'+
+  '</div>';
+}
+
+// ════════════ معرض الصور ════════════
+function renderLeagueAdminGallery(){
+  if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
+  var saved=JSON.parse(localStorage.getItem('leagueGallery')||'[]');
+  lApp(
+    '<div style="background:linear-gradient(135deg,#6d28d9,#7c3aed);padding:16px;display:flex;align-items:center;gap:12px;">'+
+      '<button onclick="go(\'league_admin\')" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-family:Cairo,sans-serif;">←</button>'+
+      '<div style="font-size:15px;font-weight:900;color:#fff;">🖼️ معرض الصور</div>'+
+    '</div>'+
+    '<div style="padding:14px;display:flex;flex-direction:column;gap:12px;">'+
+      '<div style="background:#fff;border-radius:14px;padding:14px;text-align:center;">'+
+        '<label style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#6d28d9,#7c3aed);color:#fff;border-radius:10px;padding:12px 20px;font-size:13px;font-weight:900;cursor:pointer;font-family:Cairo,sans-serif;">'+
+          '📷 إضافة صور<input type="file" accept="image/*" multiple style="display:none;" onchange="leagueAddGalleryPhotos(this)">'+
+        '</label>'+
+        '<div style="font-size:10px;color:#94a3b8;margin-top:8px;">يمكنك اختيار أكثر من صورة في آن واحد</div>'+
+      '</div>'+
+      '<div id="leagueGalleryGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">'+
+        saved.map(function(src,i){
+          return '<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;">'+
+            '<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;">'+
+            '<button onclick="leagueDeleteGalleryPhoto('+i+')" style="position:absolute;top:4px;left:4px;background:rgba(220,38,38,.85);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:Cairo,sans-serif;">✕</button>'+
+          '</div>';
+        }).join('')+
+      '</div>'+
+    '</div>'
+  );
+}
+function leagueAddGalleryPhotos(input){
+  var files=Array.from(input.files||[]);
+  var saved=JSON.parse(localStorage.getItem('leagueGallery')||'[]');
+  var pending=files.length;
+  if(!pending) return;
+  showToast('جاري رفع الصور...');
+  files.forEach(function(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      saved.push(e.target.result);
+      pending--;
+      if(!pending){
+        try{ localStorage.setItem('leagueGallery',JSON.stringify(saved)); }catch(err){}
+        showToast('✅ تم إضافة الصور');
+        renderLeagueAdminGallery();
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function leagueDeleteGalleryPhoto(idx){
+  var saved=JSON.parse(localStorage.getItem('leagueGallery')||'[]');
+  saved.splice(idx,1);
+  try{ localStorage.setItem('leagueGallery',JSON.stringify(saved)); }catch(e){}
+  renderLeagueAdminGallery();
+}
+
+// ════════════ أدوات الإدارة ════════════
+function leagueShareAllLinks(){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+    teams=teams||[];
+    if(!teams.length){ showToast('لا توجد أندية مسجلة'); return; }
+    var msg='🏆 دوري الدرجة الأولى — نادي إزكي 2026\nروابط تسجيل اللاعبين:\n\n';
+    teams.forEach(function(t){
+      var link=location.origin+location.pathname+'?lteam='+t['team_id'];
+      msg+=('🔗 '+t['اسم_الفريق']+'\n'+link+'\n\n');
+    });
+    window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  });
+}
+function leagueExportCSV(){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.PLAYERS).then(function(players){
+    players=players||[];
+    if(!players.length){ showToast('لا توجد بيانات'); return; }
+    var keys=Object.keys(players[0]).filter(function(k){return k!=='_localPhoto';});
+    var csv='﻿'+keys.join(',')+'\n';
+    players.forEach(function(p){
+      csv+=keys.map(function(k){ var v=(p[k]||'').toString().replace(/,/g,'،'); return '"'+v+'"'; }).join(',')+'\n';
+    });
+    var a=document.createElement('a');
+    a.download='لاعبو-دوري-إزكي.csv';
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.click();
+    showToast('✅ تم التصدير');
+  });
+}
+function leagueBroadcast(){
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS).then(function(teams){
+    teams=teams||[];
+    var msg=prompt('أدخل نص الرسالة التي تريد إرسالها لجميع الأندية:');
+    if(!msg) return;
+    var full='📢 إشعار من إدارة دوري الدرجة الأولى\nنادي إزكي 2026\n\n'+msg;
+    window.open('https://wa.me/?text='+encodeURIComponent(full),'_blank');
+  });
+}
+function leagueTestConnection(){
+  showToast('جاري الاختبار...');
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS,true).then(function(d){
+    showToast(d&&d.length!==undefined?'✅ الاتصال ناجح — '+d.length+' نادٍ':'⚠️ استجابة غير متوقعة');
+  }).catch(function(){ showToast('❌ فشل الاتصال'); });
+}
+
+// ════════════ قرعة المجموعات ════════════
 function renderLeagueAdminDraw(){
   if(sessionStorage.getItem('_leagueAdmin')!=='1'){ go('league_admin'); return; }
 
