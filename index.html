@@ -8020,27 +8020,27 @@ function submitLeagueTeamLogin(){
   var pass=(document.getElementById('lt_tl_pass')||{}).value||'';
   if(!phone||!pass){ showToast('أدخل رقم الهاتف وكلمة المرور'); return; }
   showToast('جاري التحقق...');
-  var url = LEAGUE_CONFIG.GAS_URL+'?sheet='+encodeURIComponent(LEAGUE_CONFIG.SHEETS.TEAMS)+'&t='+Date.now();
-  fetch(url)
-    .then(function(r){
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      return r.json();
-    })
-    .then(function(teams){
-      if(!Array.isArray(teams)) throw new Error('بيانات غير صحيحة من السيرفر');
-      var team=teams.find(function(t){
-        return (t['الهاتف']||'').replace(/\D/g,'')===(phone||'').replace(/\D/g,'') && t['كلمة_المرور']===pass;
-      });
-      if(!team){ showToast('بيانات الدخول غير صحيحة'); return; }
-      if(team['الحالة']==='قيد المراجعة'){ showToast('طلبكم قيد المراجعة — ستُبلَّغون عند القبول'); return; }
-      sessionStorage.setItem('_leagueTeamId', team['team_id']);
-      sessionStorage.setItem('_leagueTeamName', team['اسم_الفريق']);
-      go('league_team_dash');
-    })
-    .catch(function(e){
-      showToast('فشل الاتصال: '+e.message);
-      console.error('League login error:', e, 'URL:', url);
+  leagueApiGet(LEAGUE_CONFIG.SHEETS.TEAMS, true).then(function(teams){
+    if(!teams || !teams.length){
+      showToast('لا توجد بيانات — تحقق من الاتصال'); return;
+    }
+    var phoneClean = phone.replace(/\D/g,'');
+    var team = teams.find(function(t){
+      var tPhone = (t['الهاتف']||'').toString().replace(/\D/g,'');
+      var tPass  = (t['كلمة_المرور']||'').toString().trim();
+      return tPhone === phoneClean && tPass === pass;
     });
+    if(!team){ showToast('رقم الهاتف أو كلمة المرور غير صحيحة'); return; }
+    if(team['الحالة']==='قيد المراجعة'){
+      showToast('طلبكم قيد المراجعة — ستُبلَّغون عند القبول'); return;
+    }
+    sessionStorage.setItem('_leagueTeamId',   team['team_id']);
+    sessionStorage.setItem('_leagueTeamName', team['اسم_الفريق']);
+    go('league_team_dash');
+  }).catch(function(e){
+    showToast('فشل الاتصال بالسيرفر');
+    console.error('league login:', e);
+  });
 }
 
 // ── لوحة تحكم الفريق ────────────────────
