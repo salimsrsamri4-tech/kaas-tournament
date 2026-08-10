@@ -183,9 +183,16 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
   <!-- معلومات البطولة -->
   <div style="padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);">
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-map-marker-alt"></i> صلالة 2026</span>
-      <span style="background:rgba(212,175,55,.2);color:#ffdd57;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-calendar"></i> 6-7-8 أغسطس</span>
+      <span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-map-marker-alt"></i> <span id="sidebarLocBadge">صلالة 2026</span></span>
+      <span style="background:rgba(212,175,55,.2);color:#ffdd57;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;"><i class="fas fa-calendar"></i> <span id="sidebarDateBadge">6-7-8 أغسطس</span></span>
     </div>
+  </div>
+
+  <!-- تبديل البطولة -->
+  <div style="padding:12px 16px 0;">
+    <button onclick="closeSidebar();go('select_tournament')" style="width:100%;display:flex;align-items:center;gap:12px;padding:10px 14px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.25);border-radius:12px;color:rgba(255,255,255,.7);font-size:12px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif;">
+      <i class="fas fa-exchange-alt" style="width:18px;text-align:center;color:rgba(255,255,255,.5);"></i> تبديل البطولة
+    </button>
   </div>
 
   <!-- قسم الأكاديميات -->
@@ -347,7 +354,7 @@ body{font-family:'Cairo',sans-serif;background:#f4f6f4;color:#0f172a;direction:r
 // ════════════════════════════════════════
 // ملف الإعدادات — غيّر هذا فقط لكل بطولة
 // ════════════════════════════════════════
-var CONFIG = {
+var KAAS_CONFIG = {
   // ── الاتصال بقاعدة البيانات ──
   GAS_URL: 'https://script.google.com/macros/s/AKfycbyba3PLdh5PKzSoWNxR4PY7oAJYWHitoE_GgsfB62Kh7dT9XS6vL9DOappw_VYtx0cF3Q/exec',
   ADMIN_PASS: '1251',
@@ -408,6 +415,82 @@ var CONFIG = {
     // { tier: 'bronze',   name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
     // { tier: 'tech',     name: 'اسم الراعي', logo: 'رابط الشعار', url: 'رابط الموقع' },
   ],
+
+  // ── نطاق عدد الفرق (نص عرض) ──
+  TEAMS_RANGE: '32 – 48 فريق',
+
+  // ── ملاحظة عن مناخ/موسم المكان ──
+  CLIMATE_NOTE: 'خريف صلالة',
+};
+
+var CONFIG = KAAS_CONFIG; // الإعداد النشط حاليًا — يتم تبديله عبر setMode()
+
+// ════════════════════════════════════════
+// إعدادات بطولة: مهرجان نبض المستقبل
+// TODO: عدّل القيم أدناه بالبيانات الحقيقية للبطولة (التواريخ، المكان، الهاتف...)
+// ════════════════════════════════════════
+var NABD_CONFIG = {
+  // ── الاتصال بقاعدة البيانات ──
+  // TODO: أنشئ Google Sheet + Apps Script جديدين خاصين بهذه البطولة، ثم استبدل الرابط أدناه
+  GAS_URL: 'YOUR_GAS_URL_HERE',
+  ADMIN_PASS: '1251',
+
+  // ── هوية البطولة ──
+  TOURNAMENT_NAME: 'مهرجان نبض المستقبل',
+  TOURNAMENT_NAME_EN: 'Nabd Al-Mustaqbal Festival',
+  TOURNAMENT_SHORT: 'NABD',
+  SEASON: '2026/2027',
+  ORGANIZER: 'OFAL',
+  ORGANIZER_FULL: 'تحت إشراف الاتحاد العماني لكرة القدم · بالتعاون مع OFAL',
+
+  // ── الألوان الرئيسية ──
+  COLOR_PRIMARY: '#0f172a',
+  COLOR_SECONDARY: '#1e3a5f',
+  COLOR_ACCENT: '#f59e0b',
+  COLOR_DANGER: '#b81d22',
+
+  // ── التواريخ ── TODO: حدّد التواريخ الفعلية
+  EVENT_DATE: '2026-12-01',
+  EVENT_DATE_DISPLAY: 'يُحدَّد لاحقًا',
+  REGISTRATION_DEADLINE: 'يُحدَّد لاحقًا',
+  ARRIVAL_DATE: 'يُحدَّد لاحقًا',
+
+  // ── الموقع ── TODO: حدّد الموقع الفعلي
+  LOCATION: 'يُحدَّد لاحقًا',
+  LOCATION_SHORT: 'يُحدَّد لاحقًا',
+  COUNTRY: 'سلطنة عُمان',
+
+  // ── أرقام التواصل ── TODO: حدّث أرقام التواصل الخاصة بهذه البطولة
+  PHONE_1: '+96897837551',
+  PHONE_1_LABEL: 'خدمة العملاء',
+  PHONE_1_DISPLAY: '+968 9783 7551',
+  PHONE_2: '+96872750957',
+  PHONE_2_LABEL: 'الإدارة',
+  PHONE_2_DISPLAY: '+968 7275 0957',
+  EMAIL: 'official.ofal@gmail.com',
+
+  // ── إحصائيات الهيرو ──
+  HERO_TEAMS: '48',
+  HERO_CATS: '4',
+  HERO_DAYS: '3',
+  HERO_MATCHES: '8+',
+
+  // ── باقات التسجيل ──
+  PKG_TEAM_PRICE: '350 ر.ع',
+  PKG_PLAYER_PRICE: '250 ر.ع',
+  PKG_COMPANION_PRICE: '160-200 ر.ع',
+
+  // ── كلمة مرور المصور (أدمن المعرض فقط) ──
+  MEDIA_PASS: '1251',
+
+  // ── الرعاة ──
+  SPONSORS: [],
+
+  // ── نطاق عدد الفرق (نص عرض) ──
+  TEAMS_RANGE: 'يُحدَّد لاحقًا',
+
+  // ── ملاحظة عن مناخ/موسم المكان ──
+  CLIMATE_NOTE: 'يُحدَّد لاحقًا',
 };
 
 // ══════════════════════════════════════
@@ -897,15 +980,15 @@ function renderHome() {
           '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;"><i class="fas fa-map-marker-alt" style="color:var(--green);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">المكان</div><div style="font-size:12px;font-weight:900;color:var(--dark);">صلالة، ظفار</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">المكان</div><div style="font-size:12px;font-weight:900;color:var(--dark);">'+CONFIG.LOCATION_SHORT+'</div></div>'+
             '</div>'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;"><i class="fas fa-calendar-alt" style="color:var(--red);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">التواريخ</div><div style="font-size:12px;font-weight:900;color:var(--dark);">6-7-8 أغسطس 2026</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">التواريخ</div><div style="font-size:12px;font-weight:900;color:var(--dark);">'+CONFIG.EVENT_DATE_DISPLAY+'</div></div>'+
             '</div>'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;"><i class="fas fa-shield-alt" style="color:var(--green);font-size:14px;"></i></div>'+
-              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">الفرق</div><div style="font-size:12px;font-weight:900;color:var(--dark);">32 – 48 فريق</div></div>'+
+              '<div><div style="font-size:9px;color:#64748b;font-weight:700;">الفرق</div><div style="font-size:12px;font-weight:900;color:var(--dark);">'+CONFIG.TEAMS_RANGE+'</div></div>'+
             '</div>'+
             '<div style="display:flex;align-items:center;gap:8px;">'+
               '<div style="width:32px;height:32px;border-radius:8px;background:#fef2f2;display:flex;align-items:center;justify-content:center;"><i class="fas fa-clock" style="color:var(--red);font-size:14px;"></i></div>'+
@@ -5131,19 +5214,19 @@ function renderAboutTournament(){
       <!-- أرقام سريعة -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px;">
         <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 6px;">
-          <div style="font-size:20px;font-weight:900;color:#d4af37;">48</div>
+          <div style="font-size:20px;font-weight:900;color:#d4af37;">${CONFIG.HERO_TEAMS}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px;">فريق</div>
         </div>
         <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 6px;">
-          <div style="font-size:20px;font-weight:900;color:#d4af37;">4</div>
+          <div style="font-size:20px;font-weight:900;color:#d4af37;">${CONFIG.HERO_CATS}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px;">فئات</div>
         </div>
         <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 6px;">
-          <div style="font-size:20px;font-weight:900;color:#d4af37;">3</div>
+          <div style="font-size:20px;font-weight:900;color:#d4af37;">${CONFIG.HERO_DAYS}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px;">أيام</div>
         </div>
         <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 6px;">
-          <div style="font-size:20px;font-weight:900;color:#d4af37;">8+</div>
+          <div style="font-size:20px;font-weight:900;color:#d4af37;">${CONFIG.HERO_MATCHES}</div>
           <div style="font-size:9px;color:rgba(255,255,255,.6);margin-top:2px;">مباريات</div>
         </div>
       </div>
@@ -5155,11 +5238,11 @@ function renderAboutTournament(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
       <div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;">
         <div style="width:36px;height:36px;background:#f0fdf4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-map-marker-alt" style="color:#16a34a;font-size:15px;"></i></div>
-        <div><div style="font-size:9px;color:#94a3b8;font-weight:700;">المكان</div><div style="font-size:12px;font-weight:900;color:#0f172a;">صلالة، ظفار</div></div>
+        <div><div style="font-size:9px;color:#94a3b8;font-weight:700;">المكان</div><div style="font-size:12px;font-weight:900;color:#0f172a;">${CONFIG.LOCATION_SHORT}</div></div>
       </div>
       <div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;">
         <div style="width:36px;height:36px;background:#fef9c3;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-calendar-alt" style="color:#d97706;font-size:15px;"></i></div>
-        <div><div style="font-size:9px;color:#94a3b8;font-weight:700;">الموعد</div><div style="font-size:12px;font-weight:900;color:#0f172a;">6-7-8 أغسطس</div></div>
+        <div><div style="font-size:9px;color:#94a3b8;font-weight:700;">الموعد</div><div style="font-size:12px;font-weight:900;color:#0f172a;">${CONFIG.EVENT_DATE_DISPLAY}</div></div>
       </div>
       <div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;">
         <div style="width:36px;height:36px;background:#fef2f2;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-clock" style="color:#dc2626;font-size:15px;"></i></div>
@@ -5167,7 +5250,7 @@ function renderAboutTournament(){
       </div>
       <div style="background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:10px;">
         <div style="width:36px;height:36px;background:#eff6ff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas fa-cloud-rain" style="color:#1d4ed8;font-size:15px;"></i></div>
-        <div><div style="font-size:9px;color:#94a3b8;font-weight:700;">الطقس</div><div style="font-size:12px;font-weight:900;color:#0f172a;">خريف صلالة</div></div>
+        <div><div style="font-size:9px;color:#94a3b8;font-weight:700;">الطقس</div><div style="font-size:12px;font-weight:900;color:#0f172a;">${CONFIG.CLIMATE_NOTE}</div></div>
       </div>
     </div>
 
@@ -5178,7 +5261,7 @@ function renderAboutTournament(){
         <span style="font-size:14px;font-weight:900;color:#0d3318;">رؤية البطولة</span>
       </div>
       <p style="font-size:12px;color:#475569;line-height:2;margin:0;">
-        تتشرف اللجنة المنظمة بتقديم <strong style="color:#0d3318;">"كأس العرب للأكاديميات"</strong>، التي تهدف إلى تعزيز روح المنافسة الشريفة وتطوير المواهب الكروية الشابة في بيئة احترافية مثالية. تقام البطولة على ملاعب قانونية مجهزة بالكامل، حيث تضفي أجواء صلالة الخريفية الضبابية والساحرة طابعاً فريداً على المنافسة.
+        تتشرف اللجنة المنظمة بتقديم <strong style="color:#0d3318;">"${CONFIG.TOURNAMENT_NAME}"</strong>، التي تهدف إلى تعزيز روح المنافسة الشريفة وتطوير المواهب الكروية الشابة في بيئة احترافية مثالية. تقام البطولة على ملاعب قانونية مجهزة بالكامل، في ${CONFIG.LOCATION}.
       </p>
     </div>
 
@@ -5243,7 +5326,7 @@ function renderAboutTournament(){
       <div style="display:flex;flex-direction:column;gap:8px;">
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0fdf4;border-radius:12px;">
           <i class="fas fa-check-circle" style="color:#16a34a;font-size:16px;flex-shrink:0;"></i>
-          <span style="font-size:12px;color:#374151;">من <strong>32 إلى 48 فريقاً</strong> مقسمين على 4 فئات عمرية</span>
+          <span style="font-size:12px;color:#374151;"><strong>${CONFIG.TEAMS_RANGE}</strong> مقسمة على ${CONFIG.HERO_CATS} فئات عمرية</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0fdf4;border-radius:12px;">
           <i class="fas fa-check-circle" style="color:#16a34a;font-size:16px;flex-shrink:0;"></i>
@@ -7765,6 +7848,22 @@ function renderSelectTournament(){
       '</div>'+
     '</div>'+
 
+    // بطاقة مهرجان نبض المستقبل
+    '<div onclick="setMode(\'nabd\')" style="width:100%;max-width:360px;background:linear-gradient(135deg,#0f172a,#1e3a5f);border:2px solid #f59e0b;border-radius:20px;padding:24px;cursor:pointer;margin-bottom:16px;box-shadow:0 8px 32px rgba(245,158,11,.2);">'+
+      '<div style="display:flex;align-items:center;gap:14px;">'+
+        '<div style="font-size:40px;">🏆</div>'+
+        '<div>'+
+          '<div style="font-size:16px;font-weight:900;color:#f59e0b;">مهرجان نبض المستقبل</div>'+
+          '<div style="font-size:11px;color:#93c5fd;margin-top:3px;">Nabd Al-Mustaqbal Festival — NABD</div>'+
+          '<div style="font-size:11px;color:#94a3b8;margin-top:2px;">ناشئون · '+NABD_CONFIG.SEASON+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="margin-top:14px;display:flex;gap:8px;">'+
+        '<span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(245,158,11,.3);">أكاديميات</span>'+
+        '<span style="background:rgba(245,158,11,.15);color:#f59e0b;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;border:1px solid rgba(245,158,11,.3);">ناشئون</span>'+
+      '</div>'+
+    '</div>'+
+
     // بطاقة دوري الدرجة الأولى
     '<div onclick="setMode(\'league\')" style="width:100%;max-width:360px;background:linear-gradient(135deg,#5c1010,#8B1A1A);border:2px solid #C8A951;border-radius:20px;padding:24px;cursor:pointer;box-shadow:0 8px 32px rgba(139,26,26,.35);">'+
       '<div style="display:flex;align-items:center;gap:14px;">'+
@@ -7789,8 +7888,14 @@ function renderSelectTournament(){
 function setMode(mode){
   _appMode = mode;
   sessionStorage.setItem('_appMode', mode);
-  if(mode === 'league') go('league_home');
-  else go('home');
+  if(mode === 'league'){ go('league_home'); return; }
+  // منصتا الأكاديميات (كأس العرب / مهرجان نبض المستقبل) تتشاركان نفس الصفحات
+  // عبر تبديل الكائن CONFIG النشط — امسح الكاش حتى لا تختلط بيانات البطولتين
+  var nextConfig = (mode === 'nabd') ? NABD_CONFIG : KAAS_CONFIG;
+  if(CONFIG !== nextConfig){ _cache = {}; }
+  CONFIG = nextConfig;
+  applyConfig();
+  go('home');
 }
 
 // ── رئيسية الدوري ───────────────────────
@@ -9827,7 +9932,7 @@ if('serviceWorker' in navigator){
 // ════════════════════════════════════════
 // تهيئة العناصر من CONFIG
 // ════════════════════════════════════════
-(function applyConfig(){
+function applyConfig(){
   // عنوان الصفحة
   document.title = CONFIG.TOURNAMENT_SHORT + ' — ' + CONFIG.TOURNAMENT_NAME;
 
@@ -9847,13 +9952,18 @@ if('serviceWorker' in navigator){
   var ss2 = document.getElementById('sidebarSub');
   if(sd) sd.textContent = 'منصة البطولات';
   if(ss2) ss2.textContent = 'TOURNAMENTS PLATFORM';
+  var slb = document.getElementById('sidebarLocBadge');
+  var sdb = document.getElementById('sidebarDateBadge');
+  if(slb) slb.textContent = CONFIG.LOCATION_SHORT;
+  if(sdb) sdb.textContent = CONFIG.EVENT_DATE_DISPLAY;
 
   // ألوان CSS
   var root = document.documentElement;
   root.style.setProperty('--primary', CONFIG.COLOR_PRIMARY);
   root.style.setProperty('--secondary', CONFIG.COLOR_SECONDARY);
   root.style.setProperty('--accent', CONFIG.COLOR_ACCENT);
-})();
+}
+applyConfig();
 
 // شاشة الترحيب
 setTimeout(function(){
