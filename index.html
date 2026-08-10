@@ -378,6 +378,8 @@ var KAAS_CONFIG = {
   EVENT_DATE_DISPLAY: '6 - 7 - 8 أغسطس 2026',
   REGISTRATION_DEADLINE: '5 يوليو 2026',
   ARRIVAL_DATE: '5 أغسطس 2026',
+  MILESTONE_2_DATE: '5 أغسطس 2026',
+  MILESTONE_2_LABEL: 'وصول الفرق إلى صلالة، ظفار',
 
   // ── الموقع ──
   LOCATION: 'صلالة، محافظة ظفار',
@@ -399,10 +401,12 @@ var KAAS_CONFIG = {
   HERO_DAYS: '3',
   HERO_MATCHES: '8+',
 
-  // ── باقات التسجيل ──
+  // ── باقات التسجيل (تشمل الإقامة — لبطولة خارج المدينة) ──
+  SHOW_ACCOMMODATION_PACKAGES: true,
   PKG_TEAM_PRICE: '350 ر.ع',
   PKG_PLAYER_PRICE: '250 ر.ع',
   PKG_COMPANION_PRICE: '160-200 ر.ع',
+  REG_FEE_NOTE: '',
 
   // ── كلمة مرور المصور (أدمن المعرض فقط) ──
   MEDIA_PASS: '1251',
@@ -437,11 +441,11 @@ var NABD_CONFIG = {
 
   // ── هوية البطولة ──
   TOURNAMENT_NAME: 'مهرجان نبض المستقبل',
-  TOURNAMENT_NAME_EN: 'Nabd Al-Mustaqbal Festival',
+  TOURNAMENT_NAME_EN: 'Future Pulse Festival',
   TOURNAMENT_SHORT: 'NABD',
-  SEASON: '2026/2027',
-  ORGANIZER: 'OFAL',
-  ORGANIZER_FULL: 'تحت إشراف الاتحاد العماني لكرة القدم · بالتعاون مع OFAL',
+  SEASON: 'النسخة الثالثة 2026',
+  ORGANIZER: 'أكاديمية نبض المستقبل',
+  ORGANIZER_FULL: 'تنظيم أكاديمية نبض المستقبل — النسخة الثالثة',
 
   // ── الألوان الرئيسية ──
   COLOR_PRIMARY: '#0f172a',
@@ -449,18 +453,22 @@ var NABD_CONFIG = {
   COLOR_ACCENT: '#f59e0b',
   COLOR_DANGER: '#b81d22',
 
-  // ── التواريخ ── TODO: حدّد التواريخ الفعلية
-  EVENT_DATE: '2026-12-01',
-  EVENT_DATE_DISPLAY: 'يُحدَّد لاحقًا',
-  REGISTRATION_DEADLINE: 'يُحدَّد لاحقًا',
-  ARRIVAL_DATE: 'يُحدَّد لاحقًا',
+  // ── التواريخ (من كراسة شروط البطولة) ──
+  // ملاحظة: الكراسة تذكر بداية الانطلاق "الأربعاء 2026/08/19" والنهائي "الجمعة 2026/08/20"
+  // — الأيام والتواريخ غير متطابقة حسابيًا في المستند الأصلي، راجعها قبل النشر.
+  EVENT_DATE: '2026-08-19',
+  EVENT_DATE_DISPLAY: '19 - 20 أغسطس 2026',
+  REGISTRATION_DEADLINE: '13 أغسطس 2026', // آخر يوم لدفع الاشتراك
+  ARRIVAL_DATE: '18 أغسطس 2026', // آخر موعد لتسليم كشف المنتسبين (PDF)
+  MILESTONE_2_DATE: '16 أغسطس 2026',
+  MILESTONE_2_LABEL: 'سحب قرعة مباريات المهرجان (قرعة إلكترونية)',
 
-  // ── الموقع ── TODO: حدّد الموقع الفعلي
+  // ── الموقع ── TODO: لم يُذكر المكان/الملعب في كراسة الشروط — حدّده هنا
   LOCATION: 'يُحدَّد لاحقًا',
   LOCATION_SHORT: 'يُحدَّد لاحقًا',
   COUNTRY: 'سلطنة عُمان',
 
-  // ── أرقام التواصل ── TODO: حدّث أرقام التواصل الخاصة بهذه البطولة
+  // ── أرقام التواصل ── TODO: لم تُذكر أرقام تواصل في كراسة الشروط — حدّثها هنا
   PHONE_1: '+96897837551',
   PHONE_1_LABEL: 'خدمة العملاء',
   PHONE_1_DISPLAY: '+968 9783 7551',
@@ -470,15 +478,17 @@ var NABD_CONFIG = {
   EMAIL: 'official.ofal@gmail.com',
 
   // ── إحصائيات الهيرو ──
-  HERO_TEAMS: '48',
-  HERO_CATS: '4',
-  HERO_DAYS: '3',
-  HERO_MATCHES: '8+',
+  HERO_TEAMS: '—',
+  HERO_CATS: '3',
+  HERO_DAYS: '2',
+  HERO_MATCHES: '—',
 
-  // ── باقات التسجيل ──
-  PKG_TEAM_PRICE: '350 ر.ع',
-  PKG_PLAYER_PRICE: '250 ر.ع',
-  PKG_COMPANION_PRICE: '160-200 ر.ع',
+  // ── رسوم الاشتراك: مبلغ ثابت (وليس باقات إقامة) — حسب كراسة الشروط ──
+  SHOW_ACCOMMODATION_PACKAGES: false,
+  PKG_TEAM_PRICE: '',
+  PKG_PLAYER_PRICE: '',
+  PKG_COMPANION_PRICE: '',
+  REG_FEE_NOTE: 'رسوم الاشتراك 100 ر.ع لكل فريق (تشمل الفئات الثلاث) — العدد المسموح 20 منتسباً لكل فريق (17 لاعباً + 3 جهاز فني وإداري)',
 
   // ── كلمة مرور المصور (أدمن المعرض فقط) ──
   MEDIA_PASS: '1251',
@@ -486,8 +496,8 @@ var NABD_CONFIG = {
   // ── الرعاة ──
   SPONSORS: [],
 
-  // ── نطاق عدد الفرق (نص عرض) ──
-  TEAMS_RANGE: 'يُحدَّد لاحقًا',
+  // ── نطاق عدد الفرق (نص عرض) ── تلعب البطولة بنظام الثمانيات
+  TEAMS_RANGE: 'نظام الثمانيات',
 
   // ── ملاحظة عن مناخ/موسم المكان ──
   CLIMATE_NOTE: 'يُحدَّد لاحقًا',
@@ -587,40 +597,74 @@ function buildSponsorsSection() {
   return html;
 }
 
-// الفئات العمرية
-var CATEGORIES = [
+// الفئات العمرية — كأس العرب للأكاديميات
+var KAAS_CATEGORIES = [
   {
     id:'cat1', name:'الفئة الأولى',
     label:'U8/U9',
     years:'2017 · 2018',
     extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2015',
-    color:'#3b82f6'
+    color:'#3b82f6',
+    yearsList:[2017,2018], extraYear:2015, extraMonthMin:10
   },
   {
     id:'cat2', name:'الفئة الثانية',
     label:'U11/U12',
     years:'2014 · 2015 (يناير–سبتمبر)',
     extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2013',
-    color:'#8b5cf6'
+    color:'#8b5cf6',
+    yearsList:[2014,2015], extraYear:2013, extraMonthMin:10
   },
   {
     id:'cat3', name:'الفئة الثالثة',
     label:'U13/U14',
     years:'2012 · 2013 (يناير–سبتمبر)',
     extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2011',
-    color:'#f59e0b'
+    color:'#f59e0b',
+    yearsList:[2012,2013], extraYear:2011, extraMonthMin:10
   },
   {
     id:'cat4', name:'الفئة الرابعة',
     label:'U15/U16',
     years:'2010 · 2011 (يناير–سبتمبر)',
     extra:'يُسمح: أكتوبر/نوفمبر/ديسمبر 2009',
-    color:'#10b981'
+    color:'#10b981',
+    yearsList:[2010,2011], extraYear:2009, extraMonthMin:10
   }
 ];
 
+// الفئات العمرية — مهرجان نبض المستقبل (حسب كراسة شروط البطولة)
+var NABD_CATEGORIES = [
+  {
+    id:'ncat1', name:'فئة الواعدون',
+    label:'مواليد 2017-2018',
+    years:'2017 · 2018',
+    extra:'',
+    color:'#3b82f6',
+    yearsList:[2017,2018]
+  },
+  {
+    id:'ncat2', name:'فئة البراعم',
+    label:'مواليد 2015-2016',
+    years:'2015 · 2016',
+    extra:'',
+    color:'#8b5cf6',
+    yearsList:[2015,2016]
+  },
+  {
+    id:'ncat3', name:'فئة الأشبال',
+    label:'مواليد 2013-2014',
+    years:'2013 · 2014',
+    extra:'',
+    color:'#f59e0b',
+    yearsList:[2013,2014]
+  }
+];
+
+var CATEGORIES = KAAS_CATEGORIES; // القائمة النشطة حاليًا — تُبدَّل عبر setMode()
+
 // ════════════════════════════════════════
-// التحقق من الفئة العمرية
+// التحقق من الفئة العمرية — مبني على القائمة النشطة CATEGORIES
 // ════════════════════════════════════════
 function getCategory(birthDateStr) {
   var d = new Date(birthDateStr);
@@ -628,14 +672,11 @@ function getCategory(birthDateStr) {
   var y = d.getFullYear();
   var m = d.getMonth() + 1; // 1-12
 
-  if(y===2017||y===2018) return 'cat1';
-  if(y===2015 && m>=10)  return 'cat1';
-  if(y===2015 || y===2014) return 'cat2';
-  if(y===2013 && m>=10)  return 'cat2';
-  if(y===2013 || y===2012) return 'cat3';
-  if(y===2011 && m>=10)  return 'cat3';
-  if(y===2011 || y===2010) return 'cat4';
-  if(y===2009 && m>=10)  return 'cat4';
+  for (var i = 0; i < CATEGORIES.length; i++) {
+    var c = CATEGORIES[i];
+    if (c.yearsList && c.yearsList.indexOf(y) > -1) return c.id;
+    if (c.extraYear && y === c.extraYear && m >= (c.extraMonthMin || 10)) return c.id;
+  }
   return null;
 }
 
@@ -5194,6 +5235,67 @@ function saveRefereeReport(){
 }
 
 // ════════════════════════════════════════
+// باقات التسجيل / رسوم الاشتراك — يتغيّر حسب نوع البطولة
+// ════════════════════════════════════════
+function renderRegPricingSection(){
+  if(!CONFIG.SHOW_ACCOMMODATION_PACKAGES){
+    return '<div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'+
+        '<div style="width:4px;height:20px;background:linear-gradient(#d4af37,#92700a);border-radius:4px;"></div>'+
+        '<span style="font-size:14px;font-weight:900;color:#0d3318;">رسوم الاشتراك</span>'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f0fdf4;border-radius:12px;">'+
+        '<i class="fas fa-coins" style="color:#16a34a;font-size:18px;flex-shrink:0;"></i>'+
+        '<span style="font-size:12px;color:#374151;line-height:1.8;">'+CONFIG.REG_FEE_NOTE+'</span>'+
+      '</div>'+
+    '</div>';
+  }
+  return '<div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);">'+
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">'+
+      '<div style="width:4px;height:20px;background:linear-gradient(#d4af37,#92700a);border-radius:4px;"></div>'+
+      '<span style="font-size:14px;font-weight:900;color:#0d3318;">باقات التسجيل</span>'+
+    '</div>'+
+    '<div style="display:flex;flex-direction:column;gap:10px;">'+
+      '<div style="border:2px solid #16a34a;border-radius:14px;padding:16px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+          '<div><div style="font-size:13px;font-weight:900;color:#0d3318;">الباقة 1 — للفريق</div><div style="font-size:10px;color:#16a34a;margin-top:2px;">بدون إقامة</div></div>'+
+          '<div style="text-align:center;background:#16a34a;color:#fff;padding:6px 12px;border-radius:10px;"><div style="font-size:18px;font-weight:900;">'+CONFIG.PKG_TEAM_PRICE+'</div></div>'+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:4px;">'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#16a34a;width:12px;"></i> التسجيل في البطولة</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#16a34a;width:12px;"></i> المشروبات والضيافة</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#16a34a;width:12px;"></i> دعوة حفل الاستقبال</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="border:2px solid #d4af37;border-radius:14px;padding:16px;background:linear-gradient(135deg,#fffbeb,#fef9c3);position:relative;">'+
+        '<div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;">الأكثر طلباً</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+          '<div><div style="font-size:13px;font-weight:900;color:#0d3318;">الباقة 2 — للاعب</div><div style="font-size:10px;color:#d97706;margin-top:2px;">شاملة الإقامة</div></div>'+
+          '<div style="text-align:center;background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;padding:6px 12px;border-radius:10px;"><div style="font-size:18px;font-weight:900;">'+CONFIG.PKG_PLAYER_PRICE+'</div></div>'+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:4px;">'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> إقامة 4 أيام / 3 ليالٍ</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> وجبات الإفطار والعشاء</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> النقل والمواصلات</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> رسوم المشاركة كاملة</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="border:2px solid #cbd5e1;border-radius:14px;padding:16px;background:#f8fafc;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">'+
+          '<div><div style="font-size:13px;font-weight:900;color:#0d3318;">باقة المرافقين</div><div style="font-size:10px;color:#64748b;margin-top:2px;">للأهل والمشجعين</div></div>'+
+          '<div style="text-align:center;background:#475569;color:#fff;padding:6px 12px;border-radius:10px;"><div style="font-size:14px;font-weight:900;">'+CONFIG.PKG_COMPANION_PRICE+'</div></div>'+
+        '</div>'+
+        '<div style="display:flex;flex-direction:column;gap:4px;">'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#64748b;width:12px;"></i> فندق 4 أيام / 3 ليالٍ</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#64748b;width:12px;"></i> غرف مفردة أو مزدوجة</div>'+
+          '<div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#64748b;width:12px;"></i> الإفطار والعشاء</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+}
+
+// ════════════════════════════════════════
 // اعتماد الأكاديميات
 // ════════════════════════════════════════
 function renderAboutTournament(){
@@ -5343,50 +5445,8 @@ function renderAboutTournament(){
       </div>
     </div>
 
-    <!-- باقات التسجيل -->
-    <div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <div style="width:4px;height:20px;background:linear-gradient(#d4af37,#92700a);border-radius:4px;"></div>
-        <span style="font-size:14px;font-weight:900;color:#0d3318;">باقات التسجيل</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="border:2px solid #16a34a;border-radius:14px;padding:16px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div><div style="font-size:13px;font-weight:900;color:#0d3318;">الباقة 1 — للفريق</div><div style="font-size:10px;color:#16a34a;margin-top:2px;">بدون إقامة</div></div>
-            <div style="text-align:center;background:#16a34a;color:#fff;padding:6px 12px;border-radius:10px;"><div style="font-size:18px;font-weight:900;">350</div><div style="font-size:9px;">ر.ع</div></div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#16a34a;width:12px;"></i> التسجيل في البطولة</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#16a34a;width:12px;"></i> المشروبات والضيافة</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#16a34a;width:12px;"></i> دعوة حفل الاستقبال</div>
-          </div>
-        </div>
-        <div style="border:2px solid #d4af37;border-radius:14px;padding:16px;background:linear-gradient(135deg,#fffbeb,#fef9c3);position:relative;">
-          <div style="position:absolute;top:-10px;right:16px;background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;font-size:9px;font-weight:900;padding:3px 10px;border-radius:20px;">الأكثر طلباً</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div><div style="font-size:13px;font-weight:900;color:#0d3318;">الباقة 2 — للاعب</div><div style="font-size:10px;color:#d97706;margin-top:2px;">شاملة الإقامة</div></div>
-            <div style="text-align:center;background:linear-gradient(135deg,#d4af37,#92700a);color:#fff;padding:6px 12px;border-radius:10px;"><div style="font-size:18px;font-weight:900;">250</div><div style="font-size:9px;">ر.ع</div></div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> إقامة 4 أيام / 3 ليالٍ</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> وجبات الإفطار والعشاء</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> النقل والمواصلات</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#d97706;width:12px;"></i> رسوم المشاركة كاملة</div>
-          </div>
-        </div>
-        <div style="border:2px solid #cbd5e1;border-radius:14px;padding:16px;background:#f8fafc;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-            <div><div style="font-size:13px;font-weight:900;color:#0d3318;">باقة المرافقين</div><div style="font-size:10px;color:#64748b;margin-top:2px;">للأهل والمشجعين</div></div>
-            <div style="text-align:center;background:#475569;color:#fff;padding:6px 12px;border-radius:10px;"><div style="font-size:14px;font-weight:900;">160-200</div><div style="font-size:9px;">ر.ع</div></div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#64748b;width:12px;"></i> فندق 4 أيام / 3 ليالٍ</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#64748b;width:12px;"></i> غرف مفردة أو مزدوجة</div>
-            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#374151;"><i class="fas fa-check" style="color:#64748b;width:12px;"></i> الإفطار والعشاء</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- باقات التسجيل / رسوم الاشتراك -->
+    ${renderRegPricingSection()}
 
     <!-- المواعيد الهامة -->
     <div style="background:#fff;border-radius:16px;padding:18px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);">
@@ -5406,8 +5466,8 @@ function renderAboutTournament(){
         <div style="position:relative;margin-bottom:16px;">
           <div style="position:absolute;right:-19px;top:10px;width:10px;height:10px;background:#d4af37;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px #d4af37;"></div>
           <div style="background:#fffbeb;border-radius:12px;padding:12px 14px;">
-            <div style="font-size:11px;font-weight:900;color:#d97706;margin-bottom:2px;">${CONFIG.ARRIVAL_DATE}</div>
-            <div style="font-size:12px;color:#374151;">وصول الفرق إلى ${CONFIG.LOCATION_SHORT}</div>
+            <div style="font-size:11px;font-weight:900;color:#d97706;margin-bottom:2px;">${CONFIG.MILESTONE_2_DATE}</div>
+            <div style="font-size:12px;color:#374151;">${CONFIG.MILESTONE_2_LABEL}</div>
           </div>
         </div>
         <div style="position:relative;">
@@ -5418,10 +5478,11 @@ function renderAboutTournament(){
           </div>
         </div>
       </div>
+      ${CONFIG.SHOW_ACCOMMODATION_PACKAGES ? `
       <div style="margin-top:12px;padding:10px 14px;background:#fef3c7;border-radius:12px;font-size:11px;color:#92400e;font-weight:600;display:flex;align-items:center;gap:8px;">
         <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
         أي حجز بعد ${CONFIG.REGISTRATION_DEADLINE} لن يشمل أسعار الباقات المذكورة نظراً لموسم السياحة المرتفع في ${CONFIG.LOCATION_SHORT}
-      </div>
+      </div>` : ''}
     </div>
 
     <!-- تواصل معنا -->
@@ -7890,10 +7951,12 @@ function setMode(mode){
   sessionStorage.setItem('_appMode', mode);
   if(mode === 'league'){ go('league_home'); return; }
   // منصتا الأكاديميات (كأس العرب / مهرجان نبض المستقبل) تتشاركان نفس الصفحات
-  // عبر تبديل الكائن CONFIG النشط — امسح الكاش حتى لا تختلط بيانات البطولتين
+  // عبر تبديل الكائنين CONFIG و CATEGORIES النشطين — امسح الكاش حتى لا تختلط بيانات البطولتين
   var nextConfig = (mode === 'nabd') ? NABD_CONFIG : KAAS_CONFIG;
+  var nextCategories = (mode === 'nabd') ? NABD_CATEGORIES : KAAS_CATEGORIES;
   if(CONFIG !== nextConfig){ _cache = {}; }
   CONFIG = nextConfig;
+  CATEGORIES = nextCategories;
   applyConfig();
   go('home');
 }
